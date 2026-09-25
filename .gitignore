@@ -1,0 +1,12 @@
+._*
+.DS_Store
+__pycache__/
+pilot/data/
+pilot/results/features.npz
+pilot/results/predictions.npz
+pilot/results/checkpoints/
+*.partial
+slurm-*.out
+.venv/
+.env
+.env.*
