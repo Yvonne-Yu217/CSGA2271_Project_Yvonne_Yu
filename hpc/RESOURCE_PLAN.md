@@ -1,21 +1,21 @@
 # NYU HPC resource and execution plan
 
-## Request now
+## Request now: 20 GPU-hour hard cap
 
 Based on the partitions and quota provided by the user:
 
 | Resource | Initial request |
 |---|---|
 | Account | `ds_ga_1006_001-2026fa` |
-| Partition | `c12m85-a100-1` |
-| GPU | 1 × NVIDIA A100 40GB |
+| Preferred partition | `c12m85-a100-1` |
+| Preferred GPU | 1 × NVIDIA A100 40GB |
 | CPU | 8 cores initially; up to 12 if useful |
 | Host memory | 64 GB |
-| Initial wall time | 8 hours, after data/model staging |
+| Initial wall time | 4 hours, after CPU-side data/model staging |
 | Persistent/scratch capacity | 200 GB preferred; increase if retaining full raw datasets and many caches |
 | Software | Python 3.11/3.12, CUDA-compatible PyTorch, Transformers; Git and outbound data access or a staged transfer |
 
-A100 40GB is sufficient for the planned frozen CLIP/SigLIP workflow and sequential attribution/region-model inference. Final peak memory must be measured. A single `g2-standard-12` L4 is a viable fallback with smaller batches; memory and time settings must match that partition's actual limits. Two GPUs are useful later for independent runs, but no distributed-training dependency is needed.
+For the formal proposal run, one A100 is the preferred choice. Frozen ViT-B/16 CLIP/SigLIP inference would fit on an L4, but the proposal also includes Grad-ECLIP, CCI masking, repeated interventions, and multiple seeds. A100 gives more memory headroom and shorter wall-clock time under the same 20 GPU-hour cap. One L4 is the fallback if the A100 queue or availability is poor. Do not request two GPUs or distributed training.
 
 Use CPU partition `n2c48m24` for downloads, extraction, annotation validation, and cached-feature small-scorer training. Do not hold a GPU while waiting for data. Exact account permissions, allowed wall times, GPU GRES spelling, and charge multipliers are not yet verified on the cluster.
 
@@ -25,27 +25,24 @@ Example allocation, using standard Slurm syntax; confirm site settings first:
 sinfo -p c12m85-a100-1 -o '%P %l %G %m %c'
 salloc --account=ds_ga_1006_001-2026fa \
   --partition=c12m85-a100-1 --nodes=1 --ntasks=1 \
-  --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=08:00:00
+  --gres=gpu:1 --cpus-per-task=8 --mem=64G --time=04:00:00
 srun --pty bash -l
 ```
 
 Sources for generic flags: [Slurm salloc](https://slurm.schedmd.com/salloc.html), [Slurm sbatch](https://slurm.schedmd.com/sbatch.html). Partition/account values come from the user, not these generic documents.
 
-## Planning envelope, not measured runtime
+## Strict planning envelope, not measured runtime
 
 | Work package | GPU-hour ceiling to plan against |
 |---|---:|
-| Environment, throughput and end-to-end smoke experiments | 8 |
-| CLIP/SigLIP feature extraction on planned datasets | 40 |
-| Scorer runs and loss/feature/intervention ablations | 24 |
-| Decomposition, Grad-ECLIP and CCI comparisons | 64 |
-| Automatic regions and Visual Genome transfer | 48 |
-| Recoverability/faithfulness experiments | 32 |
-| Essential reruns and final figures | 24 |
-| **Initial working envelope** | **240** |
-| **Unallocated reserve** | **60** |
+| L4 smoke test and throughput measurement | 1 |
+| Flickr30K feature extraction and core scorer | 8 |
+| Essential controls, losses, and seeds | 6 |
+| One compact transfer or expensive baseline check | 3 |
+| Final rerun and figures | 2 |
+| **Hard phase cap** | **20** |
 
-These are scheduling caps, not evidence that every run will finish inside them. After the first 100–500 images, estimate `time per image × retained image count × passes × configurations`, including region and masking multiplicity. Adjust batches and job decomposition using actual measurements. Cap expensive attribution on a predeclared representative evaluation subset if needed, disclose sample counts, and still evaluate every baseline; do not silently drop methods. Dataset and model variants share features wherever possible.
+These are scheduling caps, not evidence that every run will finish inside them. After the fixed 100-image smoke test, estimate `time per image × retained image count × passes × configurations`, including region and masking multiplicity. If the estimate exceeds 20 GPU hours, reduce the predeclared representative subset and mark omitted proposal components as unverified; do not silently request more quota. Dataset and model variants share features wherever possible.
 
 Track `sacct` GPU allocation, elapsed time, exit status, and the course's actual billing units. Under simple GPU-hour accounting, 2 GPUs for 8 hours consume 16 GPU-hours; confirm whether the course applies device-specific weights. Keep datasets/caches on storage that survives cloud node termination.
 
@@ -71,6 +68,6 @@ Track `sacct` GPU allocation, elapsed time, exit status, and the course's actual
 
 Needed from the user: an existing SSH alias or login hostname and username, the allocated job ID/node or accessible terminal session, the persistent project/scratch path, and any pre-staged dataset paths. Complete MFA through the normal user login flow; no password or private key needs to be pasted into chat.
 
-First session: inspect `nvidia-smi`, Python/CUDA compatibility, data availability and storage; stage missing models on CPU; run the small pipeline; measure throughput/peak memory; fix data validity issues; then implement and schedule the full coverage matrix. Current pilot scripts are scaffolding, not a completed implementation of that matrix.
+First session: inspect `nvidia-smi`, Python/CUDA compatibility, data availability and storage; stage missing models on CPU; run a fixed 100-image smoke test on the A100; measure throughput/peak memory; then schedule only the proposal components that fit under the 20 GPU-hour cap. If A100 is unavailable, use one L4 with the same cap. Current pilot scripts are scaffolding, not a completed implementation of the proposal.
 
 A starter GPU script is provided in `hpc/pilot.sbatch`. Activate a suitable Python environment before submission and prepare the data first. The script intentionally fails if CUDA or the staged data are missing. It runs only the entity-deletion pilot; full experiment launchers will be added with their implementations.

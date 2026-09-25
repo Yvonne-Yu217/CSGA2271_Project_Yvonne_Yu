@@ -2,7 +2,7 @@
 
 Text-conditioned localization of complementary visual information — CSCI-GA 2271 course research project.
 
-**Current priority: validate the full original proposal on NYU HPC.** The repository contains the proposal, review, experiment plan, a draft local/HPC entity-deletion pilot, and a separate later-stage research extension. No quantitative experiment or training result is available yet.
+**Current priority: validate the core original proposal within a hard 20 GPU-hour phase budget on NYU HPC, using one A100 when available.** The repository contains the proposal, review, resource plan, a draft local/HPC entity-deletion pilot, and a separate later-stage research extension. No quantitative experiment or training result is available yet.
 
 - [Current goal and completion criteria](GOAL.md)
 - [Original proposal](proposal/What_Does_the_Image_Add_Proposal.pdf)

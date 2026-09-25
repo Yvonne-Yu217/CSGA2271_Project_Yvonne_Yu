@@ -17,3 +17,8 @@
 - Stopped the active local preparation process. Annotation archive CRC verification succeeded; image staging and all training remain incomplete.
 - Added `GOAL.md`, an explicit full-scope coverage matrix, resource budget, and starter Slurm script. The pilot is clearly labeled incomplete and narrower than the full proposal.
 - Added CUDA selection and configurable input/output paths to the pilot runner. No cluster job has been submitted and CUDA execution is unverified.
+
+## Budget update
+
+- User set the current allocation to 20 GPU hours and explicitly requested not to consume the full 300-hour course quota.
+- Finalized one A100 (`c12m85-a100-1`) as the preferred formal node because the proposal includes attribution and repeated masking; one L4 (`g2-standard-12`) is the fallback. The total phase cap remains 20 GPU hours.
