@@ -9,12 +9,26 @@ from collections import Counter, defaultdict
 from pathlib import Path
 
 import torch
-from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+from transformers import (AutoModelForVision2Seq, AutoProcessor,
+                          Qwen2_5_VLForConditionalGeneration)
 
 from acquisition.metrics import bootstrap_cluster, paired_bootstrap
 from acquisition.observe import (DEFAULT_MODEL, DEFAULT_REVISION, atomic_jsonl,
                                  read_jsonl)
 from acquisition.screen_core_target import STRICT_PROMPT, parse_label
+
+
+INDEPENDENT_PROMPT = """Existing caption: {caption}
+Candidate observation: {observation}
+Classify the candidate conservatively. Reply with exactly one letter:
+A = adds a visible attribute, action, state, or relation about the same specific entity instance explicitly named in the caption
+B = primarily describes a distinct entity absent from the caption
+C = new background/global information, other information, or uncertain same-instance linkage
+D = no additional fact
+A shared category alone is not the same instance. If linkage is uncertain, choose C."""
+INDEPENDENT_CODES = {
+    "A": "MENTIONED_ENTITY_DETAIL", "B": "NEW_ENTITY", "C": "OTHER", "D": "NOT_NEW",
+}
 
 
 def main():
@@ -32,6 +46,8 @@ def main():
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
+    parser.add_argument("--independent-smol", action="store_true",
+                        help="Use the independent SmolVLM text classifier and coded prompt")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         parser.error("CUDA is required")
@@ -60,11 +76,13 @@ def main():
                     args.visual_output / "visual_support.jsonl",
                     args.nli_output / "entailments.jsonl"]
     payload = {
-        "implementation": "r2-strict-core-target-caption-necessity-v1",
+        "implementation": ("r2-independent-smol-core-target-v1" if args.independent_smol
+                           else "r2-strict-core-target-caption-necessity-v1"),
         "files": {str(path): hashlib.sha256(path.read_bytes()).hexdigest()
                   for path in source_paths},
         "model": args.model, "revision": args.revision,
-        "prompt_sha256": hashlib.sha256(STRICT_PROMPT.encode()).hexdigest(),
+        "prompt_sha256": hashlib.sha256(
+            (INDEPENDENT_PROMPT if args.independent_smol else STRICT_PROMPT).encode()).hexdigest(),
         "batch_size": args.batch_size,
     }
     fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
@@ -95,7 +113,9 @@ def main():
         processor = AutoProcessor.from_pretrained(
             args.model, revision=args.revision, local_files_only=True, use_fast=False)
         processor.tokenizer.padding_side = "left"
-        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model_class = (AutoModelForVision2Seq if args.independent_smol
+                       else Qwen2_5_VLForConditionalGeneration)
+        model = model_class.from_pretrained(
             args.model, revision=args.revision, local_files_only=True,
             dtype=torch.bfloat16, attn_implementation="sdpa").to("cuda").eval()
         model.generation_config.temperature = None
@@ -107,8 +127,8 @@ def main():
             chunk = pending[offset:offset + args.batch_size]
             texts = []
             for row in chunk:
-                prompt = STRICT_PROMPT.format(caption=row["caption"],
-                                              observation=row["observation"])
+                template = INDEPENDENT_PROMPT if args.independent_smol else STRICT_PROMPT
+                prompt = template.format(caption=row["caption"], observation=row["observation"])
                 conversation = [{"role": "user", "content": [
                     {"type": "text", "text": prompt}]}]
                 texts.append(processor.apply_chat_template(
@@ -121,7 +141,11 @@ def main():
             decoded = processor.batch_decode(trimmed, skip_special_tokens=True,
                                              clean_up_tokenization_spaces=False)
             for row, raw in zip(chunk, decoded):
-                label = parse_label(raw)
+                if args.independent_smol:
+                    code = raw.strip().upper().strip(".:- ")[:1]
+                    label = INDEPENDENT_CODES.get(code)
+                else:
+                    label = parse_label(raw)
                 existing[row["key"]] = {
                     **{key: row[key] for key in ("key", "context_id", "staging_image_id",
                                                  "candidate_id")},

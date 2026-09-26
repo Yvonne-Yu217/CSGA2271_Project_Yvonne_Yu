@@ -55,3 +55,57 @@ Do not tune the ridge coefficient, feature family or split against this proxy
 test. The next material change is automatic grounded entity, padded entity and
 relation-union views, followed by the same matched observation and residual
 evaluation. Human review remains necessary before formal E3 or confirmation.
+
+## Automatic grounded geometry and binding follow-up
+
+Pinned Grounding DINO produced 443 unpadded entity boxes over all 100 images.
+The deterministic view builder added 443 15%-padded boxes, 162 nearby-pair
+unions, full image and STOP. Grounding required FP32; batch 16 exceeded the
+40GB A100, while batch 4 completed 100 images in 20.24 seconds with 9.94 GiB
+peak torch allocation. Both failed profiling attempts are retained.
+
+Across all 500 captions, the pooled grounded strict oracle was 87.0%, 3.4
+points below the fixed-grid 90.4% and within the predeclared 5-point
+noninferiority margin. It exceeded full-image completion by 38.4 points
+[31.4, 45.4]. Unpadded entity boxes alone reached 73.0% and exceeded full-image
+completion by 24.4 points [16.2, 32.6]. Padding reduced the oracle to 64.4%; the
+relation union family reached only 45.4%. These variants are rejected.
+
+The grounded pooled caption-specific oracle gain over its best same-image
+static action was 4.8 points [3.0, 6.8]; the entity-only gain was 3.2 points
+[1.6, 5.2]. Grounded boxes retain real automated headroom with fewer actions,
+but less caption dependence than the grid inventory.
+
+R3-v1 added the detector phrase embedding as an explicit binding feature. On
+the already-inspected proxy split, image–caption interaction reached 36.84%,
+while phrase–caption and combined interactions each reached 29.47%. The
+combined-minus-image-interaction interval was [-21.08, 6.32]. Explicit detector
+phrases therefore do not repair selection. Do not tune this reused split.
+
+## Independent semantic-type sensitivity
+
+Pinned SmolVLM independently repeated the final semantic-type decision after
+the existing visual-support and novelty gates. On fixed-grid actions it found a
+93.0% oracle and an 86.2% best same-image static action, a +6.8 point
+caption-specific gain [4.6, 9.2]. On pooled grounded actions it found an 89.4%
+oracle and 86.0% static action, a +3.4 point gain [1.8, 5.0]. Binary agreement
+with Qwen on eligible claims was 88.6% for grids and 91.2% for grounded views.
+The effect sizes vary, but the independent sensitivity does not remove the
+caption-dependent action-value result. Neither model is human ground truth.
+
+## Equal-call full-image refinement control
+
+A frozen second full-image call received the original caption and the first
+high-resolution completion, then requested one distinct additional fact. All
+500 contexts completed. Independent visual and NLI screening, with the NLI
+premise containing both prior texts, retained 200/500 distinct supported facts.
+Strict mentioned-entity success was 34.6% [28.0, 41.4] under Qwen semantic
+typing and 39.8% [32.8, 47.0] under independent SmolVLM typing; their binary
+agreement on the 200 eligible outputs was 86.0%.
+
+The first high-resolution full-image call succeeded on 51.0%; the Qwen-typed
+union of two full-image calls reached 59.2% [51.6, 66.8]. The fixed-grid oracle
+still exceeded that equal-call control by 31.2 points [24.0, 38.4], and the
+pooled grounded oracle exceeded it by 27.8 points [20.2, 35.4]. Thus the
+automated region headroom is not explained by merely allowing a second
+full-image call. This remains a development diagnostic pending human E0.

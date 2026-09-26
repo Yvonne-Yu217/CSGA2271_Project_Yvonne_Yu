@@ -1,5 +1,5 @@
 round_id: R1-v2-grounded
-status: predeclared_observation_pending
+status: automated_geometry_complete
 date: 2026-09-26
 parent_failure: research/rounds/R3_v0_proxy.yaml
 objective: test whether grounded entity geometry and binding preserve R2 residual headroom with fewer, interpretable actions
@@ -33,5 +33,15 @@ continuation_rule: grounded pooled strict oracle is noninferior to fixed-grid wi
 uncertainty_unit: image/duplicate group
 human_gate: automated sensitivity cannot replace E0 review
 gpu_policy: any suitable available GPU; exact device and five-second trace recorded
-results: pending
-decision: pending
+results:
+  pooled_strict_oracle: 0.870
+  pooled_strict_oracle_minus_grid_r2: -0.034
+  pooled_oracle_minus_full_image_ci95: [0.314, 0.454]
+  pooled_caption_specific_gain_ci95: [0.030, 0.068]
+  grounded_entity_oracle: 0.730
+  grounded_entity_oracle_minus_full_image_ci95: [0.162, 0.326]
+  grounded_entity_caption_specific_gain_ci95: [0.016, 0.052]
+  padded_entity_oracle: 0.644
+  relation_union_oracle: 0.454
+  source: acquisition/results/r1-v2-grounded-strict-core/provisional_report.json
+decision: pooled geometry meets the 5-point noninferiority margin and entity boxes retain positive headroom, but padding and relation unions fail; retain unpadded entities only

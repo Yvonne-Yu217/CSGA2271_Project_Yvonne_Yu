@@ -90,3 +90,20 @@ SigLIP interaction selector failed its uncertainty rule. Do not tune its proxy
 test. Continue R1 geometry/binding isolation with automatic grounded entity,
 padded and relation-union views; complete human E0 before treating selector
 training as formal E3 or opening a confirmation attempt.
+
+Automatic grounding is now implemented. Pooled grounded actions retain 87.0%
+strict automated oracle success versus 90.4% for grids and use fewer actions;
+unpadded entity boxes retain positive headroom, while padding and relation-union
+families fail. Explicit Grounding-DINO phrase binding also fails to improve the
+proxy selector. Preserve these results and do not tune the inspected split.
+Before choosing another selector family, independently test the Qwen strict
+semantic-type labels and prepare human review of R2 action-value disagreements.
+
+That independent SmolVLM sensitivity is now complete and preserves the
+caption-dependent oracle effect (grid +6.8 points; grounded +3.4 points). The
+required equal-call full-image refinement control is also complete: two
+high-resolution full-image calls cover 59.2% strictly, still 31.2 points below
+the fixed-grid oracle and 27.8 points below the pooled grounded oracle. These
+are automated development results, not human evidence. The next gate remains
+human E0 and blinded review preparation; do not tune another selector on the
+already-inspected proxy split.

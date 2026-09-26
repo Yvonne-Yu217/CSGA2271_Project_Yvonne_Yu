@@ -1,0 +1,19 @@
+{
+  "date": "2026-09-26",
+  "scope": "automated development diagnostic; not human gold",
+  "contexts": 500,
+  "second_call_broad_distinct_success": 0.4,
+  "second_call_qwen_strict": 0.346,
+  "second_call_smolvlm_strict": 0.398,
+  "two_call_union_qwen_strict": {"mean": 0.592, "ci95": [0.516, 0.668]},
+  "grid_qwen_oracle_minus_two_call_union": {"mean": 0.312, "ci95": [0.24, 0.384]},
+  "grounded_qwen_oracle_minus_two_call_union": {"mean": 0.278, "ci95": [0.202, 0.354]},
+  "independent_type_sensitivity": {
+    "grid_smolvlm_oracle": 0.93,
+    "grid_smolvlm_static": 0.862,
+    "grid_caption_gain": {"mean": 0.068, "ci95": [0.046, 0.092]},
+    "grounded_smolvlm_oracle": 0.894,
+    "grounded_smolvlm_static": 0.86,
+    "grounded_caption_gain": {"mean": 0.034, "ci95": [0.018, 0.05]}
+  }
+}

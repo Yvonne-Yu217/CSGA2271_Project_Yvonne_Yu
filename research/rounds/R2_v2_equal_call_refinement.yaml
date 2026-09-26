@@ -1,0 +1,32 @@
+round_id: R2-v2-equal-call-full-image-refinement
+status: complete_positive_control
+date: 2026-09-26
+parent_round: research/rounds/R2_v1.yaml
+objective: test whether a second full-image call closes the automated residual headroom attributed to region actions
+data_status: all 100 images and 500 captions are development; no confirmation claim is permitted
+method: provide the frozen first full-image completion and request one distinct additional full-image fact
+observer: Qwen/Qwen2.5-VL-3B-Instruct revision 66285546d2b821cf421d4f5eb2576359d3770cd3
+decoding: deterministic, max_new_tokens 48, default full-image resolution
+primary_comparison: independently screened strict mentioned-entity success of the second full-image call versus the frozen region recognition oracle
+interpretation: equal-call automated development control only; human E0 remains required
+gpu_policy: any suitable available GPU with exact device and five-second utilization trace
+results:
+  generated_contexts: 500
+  independently_supported_and_distinct: 200
+  broad_distinct_success: 0.400
+  qwen_strict_second_call_success: 0.346
+  smolvlm_strict_second_call_success: 0.398
+  qwen_smol_binary_agreement_on_eligible: 0.860
+  high_resolution_first_call_strict_success: 0.510
+  qwen_two_call_union_strict_success: 0.592
+  qwen_two_call_union_ci95: [0.516, 0.668]
+  grid_oracle_minus_two_call_union: 0.312
+  grid_oracle_minus_two_call_union_ci95: [0.240, 0.384]
+  grounded_oracle_minus_two_call_union: 0.278
+  grounded_oracle_minus_two_call_union_ci95: [0.202, 0.354]
+decision: equal-call high-resolution full-image refinement does not close region-action oracle headroom; continue region selection work after human E0
+sources:
+  - acquisition/results/qwen-full-image-refinement-e0-dev-100/runtime.json
+  - acquisition/results/provisional-full-image-refinement-distinct-100/provisional_report.json
+  - acquisition/results/provisional-full-image-refinement-distinct-core-strict-100/provisional_report.json
+  - acquisition/results/provisional-full-image-refinement-distinct-core-smol-100/provisional_report.json

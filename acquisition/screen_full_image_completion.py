@@ -28,6 +28,8 @@ def main():
     parser.add_argument("--completion-output", type=Path, required=True)
     parser.add_argument("--comparison-output", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--prior-completion-output", type=Path,
+                        help="First-pass completions included in refinement novelty premise")
     parser.add_argument("--visual-model", default=VISUAL_MODEL)
     parser.add_argument("--visual-revision", default=VISUAL_REVISION)
     parser.add_argument("--nli-model", default=NLI_MODEL)
@@ -50,6 +52,13 @@ def main():
     sources = [args.staging / "staging_images.jsonl",
                args.staging / "natural_contexts.jsonl",
                args.completion_output / "completions.jsonl"]
+    priors = {}
+    if args.prior_completion_output:
+        prior_path = args.prior_completion_output / "completions.jsonl"
+        sources.append(prior_path)
+        priors = {row["context_id"]: row["completion"] for row in read_jsonl(prior_path)}
+        if set(priors) != set(contexts):
+            raise RuntimeError("first-pass completion cache is incomplete")
     payload = {
         "files": {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in sources},
         "visual_model": args.visual_model, "visual_revision": args.visual_revision,
@@ -161,7 +170,8 @@ def main():
         for offset in range(0, len(nli_pending), args.nli_batch_size):
             chunk = nli_pending[offset:offset + args.nli_batch_size]
             inputs = tokenizer(
-                [row["initial_caption"] for row in chunk],
+                [(row["initial_caption"] + (" First completion: " + priors[row["context_id"]]
+                  if priors else "")) for row in chunk],
                 [existing[row["context_id"]]["completion"] for row in chunk],
                 padding=True, truncation=True, max_length=512, return_tensors="pt").to("cuda")
             with torch.inference_mode():

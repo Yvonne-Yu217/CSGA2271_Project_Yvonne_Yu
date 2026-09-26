@@ -192,7 +192,8 @@ def main():
             args.montage_planner / "choices.jsonl")},
     }
     report = {"status": "provisional_not_evidence", "warning": runtime["scope"],
-              "split_counts": dict(split_counts), "splits": {}}
+              "split_counts": dict(split_counts), "splits": {},
+              "incompatible_controls": []}
     for split in ("val", "proxy_test"):
         context_ids = sorted(context_id for context_id, context in contexts.items()
                              if split_for(context["staging_image_id"]) == split)
@@ -212,8 +213,12 @@ def main():
         vectors["full_image_completion"] = [
             int(full_image[key]["label"] == "MENTIONED_ENTITY_DETAIL") for key in context_ids]
         for method, planner in planners.items():
-            vectors[method] = [label_lookup.get((key, planner[key]["candidate_id"]), 0)
-                               for key in context_ids]
+            selected_ids = [planner[key]["candidate_id"] for key in context_ids]
+            if all(candidate_id in candidates for candidate_id in selected_ids):
+                vectors[method] = [label_lookup[(key, candidate_id)]
+                                   for key, candidate_id in zip(context_ids, selected_ids)]
+            elif method not in report["incompatible_controls"]:
+                report["incompatible_controls"].append(method)
         report["splits"][split] = {
             "contexts": len(context_ids), "images": len(set(clusters)),
             "methods": {method: bootstrap_cluster(values, clusters, samples=10000, seed=2271)

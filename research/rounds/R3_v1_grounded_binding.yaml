@@ -1,5 +1,5 @@
 round_id: R3-v1-grounded-binding-proxy
-status: predeclared_development_reuse
+status: complete_failed
 date: 2026-09-26
 parent_round: research/rounds/R1_v2_grounded.yaml
 objective: test whether explicit grounded entity phrase binding makes caption-dependent action value more learnable
@@ -19,5 +19,13 @@ fit: deterministic lambda=1 ridge on the unchanged image-hash development split
 metric: selected-action automated strict mentioned-entity success
 interpretation: descriptive development comparison only; human E0 and a fresh confirmation set remain required
 gpu_policy: any suitable available GPU with exact device and utilization trace
-results: pending
-decision: pending
+results:
+  proxy_test_images: 19
+  grounded_entity_oracle: 0.7368
+  image_caption_interaction: 0.3684
+  entity_phrase_caption_interaction: 0.2947
+  combined_interactions: 0.2947
+  combined_minus_interaction_ci95: [-0.2108, 0.0632]
+  combined_minus_full_image_ci95: [-0.2211, 0.1158]
+  source: acquisition/results/r3-v1-grounded-binding-proxy/provisional_report.json
+decision: explicit detector phrase binding does not improve selection; do not tune the reused proxy split

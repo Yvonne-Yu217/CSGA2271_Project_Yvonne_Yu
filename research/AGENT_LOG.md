@@ -1,5 +1,26 @@
 # Agent log
 
+## 2026-09-26 — Automatic grounded geometry and binding screen
+
+- Pinned `IDEA-Research/grounding-dino-tiny` at revision `a2bb814...` and
+  retained two implementation profiles: forced FP16 failed before proposals
+  because processor pixels were FP32; FP32 batch 16 then exceeded the 40GB
+  A100. FP32 batch 4 completed all 100 images in 20.24 seconds with 9.94 GiB
+  peak torch allocation and no images lacking detections.
+- Froze 443 unpadded entity boxes, 443 15%-padded variants, 162 nearby-pair
+  relation unions, 100 full-image actions and 100 STOP actions. The manifest
+  SHA-256 is `95ba782e6d375b0a3b6c2dc2381f0a4d27331055c7eb52d59c20137cc0b412d4`.
+- Generated and independently screened 5,740 grounded action observations.
+  Pooled strict oracle was 87.0%, within the predeclared 5-point noninferiority
+  margin of the 90.4% grid oracle, and exceeded full-image completion by 38.4
+  points [31.4, 45.4]. Unpadded entities alone reached 73.0%; padding fell to
+  64.4% and relation unions to 45.4%, so those variants are rejected.
+- Grounded entity caption-specific oracle gain was +3.2 points [1.6, 5.2]. A
+  proxy selector with explicit detector-phrase binding failed: phrase-only and
+  combined interactions reached 29.47%, below image–caption interaction at
+  36.84%. Old grid planners are candidate-incompatible and are now omitted
+  rather than incorrectly scored as zero. Do not tune the reused proxy split.
+
 ## 2026-09-26 — Caption-conditioned redesign, R2 headroom, and R3 proxy stop
 
 - Updated the hardware policy to permit any suitable available GPU and used A100
@@ -175,3 +196,20 @@
 - Added a CCI automatic patch-cluster-count sensitivity check at K=3/8/12. Deterministic-deletion Acc@1 was 0.6958/0.7558/0.7675, compared with 0.7204 at the original K=5 run. This tests internal cluster sensitivity but is not a separate proposal-generator/recall benchmark.
 - SigLIP matched rank+locality+control Acc@1 was 0.5528 (three-seed ensemble computed in the final report) and natural-caption performance remained near chance; the exact image-level intervals and all methods are in `pilot/results/final_metrics.json`.
 - The first root-level unittest invocation lacked `PYTHONPATH=pilot` and failed to import `prepare`; rerunning with the documented module path passed all four tests. Python compilation, data audit, and `git diff --check` also passed.
+
+## 2026-09-26 — Independent semantic sensitivity and equal-call control
+
+- Ran pinned SmolVLM semantic typing over all 7,000 grid and 5,740 grounded
+  context-action rows after frozen support/novelty gates. Grid oracle/static
+  were 93.0%/86.2%; grounded oracle/static were 89.4%/86.0%.
+- Implemented and ran 500 second-pass full-image refinements using the frozen
+  first high-resolution completion. Corrected the novelty screen to include
+  both the original caption and first completion in its NLI premise.
+- The distinct second call reached 34.6% strict Qwen and 39.8% strict SmolVLM
+  success. The two-call Qwen union was 59.2%, below grid by 31.2 points and
+  grounded pooled oracle by 27.8 points with image-cluster intervals above zero.
+- All GPU runs used Slurm job 2002 on NVIDIA A100-SXM4-40GB. Longer screens had
+  independent five-second utilization/progress logs (up to 100% sampled GPU
+  utilization); very short classifier runs completed before multiple monitor
+  samples and retain direct utilization observations. No allocation was
+  cancelled or released.

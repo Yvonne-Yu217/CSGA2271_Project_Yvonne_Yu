@@ -8,11 +8,13 @@ from collections import Counter
 from pathlib import Path
 
 import torch
-from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
+from transformers import (AutoModelForVision2Seq, AutoProcessor,
+                          Qwen2_5_VLForConditionalGeneration)
 
 from acquisition.metrics import bootstrap_cluster, paired_bootstrap
 from acquisition.observe import DEFAULT_MODEL, DEFAULT_REVISION, atomic_jsonl, read_jsonl
 from acquisition.screen_core_target import PROMPT, STRICT_PROMPT, parse_label
+from acquisition.screen_r2_core_target import INDEPENDENT_CODES, INDEPENDENT_PROMPT
 
 
 def main():
@@ -25,6 +27,7 @@ def main():
     parser.add_argument("--batch-size", type=int, default=32)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
+    parser.add_argument("--independent-smol", action="store_true")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         parser.error("CUDA is required")
@@ -34,14 +37,16 @@ def main():
         args.full_image_screen_output / "judgments.jsonl")}
     if set(judgments) != set(contexts):
         raise RuntimeError("full-image judgments are incomplete")
-    prompt_template = STRICT_PROMPT if args.prompt_variant == "strict" else PROMPT
+    prompt_template = (INDEPENDENT_PROMPT if args.independent_smol else
+                       STRICT_PROMPT if args.prompt_variant == "strict" else PROMPT)
     sources = [args.staging / "natural_contexts.jsonl",
                args.full_image_screen_output / "judgments.jsonl"]
     payload = {
         "files": {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in sources},
         "model": args.model, "revision": args.revision, "prompt": prompt_template,
         "batch_size": args.batch_size,
-        "implementation": "full-image-completion-core-target-v1",
+        "implementation": ("full-image-independent-smol-core-target-v1"
+                           if args.independent_smol else "full-image-completion-core-target-v1"),
     }
     fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -79,7 +84,9 @@ def main():
         processor = AutoProcessor.from_pretrained(args.model, revision=args.revision,
                                                    local_files_only=True, use_fast=False)
         processor.tokenizer.padding_side = "left"
-        model = Qwen2_5_VLForConditionalGeneration.from_pretrained(
+        model_class = (AutoModelForVision2Seq if args.independent_smol
+                       else Qwen2_5_VLForConditionalGeneration)
+        model = model_class.from_pretrained(
             args.model, revision=args.revision, local_files_only=True, dtype=torch.bfloat16,
             attn_implementation="sdpa").to("cuda").eval()
         model.generation_config.temperature = None
@@ -105,7 +112,10 @@ def main():
             decoded = processor.batch_decode(trimmed, skip_special_tokens=True,
                                              clean_up_tokenization_spaces=False)
             for context, raw in zip(chunk, decoded):
-                label = parse_label(raw)
+                if args.independent_smol:
+                    label = INDEPENDENT_CODES.get(raw.strip().upper().strip(".:- ")[:1])
+                else:
+                    label = parse_label(raw)
                 existing[context["context_id"]] = {
                     "context_id": context["context_id"],
                     "staging_image_id": context["staging_image_id"],

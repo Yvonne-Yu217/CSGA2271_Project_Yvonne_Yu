@@ -20,6 +20,14 @@ already mentioned when one is clearly visible. Do not infer identity, intent, lo
 context. Reply with one sentence of at most 30 words and no heading. If no useful new visible fact
 can be added, reply exactly NO_NEW_FACT."""
 
+REFINEMENT_PROMPT = """Existing image description: {caption}
+First full-image completion: {prior_completion}
+Inspect the full image again and add the single most useful concrete visible fact not already
+stated or entailed by either text above. Prefer an attribute, action, state, or relation of a
+specific mentioned entity. Do not repeat or paraphrase the first completion. Do not infer identity,
+intent, location, or unseen context. Reply with one sentence of at most 30 words and no heading.
+If no distinct useful new visible fact can be added, reply exactly NO_NEW_FACT."""
+
 
 def main():
     parser = argparse.ArgumentParser()
@@ -31,6 +39,8 @@ def main():
     parser.add_argument("--max-new-tokens", type=int, default=48)
     parser.add_argument("--max-pixels", type=int, default=0,
                         help="Optional Qwen image pixel cap; zero uses the model default")
+    parser.add_argument("--prior-completion-output", type=Path,
+                        help="Completed first-pass output; enables equal-call refinement")
     parser.add_argument("--allow-model-download", action="store_true")
     args = parser.parse_args()
     if not torch.cuda.is_available():
@@ -40,16 +50,27 @@ def main():
     images = {row["staging_image_id"]: row
               for row in read_jsonl(args.staging / "staging_images.jsonl")}
     contexts = read_jsonl(args.staging / "natural_contexts.jsonl")
-    sources = (args.staging / "staging_images.jsonl", args.staging / "natural_contexts.jsonl")
+    sources = [args.staging / "staging_images.jsonl", args.staging / "natural_contexts.jsonl"]
+    priors = {}
+    if args.prior_completion_output:
+        prior_path = args.prior_completion_output / "completions.jsonl"
+        sources.append(prior_path)
+        prior_rows = read_jsonl(prior_path)
+        priors = {row["context_id"]: row["completion"] for row in prior_rows}
+        if (set(priors) != {row["context_id"] for row in contexts} or
+                any(row.get("status") != "ok" for row in prior_rows)):
+            raise RuntimeError("first-pass completion cache is incomplete")
+    prompt_template = REFINEMENT_PROMPT if priors else PROMPT
     for image_id, row in images.items():
         image_path = args.staging / row["image_path"]
         if hashlib.sha256(image_path.read_bytes()).hexdigest() != row["image_sha256"]:
             raise RuntimeError(f"image hash mismatch: {image_id}")
     payload = {
         "files": {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in sources},
-        "model": args.model, "revision": args.revision, "prompt": PROMPT,
+        "model": args.model, "revision": args.revision, "prompt": prompt_template,
         "batch_size": args.batch_size, "max_new_tokens": args.max_new_tokens,
-        "implementation": "caption-conditioned-full-image-completion-v1",
+        "implementation": ("caption-conditioned-full-image-refinement-v1" if priors else
+                           "caption-conditioned-full-image-completion-v1"),
     }
     if args.max_pixels:
         payload["max_pixels"] = args.max_pixels
@@ -64,7 +85,7 @@ def main():
     metadata = {
         "scope": "model-visible full-image completion baseline; automated output is not gold",
         "fingerprint": fingerprint, "model": args.model, "revision": args.revision,
-        "prompt_sha256": hashlib.sha256(PROMPT.encode()).hexdigest(),
+        "prompt_sha256": hashlib.sha256(prompt_template.encode()).hexdigest(),
         "contexts": len(contexts), "completed": len(existing),
         "status": "running" if pending else "complete", "slurm_job_id": os.getenv("SLURM_JOB_ID"),
     }
@@ -98,7 +119,9 @@ def main():
             batch_images.append(Image.open(args.staging / image_row["image_path"]).convert("RGB"))
             conversation = [{"role": "user", "content": [
                 {"type": "image"},
-                {"type": "text", "text": PROMPT.format(caption=context["initial_caption"])}]}]
+                {"type": "text", "text": prompt_template.format(
+                    caption=context["initial_caption"],
+                    prior_completion=priors.get(context["context_id"], ""))}]}]
             texts.append(processor.apply_chat_template(conversation, tokenize=False,
                                                        add_generation_prompt=True))
         inputs = processor(text=texts, images=batch_images, padding=True,
