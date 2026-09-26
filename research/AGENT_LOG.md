@@ -230,3 +230,20 @@
   originally. On 435 bidirectionally entailed paraphrases, paired changes were
   -1.53 points [-4.0, 0.9] and -0.15 points [-2.25, 1.95]. Action-set Jaccard
   remained 0.718/0.736, motivating noisy or set-valued selector targets.
+
+## 2026-09-26 — Latest R2 blinded review handoff
+
+- Added a deterministic R2 review exporter with five strata: 100
+  image-clustered population-random rows and 50 each for grid judge
+  disagreements, grid consensus positives, grounded consensus positives, and
+  paired paraphrase action flips.
+- Generated `acquisition/data/e0-r2-blind-review-100` with 300 independently
+  shuffled rows per reviewer and 600 full/crop assets. Automated labels and
+  stratum identities exist only in the private manifest.
+- Mechanical packet checks passed: unique/matching IDs, different reviewer
+  orders, blank review fields, resolvable relative asset paths, and public/private
+  separation. Added a human-sheet auditor that will reject illegal values,
+  report completion/agreement, and emit a blank adjudication table only for
+  actual reviewer disagreements.
+- The current human audit correctly reports `awaiting_reviews`, 0/1,100 required
+  fields filled for each reviewer. No blank was interpreted as a negative vote.

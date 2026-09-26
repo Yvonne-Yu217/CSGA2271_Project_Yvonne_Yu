@@ -5,6 +5,7 @@ from pathlib import Path
 
 from acquisition.evaluate import evaluate_bundle
 from acquisition.audit import audit_report
+from acquisition.audit_r2_reviews import BASE_FIELDS, PAIR_FIELDS, required_fields
 from acquisition.fixture import write_fixture
 from acquisition.metrics import (bootstrap_cluster, caption_necessity, expected_random_metrics,
                                  material_switch, pair_regret)
@@ -99,6 +100,11 @@ class AcquisitionTests(unittest.TestCase):
         second = {"context_id": "ctx-b", "context_mode": "conditioned", "caption": "Same."}
         self.assertNotEqual(conditioned_cache_key(common[0], first, *common[1:]),
                             conditioned_cache_key(common[0], second, *common[1:]))
+
+    def test_r2_review_pair_requires_both_claim_label_sets(self):
+        self.assertEqual(required_fields({"alternate_claim": ""}), BASE_FIELDS)
+        self.assertEqual(required_fields({"alternate_claim": "Another claim."}),
+                         BASE_FIELDS + PAIR_FIELDS)
 
     def test_e1_e2_report_is_diagnostic_without_e0_and_strong_baseline(self):
         report = evaluate_bundle(self.root, "proposal_score", bootstrap_samples=200, seed=7)

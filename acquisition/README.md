@@ -161,3 +161,30 @@ crop-verification method.
 `export_screen_review.py` converts selected oracle/baseline disagreements into
 method-blind crop packets with blank fields for two independent reviewers. It
 does not expose model scores or predicted semantic types in reviewer CSV files.
+
+The latest R2 packet adds an image-clustered random population stratum plus
+grid judge disagreements, grid/grounded consensus positives, and paired
+paraphrase action flips. Public reviewer sheets contain no stratum or automated
+label; those fields remain in a separate private manifest:
+
+```sh
+PYTHONPATH=. python -m acquisition.export_r2_review \
+  --staging acquisition/data/e0-dev-100 \
+  --grid-observer acquisition/results/r2-v1-all-contexts-region-conditioned \
+  --grid-qwen acquisition/results/r2-v1-strict-core \
+  --grid-smol acquisition/results/r2-v1-independent-smol-core \
+  --paraphrase-contexts acquisition/results/r2-v3-paraphrases/paraphrased_contexts.jsonl \
+  --paraphrase-observer acquisition/results/r2-v3-paraphrase-observations \
+  --paraphrase-qwen acquisition/results/r2-v3-paraphrase-core-qwen \
+  --grounded-candidates acquisition/results/r1-v2-grounded-candidates.jsonl \
+  --grounded-observer acquisition/results/r1-v2-grounded-all-contexts-conditioned \
+  --grounded-qwen acquisition/results/r1-v2-grounded-strict-core \
+  --grounded-smol acquisition/results/r1-v2-grounded-independent-smol-core \
+  --output acquisition/data/e0-r2-blind-review-100
+
+PYTHONPATH=. python -m acquisition.audit_r2_reviews \
+  --packet acquisition/data/e0-r2-blind-review-100
+```
+
+The current generated packet has 300 rows per reviewer and is deliberately
+`awaiting_reviews`. Blank fields are incomplete work, never negative labels.

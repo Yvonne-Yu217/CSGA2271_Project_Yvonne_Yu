@@ -114,3 +114,10 @@ but exact successful-action sets have only 0.72--0.74 mean Jaccard across
 wordings. Treat selector targets as noisy/set-valued, and include the 65
 automatically disputed paraphrases in human review rather than excluding them
 from the evidence record.
+
+The latest R2 blinded packet is staged at
+`acquisition/data/e0-r2-blind-review-100`: 100 image-clustered random rows for
+population error estimation and 50 rows each for grid judge disagreement, grid
+consensus positives, grounded consensus positives, and paraphrase action flips.
+Both reviewer sheets have 300 independently shuffled rows and 600 verified
+assets. Its audit status is `awaiting_reviews`; blanks are not labels.
