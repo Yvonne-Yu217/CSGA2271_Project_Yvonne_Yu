@@ -1,5 +1,12 @@
 # Agent log
 
+## 2026-09-26 — Milestone priorities and conditional finance downstream
+
+- Updated GOAL.md and the authoritative follow-up proposal to the user's explicit order: CV validation, course-project readiness, CVPR readiness, then downstream application. Immediate work remains E0–E2; finance cannot substitute for core novelty or independent positive CV evidence.
+- Added financial event-understanding and conditional market-outcome designs, full-article/image-caption controls, strong visual baselines, temporal leakage and duplicate-event controls, and primary-source finance prior art. No financial gain or new method novelty is asserted as established.
+- Reinforced GPU preparation, productive utilization monitoring, optional independent subagent preparation, unified accounting, and preservation of allocations, checkpoints and caches. No manual cancellation or release of CPU/GPU allocations; server-managed reclamation remains required.
+- Documentation-only update: no experiment code implemented, no training or HPC job submitted, and no historical numerical result changed.
+
 ## 2026-09-26 — Direction review after the frozen follow-up
 
 - Fast-forward pulled `7716d0f` to `5f24bd4`; reviewed the actual frozen transfer tables and automatic semantic audit with a read-only audit subagent. No new HPC experiment was launched.

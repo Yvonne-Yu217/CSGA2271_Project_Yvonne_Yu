@@ -14,12 +14,18 @@ Authoritative design: `research/FOLLOWUP_PROPOSAL.md`. Evidence and literature/r
 
 ## Work and completion gates
 
+**Priority order: CV validation → course-project ready → CVPR ready → downstream application.** Finance is a conditional downstream extension, not the main objective or a substitute for a positive CV result. Current work is CV validation (E0–E2). Prepare downstream data only when it does not delay that work.
+
 1. **E0: valid task and data.** Prepare new image-disjoint development data, fluent caption states, independently checked object/attribute/relation facts and automatic candidates. Check instance identity, visibility, changed facts and annotation agreement. Preserve unknowns.
 2. **E1: measure available improvement.** Freeze the observer, enumerate candidate outcomes, and compare attainable same-budget utility against full-image caption completion, a strong prompted planner, omission rules, semantic coverage and simple selection. Count all inference costs. If the oracle has no useful gap, replace the direction before training.
 3. **E2: test caption dependence.** Show that useful actions change when known facts change, remain stable under paraphrase, and lose value after redundant acquisition. Include natural captions and saturated-caption STOP cases.
 4. **E3: learn actual action value.** Only after E1/E2, train direct utility ranking/regression and paired-caption supervision. Compare equal supervision, fixed observer and three seeds; avoid indefinite architecture/hyperparameter sweeps.
 5. **E4: independent positive confirmation.** Freeze model, metrics and strongest comparator; evaluate untouched images with human fact checks and image-level paired intervals. A meaningful gain over a competitive baseline is required. Negative outcomes change the next decision, not the stored results.
 6. **E5: publication development.** Only after positive confirmation and a clear prior-art distinction, test cross-reader/domain/backbone transfer, automatic regions, sequential observations, stop calibration and full quality–cost curves. A checklist cannot guarantee publication readiness.
+7. **D1: downstream event understanding, after the CV publication package.** Apply the validated method to financial news images. Condition on the full article and image caption available at the observation time. Compare text-only, full-image, generic image descriptions and selected complementary facts, plus shuffled-image controls. Require grounded event-understanding gains; finance alone does not establish method novelty.
+8. **D2: conditional market-outcome study.** Only if D1 succeeds and time-aligned data is valid, test incremental prediction of a preregistered market outcome with chronological evaluation and leakage controls. Better visual facts do not imply better returns prediction. A null market result must be retained and does not invalidate independently confirmed CV results.
+
+Course-project readiness requires E0–E4, a reproducible implementation, human checks, strong baselines and mechanism ablations. CVPR readiness additionally requires E5 and a defensible distinction from prior work; it is a research target, not an acceptance guarantee. Downstream work follows these milestones and must not postpone the core CV confirmation to chase a financial correlation.
 
 Sample sizes and suggested thresholds are in the proposal; they are planning choices, not forecasts. Next implementation is E0–E2 infrastructure. The old frozen-checkpoint scripts do not implement the new task.
 
@@ -36,8 +42,10 @@ Persistently low utilization slows progress and must be diagnosed. Sample memory
 
 Maintain a finite queue of necessary work. Subagents may prepare independent code/data/analysis; one owner controls GPU submissions, shared output paths and total cost. Never repeat experiments or generate synthetic load to inflate utilization. Under the latest HPC instruction, **do not manually cancel or release existing CPU/GPU allocations**; preserve the session and let the server handle reclamation.
 
+Prepare and push runnable stage code, dependencies, inputs and resume commands before GPU execution so implementation gaps do not strand allocated hardware. If a run stalls, diagnose it and switch only to a ready, scientifically necessary task within the current gate. Preserve allocations, checkpoints, caches and working environments; do not arbitrarily delete resources or restart the allocation to address low utilization.
+
 ## Suggested conversation goal
 
-`/goal 基于现有结果和文献，验证一个有可信正向效果与明确新意的新方向：给定已有描述，预测并执行最能补充正确视觉事实的观察，重点研究已提及实体的未覆盖属性/关系。先建设可靠数据并比较强 baseline 与 oracle，确认提升空间，再训练实际收益选择器和做独立测试。研究设计不受旧试验小时数限制，使用合适的可用 HPC 资源并保持有效占用、记账和会话连续性。若没有空间或与前作无实质区别，就换题；不得强行包装正结果。`
+`/goal 按 CV 核心验证 → course-project ready → CVPR ready → downstream application 的顺序推进，主次分明。首先验证给定已有描述时，能否学习选择最能补充正确视觉事实的观察，重点是已提及实体的未覆盖属性/关系。先完成可靠数据、强 baseline、oracle 和上下文必要性验证，再训练实际收益选择器并做独立测试，以可信正向效果、人工核验和明确新意达到课程标准；随后完成跨域/跨模型、机制与质量成本证据，推进 CVPR 级研究。此后开展 finance 事件理解；只有数据与结果支持时才研究市场预测，不能用金融相关性替代 CV 方法验证。研究设计不受旧试验小时数限制，使用任何合适的可用 GPU，提前完成代码与数据准备，保持有效 GPU 占用并及时诊断低利用率，必要时用 subagent 准备独立任务；统一提交、记账、缓存和检查点，不随意取消或释放 CPU/GPU 分配，不随意删除资源，由服务器管理回收并保持会话连续。若核心方向无提升空间或无实质新意就换题，绝不强行包装正结果。`
 
 This updates the repository objective; it does not claim the conversation-level goal was rewritten through an API.
