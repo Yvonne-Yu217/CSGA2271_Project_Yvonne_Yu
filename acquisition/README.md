@@ -54,6 +54,17 @@ PYTHONPATH=. python -u acquisition/planner_baseline.py \
   --staging acquisition/data/e0-dev-100 \
   --output acquisition/results/qwen-planner-e0-dev-100 --batch-size 4
 
+# Review-only E2 context drafts; these are never labels or verified captions.
+PYTHONPATH=. python -u acquisition/propose_contexts.py \
+  --staging acquisition/data/e0-dev-100 \
+  --output acquisition/results/qwen-context-proposals-e0-dev-100 --batch-size 4
+
+# Blank, independently shuffled review sheets for those drafts.
+PYTHONPATH=. python -u acquisition/export_review.py \
+  --stage context-proposals --staging acquisition/data/e0-dev-100 \
+  --context-proposal-output acquisition/results/qwen-context-proposals-e0-dev-100 \
+  --output acquisition/data/e0-review-context-proposals
+
 # Only an adjudicated bundle may pass audit and enter E1/E2.
 PYTHONPATH=. python -m acquisition.audit \
   --bundle acquisition/data/e0-bundle --output acquisition/results/e0-audit.json
@@ -86,3 +97,16 @@ PYTHONPATH=. python -m unittest acquisition.test_acquisition -v
 All generated data, model caches, raw observations, review packets, and runtime
 results are ignored by Git. Compact audited reports can be committed after the
 labels are genuinely reviewed.
+
+## Pre-adjudication screening
+
+The `screen_*` commands are deliberately provisional diagnostics. They separate
+crop support, text entailment, and complement type, cache every raw model answer,
+and report image-clustered intervals. Because the observer and judges share the
+same Qwen family, their output cannot pass E0/E1/E2. The current diagnostic
+result and exact limitations are recorded in
+`research/PROVISIONAL_DIRECTION_SCREEN.md`.
+
+`export_screen_review.py` converts selected oracle/baseline disagreements into
+method-blind crop packets with blank fields for two independent reviewers. It
+does not expose model scores or predicted semantic types in reviewer CSV files.

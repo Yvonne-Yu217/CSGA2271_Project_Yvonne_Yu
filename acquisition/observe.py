@@ -90,6 +90,7 @@ def main():
                                   args.max_new_tokens, args.batch_size, args.max_images)
     metadata_path = args.output / "observer_metadata.json"
     rows_path = args.output / "observations.jsonl"
+    old = None
     if metadata_path.is_file():
         old = json.loads(metadata_path.read_text())
         if old.get("fingerprint") != fingerprint:
@@ -135,6 +136,8 @@ def main():
         "torch": torch.__version__, "transformers": __import__("transformers").__version__,
         "python": platform.python_version(),
     }
+    if not pending and old:
+        metadata = {**metadata, **old, "completed_candidates": len(existing), "status": "complete"}
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
     atomic_jsonl(rows_path, [existing[key] for key in sorted(existing)])
     if not pending:

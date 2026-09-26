@@ -55,6 +55,38 @@ def fact_stage(staging):
     return {"fact_inventory": rows}, {"images": len(images), "fact_seed_rows": len(rows)}
 
 
+def context_proposal_stage(staging, proposal_output):
+    images = {row["staging_image_id"]: row
+              for row in read_jsonl(staging / "staging_images.jsonl")}
+    proposals = read_jsonl(proposal_output / "context_proposals.jsonl")
+    metadata = json.loads((proposal_output / "runtime.json").read_text())
+    if metadata.get("status") != "complete" or len(proposals) != len(images):
+        raise RuntimeError("context proposal cache is not complete")
+    rows = []
+    for proposal in proposals:
+        if proposal.get("proposals") is None:
+            raise RuntimeError(f"unparsed proposal: {proposal['proposal_id']}")
+        image_id = proposal["staging_image_id"]
+        if image_id not in images:
+            raise RuntimeError("proposal references an unknown staged image")
+        for kind in ("enriched", "paraphrase", "saturated"):
+            rows.append({
+                "item_id": blind_id("context-proposal", proposal["proposal_id"], kind),
+                "proposal_id": proposal["proposal_id"], "staging_image_id": image_id,
+                "image_path": images[image_id]["image_path"],
+                "reference_context_id": proposal["reference_context_id"],
+                "reference_caption": proposal["reference_caption"], "context_kind": kind,
+                "proposed_caption": proposal["proposals"][kind],
+                "visually_correct": "", "preserves_required_facts": "",
+                "changed_facts_json": "", "approved_caption_or_rewrite": "", "notes": "",
+            })
+    return {"context_proposals": rows}, {
+        "images": len(images), "context_proposal_rows": len(rows),
+        "proposal_fingerprint": metadata["fingerprint"],
+        "proposal_prompt_sha256": metadata["prompt_sha256"],
+    }
+
+
 def label_stage(bundle):
     public = PublicStore(bundle)
     fact_path = Path(bundle) / "gold" / "facts.jsonl"
@@ -117,8 +149,10 @@ def label_stage(bundle):
 
 def main():
     parser = argparse.ArgumentParser()
-    parser.add_argument("--stage", required=True, choices=("facts", "labels"))
+    parser.add_argument("--stage", required=True,
+                        choices=("facts", "context-proposals", "labels"))
     parser.add_argument("--staging", type=Path)
+    parser.add_argument("--context-proposal-output", type=Path)
     parser.add_argument("--canonical-bundle", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--reviewers", default="reviewer_a,reviewer_b")
@@ -129,6 +163,10 @@ def main():
         if args.staging is None:
             parser.error("--staging is required for facts stage")
         tables, counts = fact_stage(args.staging)
+    elif args.stage == "context-proposals":
+        if args.staging is None or args.context_proposal_output is None:
+            parser.error("--staging and --context-proposal-output are required")
+        tables, counts = context_proposal_stage(args.staging, args.context_proposal_output)
     else:
         if args.canonical_bundle is None:
             parser.error("--canonical-bundle is required for labels stage")

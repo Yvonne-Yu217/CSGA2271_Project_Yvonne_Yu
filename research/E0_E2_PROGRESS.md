@@ -25,6 +25,11 @@ Date: 2026-09-26. This is a status record, not a positive-results claim.
   deterministic parsing recovered all 500 choices, including 85 STOP choices.
   Its cache is model-visible only and cannot establish performance until E0
   labels exist.
+- Generated review-only enriched, paraphrase, and saturated caption drafts for
+  all 100 images in 180.42 seconds on one L4 (peak 7,519.10 MiB torch
+  allocation). All 100 outputs parsed into the three requested fields and none
+  copied enriched text verbatim into paraphrase text. These drafts are neither
+  verified captions nor context labels and must be independently reviewed.
 - Added strict public/gold separation, exact Cartesian atomic-label coverage,
   exactly two votes plus explicit adjudication, instance/image consistency,
   STOP semantics, deterministic action derivation, duplicate-group bootstrap,
@@ -45,6 +50,17 @@ Date: 2026-09-26. This is a status record, not a positive-results claim.
   deployable baseline, never the recognition oracle.
 - E3 selector training, E4 independent confirmation, E5 publication expansion,
   and downstream finance work remain gated on E0–E2.
+
+## Provisional automated direction screen
+
+The non-independent 100-image/500-caption screen in
+`research/PROVISIONAL_DIRECTION_SCREEN.md` found a 16.4-point binary any-new-fact
+oracle gap over the montage planner and a much larger provisional gap for the
+intended mentioned-entity-detail target. This is sufficient to prioritize human
+validation, not sufficient to pass E0/E1/E2 or claim a positive result.
+The strict instance-linkage prompt preserves a 27.8-point oracle-minus-montage
+gap but reduces oracle availability to 34.8%; broad/strict target labels have
+only 16.65% Jaccard. This prompt sensitivity is now part of the review design.
 
 ## Immediate next decision
 

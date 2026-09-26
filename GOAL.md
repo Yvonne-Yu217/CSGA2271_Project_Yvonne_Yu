@@ -56,6 +56,12 @@ The E0–E2 infrastructure and 100-image staging/frozen-observer caches now exis
 see `research/E0_E2_PROGRESS.md`. This is engineering progress only. E0 has no
 completed pair of independent human annotations or adjudication and therefore
 has **not passed**. E1/E2 have not been evaluated, and selector training remains
-gated. A frozen full-image prompted-planner cache has also completed, but cannot
-be scored before gold exists. No current artifact establishes a positive result
-or novelty.
+gated. Frozen full-image prompted-planner inference and review-only E2 context
+drafts have also completed, but cannot be scored or promoted to labels before
+human review. No current artifact establishes a positive result or novelty.
+
+A provisional same-model screen now shows enough apparent core-target oracle
+headroom to justify targeted human validation; see
+`research/PROVISIONAL_DIRECTION_SCREEN.md`. It does not change the gates above:
+same-family self-judging is not gold, generated saturated contexts failed the
+natural E2 screen, and E3 training remains prohibited until E0–E2 are credible.

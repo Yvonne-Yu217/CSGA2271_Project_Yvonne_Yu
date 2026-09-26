@@ -4,8 +4,13 @@ import unittest
 from pathlib import Path
 
 from acquisition.evaluate import evaluate_bundle
+from acquisition.audit import audit_report
 from acquisition.fixture import write_fixture
-from acquisition.metrics import bootstrap_cluster, caption_necessity, material_switch, pair_regret
+from acquisition.metrics import (bootstrap_cluster, caption_necessity, expected_random_metrics,
+                                 material_switch, pair_regret)
+from acquisition.planner_baseline import parse_choice
+from acquisition.screen_entailment import parse_label as parse_entailment
+from acquisition.screen_visual_support import parse_label as parse_visual_support
 from acquisition.schema import (
     GoldStore, PublicStore, SchemaError, derive_action_labels, observation_cache_key,
     validate_bundle,
@@ -159,6 +164,35 @@ class AcquisitionTests(unittest.TestCase):
         self.assertEqual(a, b)
         self.assertEqual(a["clusters"], 2)
         self.assertAlmostEqual(a["mean"], 0.5)
+
+    def test_fixture_can_never_pass_e0_gate(self):
+        report = audit_report(self.root)
+        self.assertEqual(report["status"], "not_eligible")
+        self.assertTrue(report["e0_gate"]["synthetic_or_fixture"])
+        self.assertEqual(set(report["e0_gate"]["table_checks"]), {
+            "context_status", "candidate_visibility", "candidate_sufficiency",
+            "observation_claim_status",
+        })
+
+    def test_model_output_parsers_accept_only_declared_aliases(self):
+        candidates = [{"kind": "bbox"}, {"kind": "stop"}]
+        self.assertEqual(parse_choice("1", candidates), 1)
+        self.assertEqual(parse_choice("STOP", candidates), 1)
+        self.assertEqual(parse_entailment("NOT ENTAILED."), "NOT_ENTAILED")
+        self.assertEqual(parse_visual_support("SUPPORTIVE"), "SUPPORTED")
+        self.assertIsNone(parse_entailment("probably new"))
+
+    def test_random_rate_is_ratio_of_expected_counts(self):
+        actions = {
+            "a": {"new_supported_fact_ids": ["x", "y"], "contradicted_claim_ids": [],
+                  "repeated_fact_ids": [], "eligible_missing_fact_ids": ["x", "y"],
+                  "unknown_claim_ids": [], "pixel_cost": 1},
+            "b": {"new_supported_fact_ids": [], "contradicted_claim_ids": ["bad"],
+                  "repeated_fact_ids": [], "eligible_missing_fact_ids": ["x", "y"],
+                  "unknown_claim_ids": [], "pixel_cost": 1},
+        }
+        result = expected_random_metrics(["a", "b"], actions, fact_count=2)
+        self.assertAlmostEqual(result["invalid_claim_rate"], 1 / 3)
 
 
 if __name__ == "__main__":

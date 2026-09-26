@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 
 import torch
-from PIL import Image
+from PIL import Image, ImageDraw
 from transformers import AutoProcessor, Qwen2_5_VLForConditionalGeneration
 
 from acquisition.observe import DEFAULT_MODEL, DEFAULT_REVISION, atomic_jsonl, read_jsonl
@@ -20,6 +20,11 @@ covered by that description. Regions use pixel boxes [left,top,right,bottom]. Ch
 description is already sufficient. Options:
 {options}
 Reply with only CHOICE=<integer>."""
+
+MONTAGE_PROMPT = """An existing image description is: {caption}
+The supplied montage contains numbered candidate observations. Choose exactly one candidate most
+likely to reveal a correct visible fact not already covered by the description. Choose {stop_index}
+for STOP if no additional observation is useful. Reply with only CHOICE=<integer>."""
 
 
 def parse_choice(raw, candidates):
@@ -33,6 +38,39 @@ def parse_choice(raw, candidates):
     return -1
 
 
+def candidate_montage(image_path, candidates, tile=224):
+    with Image.open(image_path) as source:
+        source = source.convert("RGB")
+        views = []
+        indices = []
+        for index, candidate in enumerate(candidates):
+            if candidate["kind"] == "stop":
+                continue
+            crops = [source.crop(box) for box in candidate["boxes"]]
+            if len(crops) == 1:
+                view = crops[0]
+            else:
+                width = sum(crop.width for crop in crops)
+                view = Image.new("RGB", (width, max(crop.height for crop in crops)), "white")
+                x = 0
+                for crop in crops:
+                    view.paste(crop, (x, 0))
+                    x += crop.width
+            view.thumbnail((tile, tile))
+            canvas = Image.new("RGB", (tile, tile), "white")
+            canvas.paste(view, ((tile - view.width) // 2, (tile - view.height) // 2))
+            ImageDraw.Draw(canvas).rectangle((0, 0, 42, 24), fill="black")
+            ImageDraw.Draw(canvas).text((4, 4), str(index), fill="white")
+            views.append(canvas)
+            indices.append(index)
+    columns = 4
+    montage = Image.new("RGB", (columns * tile, ((len(views) + columns - 1) // columns) * tile),
+                        "white")
+    for position, view in enumerate(views):
+        montage.paste(view, ((position % columns) * tile, (position // columns) * tile))
+    return montage
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--staging", type=Path, required=True)
@@ -40,6 +78,8 @@ def main():
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
     parser.add_argument("--batch-size", type=int, default=4)
+    parser.add_argument("--visualization", choices=("coordinates", "montage"),
+                        default="coordinates")
     parser.add_argument("--allow-model-download", action="store_true")
     args = parser.parse_args()
     if not torch.cuda.is_available():
@@ -54,17 +94,21 @@ def main():
         path = args.staging / row["image_path"]
         if hashlib.sha256(path.read_bytes()).hexdigest() != row["image_sha256"]:
             raise RuntimeError(f"image hash mismatch: {image_id}")
+    prompt_template = PROMPT if args.visualization == "coordinates" else MONTAGE_PROMPT
     payload = {
         "staging": {name: hashlib.sha256((args.staging / name).read_bytes()).hexdigest()
                     for name in ("staging_images.jsonl", "natural_contexts.jsonl",
                                  "automatic_candidates.jsonl")},
-        "model": args.model, "revision": args.revision, "prompt": PROMPT,
+        "model": args.model, "revision": args.revision, "prompt": prompt_template,
         "batch_size": args.batch_size, "implementation": "qwen-planner-v1",
     }
+    if args.visualization != "coordinates":
+        payload["visualization"] = args.visualization
     fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
     args.output.mkdir(parents=True, exist_ok=True)
     rows_path, metadata_path = args.output / "choices.jsonl", args.output / "runtime.json"
     existing = {row["context_id"]: row for row in read_jsonl(rows_path)}
+    old = None
     if metadata_path.is_file():
         old = json.loads(metadata_path.read_text())
         if old.get("fingerprint") != fingerprint:
@@ -85,10 +129,13 @@ def main():
     metadata = {
         "scope": "frozen model-visible planner baseline; no outcome claim before E0",
         "fingerprint": fingerprint, "model": args.model, "revision": args.revision,
-        "prompt_sha256": hashlib.sha256(PROMPT.encode()).hexdigest(),
+        "prompt_sha256": hashlib.sha256(prompt_template.encode()).hexdigest(),
+        "visualization": args.visualization,
         "contexts": len(contexts), "completed": len(existing),
         "status": "running" if pending else "complete", "slurm_job_id": os.getenv("SLURM_JOB_ID"),
     }
+    if not pending and old:
+        metadata = {**metadata, **old, "completed": len(existing), "status": "complete"}
     metadata_path.write_text(json.dumps(metadata, indent=2) + "\n")
     if not pending:
         print("planner cache complete")
@@ -114,15 +161,23 @@ def main():
             image_id = context["staging_image_id"]
             candidates = sorted(candidates_by_image[image_id], key=lambda row: row["candidate_id"])
             ordered_candidates.append(candidates)
-            options = "\n".join(
-                f"{index}: {'STOP' if row['kind'] == 'stop' else json.dumps(row['boxes'])}"
-                for index, row in enumerate(candidates))
-            prompt = PROMPT.format(caption=context["initial_caption"], options=options)
+            if args.visualization == "coordinates":
+                options = "\n".join(
+                    f"{index}: {'STOP' if row['kind'] == 'stop' else json.dumps(row['boxes'])}"
+                    for index, row in enumerate(candidates))
+                prompt = PROMPT.format(caption=context["initial_caption"], options=options)
+                visual = Image.open(args.staging / images[image_id]["image_path"]).convert("RGB")
+            else:
+                stop_index = next(index for index, row in enumerate(candidates)
+                                  if row["kind"] == "stop")
+                prompt = MONTAGE_PROMPT.format(caption=context["initial_caption"],
+                                               stop_index=stop_index)
+                visual = candidate_montage(args.staging / images[image_id]["image_path"], candidates)
             conversation = [{"role": "user", "content": [
                 {"type": "image"}, {"type": "text", "text": prompt}]}]
             texts.append(processor.apply_chat_template(conversation, tokenize=False,
                                                        add_generation_prompt=True))
-            batch_images.append(Image.open(args.staging / images[image_id]["image_path"]).convert("RGB"))
+            batch_images.append(visual)
         inputs = processor(text=texts, images=batch_images, padding=True, return_tensors="pt").to("cuda")
         batch_started = time.time()
         with torch.inference_mode():

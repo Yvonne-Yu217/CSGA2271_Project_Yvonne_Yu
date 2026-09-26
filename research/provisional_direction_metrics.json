@@ -1,0 +1,67 @@
+{
+  "status": "provisional_not_evidence",
+  "date": "2026-09-26",
+  "unit": "image_cluster_after_five_caption_macro_average",
+  "sample": {
+    "images": 100,
+    "natural_contexts": 500,
+    "candidate_actions_per_image": 15,
+    "context_action_entailments": 7000
+  },
+  "any_new_fact": {
+    "cost_matched_recognition_oracle": {"mean": 0.996, "ci95": [0.99, 1.0]},
+    "montage_planner": {"mean": 0.836, "ci95": [0.778, 0.888]},
+    "largest_area": {"mean": 0.776, "ci95": [0.716, 0.832]},
+    "clip_inverse_cost_matched": {"mean": 0.768, "ci95": [0.698, 0.832]},
+    "siglip_inverse_cost_matched": {"mean": 0.734, "ci95": [0.668, 0.796]},
+    "random_cost_matched_to_montage": {
+      "mean": 0.7006110556110556,
+      "ci95": [0.6691630602730602, 0.7306660897435898]
+    },
+    "oracle_minus_montage": {"mean": 0.164, "ci95": [0.112, 0.222]},
+    "montage_minus_clip_cost_matched": {"mean": 0.068, "ci95": [0.006, 0.134]},
+    "montage_minus_siglip_cost_matched": {"mean": 0.102, "ci95": [0.04, 0.166]}
+  },
+  "core_target_broad_prompt": {
+    "target_rows": 1751,
+    "oracle": {"mean": 0.878, "ci95": [0.82995, 0.922]},
+    "montage_planner": {"mean": 0.3, "ci95": [0.24, 0.364]},
+    "random_expected": {"mean": 0.25014285714285717, "ci95": [0.222425, 0.278575]},
+    "oracle_minus_montage": {"mean": 0.578, "ci95": [0.512, 0.644]}
+  },
+  "core_target_strict_prompt": {
+    "target_rows": 316,
+    "oracle": {"mean": 0.348, "ci95": [0.29, 0.408]},
+    "montage_planner": {"mean": 0.07, "ci95": [0.042, 0.102]},
+    "random_expected": {"mean": 0.045142857142857144, "ci95": [0.035571, 0.056]},
+    "oracle_minus_montage": {"mean": 0.278, "ci95": [0.226, 0.332]}
+  },
+  "prompt_sensitivity": {
+    "all_label_agreement": 0.5794285714285714,
+    "core_target_jaccard": 0.1664785553047404,
+    "broad_target_rows_retained_by_strict": 0.1684751570531125,
+    "strict_target_rows_also_broad": 0.9335443037974683
+  },
+  "e2": {
+    "model_authored_context_screen": {
+      "caption_necessity_gap": 0.0,
+      "natural_to_saturated_switch_rate": 0.0,
+      "saturated_stop_rate": 0.0,
+      "interpretation": "failed because the generated saturated captions were not saturated"
+    },
+    "constructed_redundancy_sanity_check": {
+      "caption_necessity_gap": 0.25,
+      "selected_action_redundancy_loss": 0.9,
+      "saturated_stop_rate": 1.0,
+      "natural_to_saturated_switch_rate": 1.0,
+      "interpretation": "definition-level check only; partly true by construction"
+    }
+  },
+  "limitations": [
+    "Observer and all judges use the same Qwen family.",
+    "There is no independent human fact adjudication.",
+    "Utility is binary rather than an atomic-fact count.",
+    "Broad and strict core-target prompts are highly unstable.",
+    "Generic grids and high random success make the any-new-fact proxy too easy."
+  ]
+}
