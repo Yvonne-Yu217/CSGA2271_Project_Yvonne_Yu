@@ -1,5 +1,15 @@
 # Agent log
 
+## 2026-09-26 — VQ-FocusAmbiguity externally labeled preflight
+
+- Switched to an externally labeled CV benchmark after the observation-selection and crop-verification screens failed. Downloaded and CRC-checked the official VQ-FocusAmbiguity annotations/images, pinned all source hashes, and audited 5,474 records, 3,227 unique images, and 15,361 binary nonempty masks. All masks match decoded image dimensions.
+- Found evaluation-critical source quirks: every row's internal `set` field says `train`; 40 image filenames cross official JSON files but no exact normalized image-question pair does; 11 JSON sizes have width/height swapped. Split is now derived from the JSON filename and internal resampling must group by image.
+- Ran pinned SmolVLM on all 140 public train+validation examples with test inference locked. Image+question balanced accuracy was 51.67%, and it detected only 2/60 ambiguous rows. Question-only balanced accuracy was 44.58%; the image-minus-text interval crossed zero. A first prompt was rejected because the VLM answered the embedded VQA question instead of returning a class; the final A/B format parsed all rows with no manual relabeling.
+- Falsified the prompted classifier with an A/B meaning swap. SmolVLM changed from 2 to 23 ambiguous image predictions; Qwen2.5-VL-3B changed from 66 to 3 and retained only 55% semantic agreement across code orders. All four 140-row runs parsed completely and test remained locked. These generation scores are prompt-order diagnostics, not accepted baselines.
+- Extracted pinned SigLIP features on one L4 and ran fixed `lambda=1` linear probes without tuning. The image+question probe trained on 70 train rows reached 62.86% accuracy / 60.83% balanced accuracy on 70 validation rows, versus 57.14% / 50% for always-unambiguous. Its 95% bootstrap interval [49.48, 72.02] crosses chance; source results range from 45% COCO to 80% VizWiz, so this is weak feasibility evidence, not a positive result.
+- Repeated the fixed probe with pinned CLIP. Image-only reached 62.50% balanced accuracy [51.19, 73.56], exceeding image+question at 57.50% [45.67, 69.05]. Together with the all-unambiguous MSRA subset and large source variation, this is evidence of image/source shortcuts, not focus reasoning.
+- Literature review confirms that ICCV 2025 introduced ambiguity recognition and plausible-focus localization, while CVPRW 2026 already reframes localization around disambiguation sufficiency and provides a two-stage baseline. The topic is gated pending a distinction beyond those tasks and a source-aware protocol; do not scale training or inspect test performance yet.
+
 ## 2026-09-26 — Claim-conditioned crop-verification pivot screen
 
 - After the fixed-candidate complement-selection design failed against direct full-image completion, screened an adjacent claim-conditioned evidence-verification pivot rather than training E3. Predeclared continuation required proper-zoom recall at least 80% and false support at most 20%, plus a novelty distinction from generic crop verification.

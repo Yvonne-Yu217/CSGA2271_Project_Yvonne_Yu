@@ -30,5 +30,7 @@ slurm-*.out
 .venv/
 acquisition/data/
 acquisition/results/
+focus_ambiguity/data/
+focus_ambiguity/results/
 .env
 .env.*

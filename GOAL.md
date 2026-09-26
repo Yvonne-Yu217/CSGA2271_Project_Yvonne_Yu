@@ -79,3 +79,30 @@ collapsing recall to 42.76%. Generic zoom/verification also has direct recent
 prior art. Do not train this pivot. Preserve both negative screens and move to a
 genuinely different CV task with externally verifiable labels; do not skip to
 finance or reweight these proxies to manufacture a positive result.
+
+A first externally labeled topic preflight now exists for VQ-FocusAmbiguity;
+see `research/FOCUS_AMBIGUITY_PREFLIGHT.md`. Its official images and 15,361
+masks pass structural validation, but the metadata require care: every internal
+`set` field says `train`, 40 image filenames cross official JSON files, and 11
+width/height records are swapped while image and mask pixels agree. Use the JSON
+filename as the split and group any internal resampling by image.
+
+This topic has **not passed the direction gate**. A pinned zero-shot SmolVLM
+image+question classifier reached only 51.67% balanced accuracy and 3.33%
+ambiguous recall on the 140 public train+validation rows. Swapping the meanings
+of A/B changed its ambiguity predictions from 2 to 23; the same change moved
+Qwen2.5-VL-3B from 66 to 3, with only 55% semantic agreement across Qwen prompt
+orders. Treat prompted generative classification as invalidated by label-order
+bias. A fixed, untuned
+SigLIP image+question ridge probe trained on 70 rows reached 60.83% balanced
+accuracy on 70 validation rows, but its 95% bootstrap interval [49.48, 72.02]
+includes chance and performance varies sharply by source. A fixed CLIP probe is
+more concerning: image-only balanced accuracy is 62.50% [51.19, 73.56], higher
+than image+question at 57.50% [45.67, 69.05], indicating source/image shortcuts
+rather than demonstrated question-specific focus reasoning. The official test set
+remains locked. Recent ICCV 2025 and CVPRW 2026 work already covers ambiguity
+recognition, focus localization, sufficiency-oriented evaluation, and a
+two-stage baseline. Do not scale training or submit test predictions until a
+written novelty screen establishes a falsifiable contribution beyond those
+tasks and a source-aware development protocol is frozen; otherwise change topic
+again.

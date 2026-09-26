@@ -1,0 +1,114 @@
+{
+  "date": "2026-09-26",
+  "decision": "weak_feasibility_signal_direction_not_passed",
+  "test_policy": "No test inference, threshold selection, or model selection was performed.",
+  "data": {
+    "records": {"train": 70, "val": 70, "test": 5334},
+    "unique_images": 3227,
+    "masks": 15361,
+    "audit_status": "pass_with_warnings",
+    "hard_errors": 0,
+    "cross_split_image_filenames": 40,
+    "exact_cross_split_image_question_duplicates": 0,
+    "json_size_swapped_records": 11,
+    "internal_set_mismatch_records": 5404,
+    "sha256": {
+      "fa_images.zip": "09457f85e735b398fe053e6b5a6964aa97d562fbfc3669b280948abf4435e5e9",
+      "focusAmbiguity_gts.zip": "fc346aa13e46083a19fc3d62802aeaabf9062835096b4ede5870ccb082c6abfb",
+      "train_gt.json": "55ba6cca0e343ed9b94d0292a0f6f014e1b1a392894326fb6d1c216507392333",
+      "val_gt.json": "7b6134c21e62098f7faab6b1613e79de2e8debc695df9914ad8a63521ea2db0f",
+      "test_gt.json": "94e117cfdebe38b5b5e9937484d80d011b6d4d7d51ecea784fc819fe290430e1"
+    }
+  },
+  "zero_shot": {
+    "records": 140,
+    "majority_unambiguous": {"accuracy": 0.5714285714, "balanced_accuracy": 0.5},
+    "smolvlm": {
+      "revision": "81cd9a775a4d644f2faf4e7becff4559b46b14c7",
+      "base_image_question": {
+        "accuracy": 0.5857142857,
+        "balanced_accuracy": 0.5166666667,
+        "balanced_accuracy_ci95": [0.5, 0.5423728814],
+        "ambiguous_recall": 0.0333333333,
+        "ambiguous_predictions": 2,
+        "elapsed_seconds": 55.8530817032,
+        "peak_gpu_memory_mb": 4950.056640625
+      },
+      "swapped_image_question": {
+        "accuracy": 0.6071428571,
+        "balanced_accuracy": 0.5604166667,
+        "balanced_accuracy_ci95": [0.4962566845, 0.6255367001],
+        "ambiguous_recall": 0.2333333333,
+        "ambiguous_predictions": 23,
+        "elapsed_seconds": 54.7639029026,
+        "peak_gpu_memory_mb": 4950.056640625
+      },
+      "semantic_agreement_across_code_orders": 0.8214285714
+    },
+    "qwen2_5_vl_3b": {
+      "revision": "66285546d2b821cf421d4f5eb2576359d3770cd3",
+      "base_image_question": {
+        "accuracy": 0.5428571429,
+        "balanced_accuracy": 0.5395833333,
+        "balanced_accuracy_ci95": [0.4554738562, 0.6241958913],
+        "ambiguous_recall": 0.5166666667,
+        "ambiguous_predictions": 66,
+        "elapsed_seconds": 96.5762794018,
+        "peak_gpu_memory_mb": 10785.8393554688
+      },
+      "swapped_image_question": {
+        "accuracy": 0.5785714286,
+        "balanced_accuracy": 0.5104166667,
+        "balanced_accuracy_ci95": [0.4871794872, 0.5384615385],
+        "ambiguous_recall": 0.0333333333,
+        "ambiguous_predictions": 3,
+        "elapsed_seconds": 96.8419692516,
+        "peak_gpu_memory_mb": 10785.8393554688
+      },
+      "semantic_agreement_across_code_orders": 0.55
+    }
+  },
+  "siglip_fixed_ridge": {
+    "revision": "7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed",
+    "ridge_lambda": 1.0,
+    "train_records": 70,
+    "val_records": 70,
+    "question_balanced_accuracy": 0.525,
+    "image_balanced_accuracy": 0.525,
+    "image_question": {
+      "accuracy": 0.6285714286,
+      "balanced_accuracy": 0.6083333333,
+      "balanced_accuracy_ci95": [0.4948320413, 0.7202380952],
+      "ambiguous_recall": 0.4666666667,
+      "source_accuracy": {"coco": 0.45, "msra": 0.9, "paco": 0.5, "vizwiz": 0.8}
+    },
+    "elapsed_seconds": 7.1600863934,
+    "peak_gpu_memory_mb": 474.9008789062
+  },
+  "clip_fixed_ridge": {
+    "revision": "57c216476eefef5ab752ec549e440a49ae4ae5f3",
+    "ridge_lambda": 1.0,
+    "train_records": 70,
+    "val_records": 70,
+    "question": {
+      "balanced_accuracy": 0.5916666667,
+      "balanced_accuracy_ci95": [0.4821428571, 0.7023809524]
+    },
+    "image": {
+      "accuracy": 0.6142857143,
+      "balanced_accuracy": 0.625,
+      "balanced_accuracy_ci95": [0.5119047619, 0.7355555556],
+      "ambiguous_recall": 0.7,
+      "source_accuracy": {"coco": 0.4, "msra": 1.0, "paco": 0.5, "vizwiz": 0.75}
+    },
+    "image_question": {
+      "accuracy": 0.5857142857,
+      "balanced_accuracy": 0.575,
+      "balanced_accuracy_ci95": [0.4566993464, 0.6904761905],
+      "ambiguous_recall": 0.5
+    },
+    "elapsed_seconds": 10.5387048721,
+    "peak_gpu_memory_mb": 384.1372070312
+  },
+  "gpu": "NVIDIA L4"
+}

@@ -8,6 +8,8 @@ Text-conditioned localization of complementary visual information — CSCI-GA 22
 
 - [Latest results, audit corrections and literature/repo review](research/DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md)
 - [Proposed next task and course-to-publication experiment design](research/FOLLOWUP_PROPOSAL.md)
+- [Externally labeled focus-ambiguity direction preflight](research/FOCUS_AMBIGUITY_PREFLIGHT.md)
+- [Focus-ambiguity audit and reproduction commands](focus_ambiguity/README.md)
 
 - [Result review and direction decision](research/RESULTS_REVIEW_AND_NEXT_STEPS.md)
 - [Completed frozen-follow-up code and CPU → GPU → CPU commands](hpc/NEXT_ROUND.md)
