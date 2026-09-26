@@ -1,5 +1,27 @@
 # Agent log
 
+## 2026-09-26 — Caption-conditioned redesign, R2 headroom, and R3 proxy stop
+
+- Updated the hardware policy to permit any suitable available GPU and used A100
+  allocation 2002 without manually canceling or releasing it. Added independent
+  five-second utilization monitoring. The largest R2 SmolVLM batches used about
+  35.4 GiB and repeatedly reached 98–100% instantaneous utilization.
+- Generated 5,600 outputs for the matched R1 text/context matrix and 7,000
+  outputs for all 100 images × five captions × 14 region actions. All caches are
+  context-keyed and resumable; six R2 format failures were recovered with a
+  coded deterministic retry, with original outputs retained.
+- Automated strict R2 oracle success was 90.4% versus 80.2% for the best
+  same-image static action and 48.6% for direct full-image completion. The
+  caption-specific gain was +10.2 points [7.6, 13.0], and 82.9% of same-image
+  caption pairs changed their successful-action set. This passes the automated
+  development rule but is not human E0 evidence.
+- Existing prompted planners failed to exploit the headroom: coordinate 18.4%,
+  montage 27.4%. A predeclared frozen-SigLIP proxy selector improved from 25.26%
+  image-only to 36.84% interaction on 19 proxy-test images, but its paired
+  interval [-7.37, 30.53] crossed zero and it did not reliably beat full-image
+  completion. Stopped without tuning the proxy test. Next test grounded entity,
+  padded and relation-union geometry before another action-prediction family.
+
 ## 2026-09-26 — Preserve the research question; redesign the method on fixed L4
 
 - Fast-forward pulled `0e7ccef` to `2f96409`. Two read-only subagents audited results/code and primary literature/official repos. No experiment or live HPC connection occurred in this update.

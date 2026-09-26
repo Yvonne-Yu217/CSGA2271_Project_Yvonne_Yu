@@ -77,3 +77,16 @@ The research design is not constrained by historical pilot-hour envelopes. Actua
 `/goal 保持“给定已有文本，提取图片能补充的正确且有用事实”这一主线，按 CV 验证 → course-project ready → CVPR ready → downstream application 推进。把失败归因到具体方法和证据，先公平比较区域生成、caption 条件、全局上下文和事实评估，再学习相对强全图基线的新增收益。若方法失败，必须保存结果、分析错误、查阅论文与官方 repo、自主提出并预先记录新实验设计，在授权资源内继续迭代直到获得独立确认的正向效果与明确新意；不能反复刷测试集或包装假阳性。可使用任何当前可用且适合的 GPU（包括 L4 或 A100），从单卡开始，按实际硬件调整模型、分辨率、训练与 batch，并把必要实验跑完。GPU 有效占用是每次执行和交接的重点：每 5 秒监控，及时诊断低利用率，提前准备代码数据和有限必要任务队列，必要时安排 subagent 并发准备，统一提交记账。不得随意取消、释放或重启 CPU/GPU 分配，保留缓存检查点与会话，由服务器管理回收。`
 
 This file and its suggested command update the repository goal; no conversation-level goal API rewrite is claimed.
+
+## Latest redesign execution (2026-09-26)
+
+R1 and R2 now have automated development results; see
+`research/R1_R3_REDESIGN_RESULTS.md`. Caption-conditioned fixed-grid actions
+show strict same-image caption-dependent oracle headroom (+10.2 points over the
+best static action [7.6, 13.0], and +41.8 points over direct full-image
+completion [34.8, 49.0]). This is a positive mechanism diagnostic, not human
+evidence. Existing prompted planners do not capture it, and the first frozen
+SigLIP interaction selector failed its uncertainty rule. Do not tune its proxy
+test. Continue R1 geometry/binding isolation with automatic grounded entity,
+padded and relation-union views; complete human E0 before treating selector
+training as formal E3 or opening a confirmation attempt.

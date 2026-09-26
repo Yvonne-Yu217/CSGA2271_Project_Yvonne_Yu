@@ -1,5 +1,5 @@
 round_id: R2-v1
-status: predeclared_development
+status: automated_development_complete_human_review_pending
 date: 2026-09-26
 parent_round: research/rounds/R1_v1.yaml
 objective: test caption-dependent residual action value beyond strong full-image completion
@@ -26,5 +26,15 @@ development_continuation_rule: caption-specific oracle exceeds best same-image s
 uncertainty_unit: image/duplicate group
 holdout_policy: no confirmation inference; all current 100 images remain development only
 gpu_policy: any suitable available GPU; exact type, configuration and five-second utilization trace recorded
-results_and_failure_examples: pending
-decision_and_next_design: pending
+results_and_failure_examples:
+  broad_caption_specific_oracle: 0.930
+  broad_best_same_image_static: 0.870
+  broad_caption_specific_gain_ci95: [0.038, 0.084]
+  strict_caption_specific_oracle: 0.904
+  strict_best_same_image_static: 0.802
+  strict_caption_specific_gain_ci95: [0.076, 0.130]
+  strict_full_image_completion: 0.486
+  strict_oracle_minus_full_image_ci95: [0.348, 0.490]
+  same_image_caption_pair_action_set_change_rate: 0.829
+  source: acquisition/results/r2-v1-strict-core/provisional_report.json
+decision_and_next_design: automated continuation rule passes; test proxy learnability, while human E0 remains required

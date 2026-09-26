@@ -1,0 +1,31 @@
+round_id: R3-v0-proxy
+status: complete_failed_continuation_rule
+date: 2026-09-26
+parent_round: research/rounds/R2_v1.yaml
+objective: test whether caption-specific automated action value is learnable across images
+label_warning: automated SmolVLM support, DeBERTa novelty and Qwen strict semantic type; not E0 gold
+split_rule: sha256("r3-proxy-v1:" + staging_image_id) mod 10; 0-5 train, 6-7 validation, 8-9 proxy_test
+split_unit: whole image
+features: pinned frozen SigLIP image crop and caption embeddings
+methods:
+  - image_only
+  - elementwise_image_caption_interaction
+  - image_plus_interaction
+fit: deterministic ridge regression; lambda=1; no hyperparameter tuning
+primary_metric: selected-action automated strict mentioned-entity success
+primary_comparison: interaction minus image-only on proxy_test
+continuation_rule: interaction improves selected-action success by at least 5 percentage points with image-paired 95% interval above zero and exceeds direct full-image completion
+controls: recognition oracle, full-image completion, cached coordinate planner, cached montage planner
+confirmation_policy: proxy_test is development-only because all source images were previously inspected; it cannot count as formal confirmation
+gpu_policy: any suitable available GPU with exact device and five-second utilization trace
+results:
+  proxy_test_images: 19
+  proxy_test_contexts: 95
+  image_only_selected_success: 0.2526
+  interaction_selected_success: 0.3684
+  interaction_minus_image_only_ci95: [-0.0737, 0.3053]
+  full_image_completion: 0.3368
+  interaction_minus_full_image_ci95: [-0.1368, 0.2105]
+  recognition_oracle: 0.9474
+  source: acquisition/results/r3-v0-proxy-siglip/provisional_report.json
+decision: frozen linear interaction does not generalize reliably; do not tune on proxy_test, return to grounded geometry and binding redesign

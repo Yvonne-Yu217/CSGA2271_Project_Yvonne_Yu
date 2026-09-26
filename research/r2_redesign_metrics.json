@@ -1,0 +1,106 @@
+{
+  "contexts": 500,
+  "images": 100,
+  "methods": {
+    "best_same_image_static": {
+      "ci95": [
+        0.7539999999999999,
+        0.848
+      ],
+      "clusters": 100,
+      "mean": 0.802,
+      "samples": 10000,
+      "seed": 2271
+    },
+    "coordinate_planner": {
+      "ci95": [
+        0.13,
+        0.24400000000000002
+      ],
+      "clusters": 100,
+      "mean": 0.18400000000000002,
+      "samples": 10000,
+      "seed": 2271
+    },
+    "full_image_completion": {
+      "ci95": [
+        0.4120000000000001,
+        0.558
+      ],
+      "clusters": 100,
+      "mean": 0.486,
+      "samples": 10000,
+      "seed": 2271
+    },
+    "montage_planner": {
+      "ci95": [
+        0.214,
+        0.338
+      ],
+      "clusters": 100,
+      "mean": 0.274,
+      "samples": 10000,
+      "seed": 2271
+    },
+    "recognition_oracle": {
+      "ci95": [
+        0.8639999999999999,
+        0.9399999999999998
+      ],
+      "clusters": 100,
+      "mean": 0.904,
+      "samples": 10000,
+      "seed": 2271
+    }
+  },
+  "paired_gaps": {
+    "best_same_image_static_minus_full_image": {
+      "ci95": [
+        0.25000000000000006,
+        0.38400000000000006
+      ],
+      "clusters": 100,
+      "mean": 0.316,
+      "samples": 10000,
+      "seed": 2271
+    },
+    "coordinate_planner_minus_full_image": {
+      "ci95": [
+        -0.3760000000000001,
+        -0.228
+      ],
+      "clusters": 100,
+      "mean": -0.30199999999999994,
+      "samples": 10000,
+      "seed": 2271
+    },
+    "montage_planner_minus_full_image": {
+      "ci95": [
+        -0.28800000000000003,
+        -0.134
+      ],
+      "clusters": 100,
+      "mean": -0.212,
+      "samples": 10000,
+      "seed": 2271
+    },
+    "recognition_oracle_minus_full_image": {
+      "ci95": [
+        0.348,
+        0.49000000000000005
+      ],
+      "clusters": 100,
+      "mean": 0.418,
+      "samples": 10000,
+      "seed": 2271
+    }
+  },
+  "sources": {
+    "acquisition/results/provisional-full-image-completion-lowres-core-strict-100/complement_types.jsonl": "34b8e36fc5952e65c593eada3a708d2b60e6726e640b068d39724f1ba14d49c6",
+    "acquisition/results/qwen-montage-planner-e0-dev-100/choices.jsonl": "ca16bfbdb2efc25031c7871129d60ec7f238056d86cf9a7101c0efe0a3ca7489",
+    "acquisition/results/qwen-planner-e0-dev-100/choices.jsonl": "0f56c07a54ac66c6a85ff9e1d1a8553d63f0f63337d901f260c44e192086a49d",
+    "acquisition/results/r2-v1-strict-core/complement_types.jsonl": "ff19e42ce7c1729804e45c1842cb667452a357a555e5f75b595276870555dce7"
+  },
+  "status": "provisional_not_evidence",
+  "warning": "Automated strict action labels are not human adjudication."
+}
