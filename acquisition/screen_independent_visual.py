@@ -9,9 +9,10 @@ from collections import Counter
 from pathlib import Path
 
 import torch
+from PIL import Image
 from transformers import AutoModelForVision2Seq, AutoProcessor
 
-from acquisition.observe import atomic_jsonl, crop_candidate, read_jsonl
+from acquisition.observe import atomic_jsonl, crop_candidate_from_source, read_jsonl
 from acquisition.screen_visual_support import LABELS, PROMPT, parse_label
 
 
@@ -105,9 +106,13 @@ def main():
         for offset in range(0, len(pending), args.batch_size):
             chunk = pending[offset:offset + args.batch_size]
             crops, texts = [], []
+            source_cache = {}
             for candidate, observation in chunk:
-                crops.append(crop_candidate(args.staging, images[candidate["staging_image_id"]],
-                                            candidate))
+                image_id = candidate["staging_image_id"]
+                if image_id not in source_cache:
+                    source_cache[image_id] = Image.open(
+                        args.staging / images[image_id]["image_path"]).convert("RGB")
+                crops.append(crop_candidate_from_source(source_cache[image_id], candidate))
                 conversation = [{"role": "user", "content": [
                     {"type": "image"},
                     {"type": "text", "text": PROMPT.format(observation=observation)}]}]
@@ -126,6 +131,8 @@ def main():
                     "raw_output": raw.strip(), "status": "ok" if label else "parse_failed"}
             for crop in crops:
                 crop.close()
+            for source in source_cache.values():
+                source.close()
             atomic_jsonl(rows_path, [existing[key] for key in sorted(existing)])
             metadata.update({"completed": len(existing), "elapsed_seconds": time.time() - started,
                              "peak_gpu_memory_mb": torch.cuda.max_memory_allocated() / 1024 ** 2})

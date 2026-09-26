@@ -1,0 +1,30 @@
+round_id: R2-v1
+status: predeclared_development
+date: 2026-09-26
+parent_round: research/rounds/R1_v1.yaml
+objective: test caption-dependent residual action value beyond strong full-image completion
+continuation_evidence: R1 automated strict region-conditioned oracle 0.89 versus matched no-caption 0.70 and full-image completion 0.52
+warning: continuation evidence is automated sensitivity, not human truth
+development_manifest:
+  staging_images_sha256: 35a5de457ca116c7cf4ee5c46caa814f2b9b59cfd0c64e72276ce904a465cf92
+  natural_contexts_sha256: 50e6c7469fbbce3b5ae8ef2a160594a0a885f01a055d68a7b6b460dd8c9c2d01
+  automatic_candidates_sha256: 81bb864daac1f0a2ddb77e2b244db58410c3057ffd33f312bbf952df2952edfe
+development_scope: all 100 images; all 5 natural captions per image; all 14 non-STOP fixed-grid actions
+observer: Qwen/Qwen2.5-VL-3B-Instruct@66285546d2b821cf421d4f5eb2576359d3770cd3
+input_mode: caption-conditioned region-only
+strong_baseline: caption-conditioned low-resolution direct full-image completion on identical contexts
+automated_sensitivity:
+  visual_support: HuggingFaceTB/SmolVLM-Instruct@81cd9a775a4d644f2faf4e7becff4559b46b14c7
+  novelty: MoritzLaurer/DeBERTa-v3-base-mnli-fever-anli@6f5cf0a2b59cabb106aca4c287eed12e357e90eb
+  semantic_type: strict same-instance prompt; automated only
+primary_human_metric: independently reviewed correct novel mentioned-entity facts per context-action
+context_necessity_metrics:
+  - per-caption oracle minus best same-image static action
+  - successful-action-set change across same-image captions
+  - paraphrase stability and saturated-caption STOP in later adjudicated bundle
+development_continuation_rule: caption-specific oracle exceeds best same-image static action by at least 5 percentage points with image-cluster 95% interval above zero, while strict residual oracle remains above full-image completion
+uncertainty_unit: image/duplicate group
+holdout_policy: no confirmation inference; all current 100 images remain development only
+gpu_policy: any suitable available GPU; exact type, configuration and five-second utilization trace recorded
+results_and_failure_examples: pending
+decision_and_next_design: pending

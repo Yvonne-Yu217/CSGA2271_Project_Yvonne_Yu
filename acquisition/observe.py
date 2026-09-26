@@ -49,10 +49,9 @@ def run_fingerprint(staging, model, revision, prompt, max_new_tokens, batch_size
     return hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
 
 
-def crop_candidate(staging, image_row, candidate):
-    with Image.open(staging / image_row["image_path"]) as source:
-        source = source.convert("RGB")
-        crops = [source.crop(box) for box in candidate["boxes"]]
+def crop_candidate_from_source(source, candidate):
+    """Crop/montage a candidate from an already decoded RGB source image."""
+    crops = [source.crop(box) for box in candidate["boxes"]]
     if len(crops) == 1:
         return crops[0]
     target_height = max(image.height for image in crops)
@@ -67,6 +66,12 @@ def crop_candidate(staging, image_row, candidate):
         canvas.paste(image, (x, 0))
         x += image.width + 4
     return canvas
+
+
+def crop_candidate(staging, image_row, candidate):
+    with Image.open(staging / image_row["image_path"]) as source:
+        source = source.convert("RGB")
+        return crop_candidate_from_source(source, candidate)
 
 
 def main():
