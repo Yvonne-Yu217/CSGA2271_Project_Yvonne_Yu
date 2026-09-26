@@ -1,5 +1,7 @@
 # 实验复盘与研究方向决策
 
+> 本文保留上一阶段判断。最新决策见 [DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md](DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md)，后续方案见 [FOLLOWUP_PROPOSAL.md](FOLLOWUP_PROPOSAL.md)。用户现在要求课程项目也有正向结果与新意，旧的“负结果课程报告即完成”不再作为当前目标。
+
 日期：2026-09-26。依据：HPC 提交 `6d67ef4`、`pilot/results/final_metrics.json`、原始报告及实现代码。最初复盘阶段未重算预测；随后的执行更新已在 HPC 完成冻结迁移、有效性审计和账本更新。
 
 ## 执行更新：有效性门槛已经触发停止条件

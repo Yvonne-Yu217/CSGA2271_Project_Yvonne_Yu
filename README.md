@@ -2,10 +2,13 @@
 
 Text-conditioned localization of complementary visual information — CSCI-GA 2271 course research project.
 
-**Decision reached: retain this phase as a rigorous negative course comparison and repair or replace the task before more learned-method work.** Frozen deletion-checkpoint transfer did not beat inverse cosine, and a 100-row Codex visual diagnostic found only 44 valid rows (53 invalid, 3 uncertain; no human-confirmed labels). Conditional confirmation, Visual Genome and CVPR expansion remain stopped at the gate.
+**Current priority: establish a positive result with a defensible contribution through a task/method pivot.** Actual frozen transfer completed without learned superiority. The proposed next task predicts which observation adds new grounded facts given an existing description, especially attributes and relations of already mentioned entities. First measure strong-baseline and oracle performance, then decide whether to train. Research design is no longer constrained by the old pilot-hour envelope; use compatible HPC resources and maintain accounting.
+
+- [Latest results, audit corrections and literature/repo review](research/DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md)
+- [Proposed next task and course-to-publication experiment design](research/FOLLOWUP_PROPOSAL.md)
 
 - [Result review and direction decision](research/RESULTS_REVIEW_AND_NEXT_STEPS.md)
-- [Next-round code and CPU → GPU → CPU commands](hpc/NEXT_ROUND.md)
+- [Completed frozen-follow-up code and CPU → GPU → CPU commands](hpc/NEXT_ROUND.md)
 - [Current goal and completion criteria](GOAL.md)
 - [Revised proposal](proposal/What_Does_the_Image_Add_Proposal.pdf)
 - [Proposal review and initial execution plan](research/REVIEW_AND_EXECUTION_PLAN.md)

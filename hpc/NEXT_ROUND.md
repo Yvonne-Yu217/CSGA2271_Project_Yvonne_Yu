@@ -1,5 +1,7 @@
 # Frozen-checkpoint follow-up
 
+> This workflow was completed in HPC commit `5f24bd4`. It reproduces the old frozen-transfer diagnostic, not the proposed new task. See `research/FOLLOWUP_PROPOSAL.md` for the next design; its E0–E2 pipeline remains to be implemented.
+
 **Execution status (2026-09-26): complete.** Preflight, visibility audit, frozen GPU inference, 100-row Codex visual review, and CPU summary ran successfully. The review is not human annotation. The validity gate stopped later model/confirmation work; see `research/FINAL_REPORT.md`.
 
 This bounded experiment evaluates the existing deletion-trained scorer on deletion, matched generalization, and natural captions without retraining. It retains three individual seeds, their metric mean, and a true prediction ensemble as distinct results. It does not establish that natural-caption changes preserve other entities.

@@ -1,5 +1,17 @@
 # Agent log
 
+## 2026-09-26 — Direction review after the frozen follow-up
+
+- Fast-forward pulled `7716d0f` to `5f24bd4`; reviewed the actual frozen transfer tables and automatic semantic audit with a read-only audit subagent. No new HPC experiment was launched.
+- Frozen ensemble deletion Acc@1 remains below inverse cosine by 5.42 percentage points, paired CI [−10.42, −0.67]. Matched/natural transfer gives no reliable superiority. Small reviewed subsets cannot establish a positive claim.
+- Corrected a material interpretation risk: 44/100 passing all checks is not a dataset-wide semantic-error estimate. In the recorded audit, all 23 deletion failures are grammar-only; natural controls fail in 23/33 rows. Some automatic grammaticality judgments are inconsistent. Human adjudication remains needed.
+- Identified objective mismatch: within-region caption-difference losses do not directly supervise absolute region choice or actual new-fact acquisition. More compute alone does not resolve that mismatch.
+- Conducted targeted primary-source and official-repository research, assisted by a literature subagent. Checked CompreCap, CapRL/CapRL++, CCCaption, ClaimDiff-RL, AdaptVision, SC-Captioner, CaptionQA, CapProbe and the 2025 high-resolution omission/crop/refinement predecessor. Generic coverage rewards and omitted-object crop completion are already covered by prior work.
+- Read official code entry points for CompreCap evaluation, AdaptVision training and CapRL Prism evaluation. Cloned CompreCap into an isolated temporary directory at commit `b70aae69f3e3516caf93eb455faa3e8f96e54668` for inspection; did not install or run third-party training. Some repositories have API dependencies or incomplete releases, documented in the review.
+- Added a detailed direction decision and separate follow-up proposal: context-dependent visual acquisition targeting missing attributes/relations of mentioned entities, actual action-value supervision, strong full-image/planner/coverage baselines, oracle headroom, independent confirmation and conditional publication expansion. Novelty and positive gains are hypotheses, not established results.
+- Updated repository goal to the user's positive-results and novelty requirement. Old pilot-hour envelopes no longer constrain the research design. Actual execution still requires profiling/accounting and preserves the no-manual-cancellation session policy. Historical proposal PDF and numeric evidence remain unchanged.
+- This turn implements planning/documentation only; the new E0–E2 pipeline is explicitly not yet implemented. Checked documentation diff and local link targets. No training/code regression suite was needed for these document-only changes.
+
 ## 2026-09-26 — Frozen transfer, semantic review, and decision gate
 
 - Latest user override after the follow-up: never manually release, cancel, or `scancel` CPU/GPU allocations because doing so interrupts the task session; the server handles reclamation. This supersedes earlier project-memory advice to release idle nodes. Productive work remains preferred and synthetic load remains prohibited.

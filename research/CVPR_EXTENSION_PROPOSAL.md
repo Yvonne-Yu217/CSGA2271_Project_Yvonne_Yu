@@ -1,5 +1,7 @@
 # Beyond Mention Detection: Grounded Residual Visual Information under Text Interventions
 
+> Superseded as the forward plan by [FOLLOWUP_PROPOSAL.md](FOLLOWUP_PROPOSAL.md), following frozen-transfer results and broader literature review. Generic coverage rewards and omission-to-crop completion have close prior art. This is retained as the earlier extension proposal; its positive-results assumptions are not established.
+
 Research extension proposal — 26 September 2026
 
 ## Decision update after the initial HPC results

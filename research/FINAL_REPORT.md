@@ -1,5 +1,7 @@
 # Final evidence report: What Does the Image Add?
 
+> Historical evidence for the completed pilot. Current decision: [DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md](DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md); proposed next task: [FOLLOWUP_PROPOSAL.md](FOLLOWUP_PROPOSAL.md). The 44/100 diagnostic pass rate is not a population semantic-error estimate: all 23 rejected deletion rows failed grammar only according to the recorded checks, and the automatic audit itself requires adjudication. The historical gate below does not complete the user's new positive-results objective.
+
 ## Summary
 
 The core learned-method claim is **not supported** at this scale: the three-seed rank+locality+control seed mean reached Accuracy@1 `0.7722`, versus `0.8450` for inverse crop-text cosine. The shuffled-image control fell to `0.4326`, showing that the learned scorer uses visual input, but that does not establish an advantage over the simple baseline. RQ2 is **frozen transfer completed, but task validity is weak and superiority remains unsupported**. RQ3 remains partial: a SigLIP encoder check is included; automatic patch-cluster sensitivity is included, but Visual Genome and an independent region-proposal transfer benchmark are not.

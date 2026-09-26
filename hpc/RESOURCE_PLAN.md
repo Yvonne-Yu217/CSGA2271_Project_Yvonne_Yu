@@ -1,5 +1,7 @@
 # HPC resource plan after the initial results
 
+> Historical allocation plan. The user removed the old limited-compute assumption for research planning; see `GOAL.md` and `research/FOLLOWUP_PROPOSAL.md`. Old caps below describe the previous pilot. Future jobs need measured throughput and current accounting. Do not manually cancel or release existing allocations under the latest session instruction.
+
 The current authority is `GOAL.md`; historical L4 launchers reproduce the earlier experiment. Their defaults do not impose a device restriction on future work.
 
 | Partition supplied by user | Hardware | Use |

@@ -13,4 +13,4 @@
 - Record measured Slurm usage and utilization issues in the compute ledger and `research/AGENT_LOG.md`.
 - Sample utilization and progress every 5 seconds. During steady GPU-ready work, target 70–90% where feasible; diagnose <30% for two minutes or stalled progress. These are internal targets, not verified cluster eviction rules.
 - Subagents may prepare independent code, data or analysis when useful; one main owner controls job submissions, output paths and cumulative budget.
-- Do not force the original proposal to succeed. Follow the validity and direction-change gates in `GOAL.md`; preserve negative evidence and distinguish unrun work from completed results.
+- Do not force the original proposal to succeed. The user now requires positive results and novelty, including for the course project. Follow the task/oracle/confirmation gates in `GOAL.md`; preserve negative evidence, change direction when needed, and distinguish unrun work from completed results.

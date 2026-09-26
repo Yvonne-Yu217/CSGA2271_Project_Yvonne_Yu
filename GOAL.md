@@ -1,47 +1,43 @@
-# Goal: Validate the proposal globally, then decide whether to continue
+# Goal: Establish a positive result with a defensible research contribution
 
-Updated: 2026-09-26. The latest user instructions supersede earlier device restrictions.
+Updated 2026-09-26 after pulling HPC commit `5f24bd4` and the user's new direction request. The user requires positive results and novelty for the course project as well as any publication extension. A negative-results report alone no longer satisfies the intended outcome.
 
-## First objective
+## Current decision
 
-Evaluate the original proposal's full set of claims against valid evidence, within the remaining authorized compute budget. Establish what works, what fails, and what remains untested. A credible negative result is a valid outcome. Do not require an MLP improvement, force a CVPR narrative, or silently count unrun experiments as complete.
+Stop expanding the original CLIP-crop MLP and phrase-deletion objective as the main direction. Frozen ensemble intervention Acc@1 is 79.08/73.17/56.01% for deletion/matched/natural, versus inverse cosine 84.50/75.75/58.16%. No reliable learned superiority has emerged. Keep historical artifacts as evidence.
 
-The learned scorer currently trails inverse cosine on deterministic deletion: 77.22% versus 84.50% Acc@1; paired difference −7.28 percentage points, 95% image-bootstrap CI [−11.70, −3.33]. This is a mean of seed metrics, not a prediction ensemble. Natural-caption and SigLIP runs used separate training and do not establish frozen-model transfer.
+Do not interpret 44/100 passing automatic audit as a population semantic-error rate: 23 deletion failures were grammar-only, natural-caption controls genuinely changed, and some automatic judgments are inconsistent. New data needs adjudicated semantic labels.
 
-## Evidence and completion gates
+The next candidate is **learning which visual observation adds the most grounded facts given an existing description**, particularly missing attributes/relations of already mentioned entities. This is a proposed pivot, not an established novel or successful method. Generic omission detection, crop-and-caption refinement, QA rewards and adaptive cropping have close predecessors.
 
-1. **Recover and correct evidence (CPU).** Recover HPC manifests, predictions, checkpoints, model metadata, final accounting for terminal experiment jobs, and timestamped snapshots for any live server-managed session allocation. Preserve historical metrics; distinguish seed averages from ensembles, independent retraining from transfer, and similarity proxies from recoverability. Fix cache provenance and tie handling before new conclusions.
-2. **Validate the task.** Export and manually review 100 stratified intervention pairs. Record target fact granularity, whether it is visible and genuinely omitted, and which other regions change. Natural captions cannot assume every non-target region remains covered. Mark invalid/ambiguous cases; do not invent human annotations. Freeze a reviewed diagnostic subset before comparing methods.
-3. **Run the bounded follow-up.** Reuse deletion-trained checkpoints without optimization on matched/natural captions. Report same-caption absolute ranking, intervention-difference ranking, tie-aware metrics, three seeds, a separately identified prediction ensemble, paired image-bootstrap intervals and scale-normalized changes. The existing test set is exploratory after repeated inspection.
-4. **Decision gate.** If labels cannot support the operational definition, repair or replace the task. If strong similarity/phrase baselines remain best, finish a rigorous course comparison and failure analysis, or recommend changing direction. At most two motivated learned variants may be proposed after the validity gate; no unbounded tuning.
-5. **Conditional confirmation.** Only with a meaningful validation signal, preregister a new untouched image subset, strong direct semantic-coverage baselines, automatic-region visibility/recall controls, and an independent reader evaluation. Visual Genome transfer, independent semantic coverage, and a complete official attribution reproduction remain unverified. They cannot be marked complete from the current pilot.
-6. **Deliver.** Maintain corrected proposal, review, runnable staged experiment scripts, report, compute ledger and Agent Log; push code and compact evidence. Keep data, caches and checkpoints outside Git. Publication expansion has its own gated proposal.
+Authoritative design: `research/FOLLOWUP_PROPOSAL.md`. Evidence and literature/repo review: `research/DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md`. The existing proposal PDF and results document the completed phase; do not overwrite history with unrun positive claims.
 
-See `research/RESULTS_REVIEW_AND_NEXT_STEPS.md`, `research/CVPR_EXTENSION_PROPOSAL.md` and `hpc/NEXT_ROUND.md` for the decision tree and execution details.
+## Work and completion gates
 
-## Compute budget and hardware
+1. **E0: valid task and data.** Prepare new image-disjoint development data, fluent caption states, independently checked object/attribute/relation facts and automatic candidates. Check instance identity, visibility, changed facts and annotation agreement. Preserve unknowns.
+2. **E1: measure available improvement.** Freeze the observer, enumerate candidate outcomes, and compare attainable same-budget utility against full-image caption completion, a strong prompted planner, omission rules, semantic coverage and simple selection. Count all inference costs. If the oracle has no useful gap, replace the direction before training.
+3. **E2: test caption dependence.** Show that useful actions change when known facts change, remain stable under paraphrase, and lose value after redundant acquisition. Include natural captions and saturated-caption STOP cases.
+4. **E3: learn actual action value.** Only after E1/E2, train direct utility ranking/regression and paired-caption supervision. Compare equal supervision, fixed observer and three seeds; avoid indefinite architecture/hyperparameter sweeps.
+5. **E4: independent positive confirmation.** Freeze model, metrics and strongest comparator; evaluate untouched images with human fact checks and image-level paired intervals. A meaningful gain over a competitive baseline is required. Negative outcomes change the next decision, not the stored results.
+6. **E5: publication development.** Only after positive confirmation and a clear prior-art distinction, test cross-reader/domain/backbone transfer, automatic regions, sequential observations, stop calibration and full quality–cost curves. A checklist cannot guarantee publication readiness.
 
-- Course quota is 300 GPU hours; it is **not** the phase authorization. The imported HPC record states a revised 24 GPU-hour cap; the earlier local conversation authorized 20. Reconcile the handoff and final `sacct` ledger before submission; if unresolved, use the lower 20-hour total. Count previously consumed allocations, concurrent jobs and GPU count. No automatic reset or quota extension.
-- The latest committed report snapshot records 2.0333 GPU hours, including a running server-managed notebook allocation; it is not final usage. Next diagnostic work has an internal ceiling of **4 additional allocated GPU hours**, bounded further by the actual remaining authorized balance. This is a maximum, not a request to consume it.
-- Use available compatible hardware: L4, A100, or another suitable GPU. Do not wait for A100 as a requirement. Default to one GPU; batch size follows memory. Multi-GPU only if measured throughput and total allocation cost justify it within the same budget.
-- Prepare downloads, environment, semantic audit, CPU reports and commands before allocating a GPU. Use batch jobs to survive terminal disconnection. Cluster idle-reclamation behavior must be checked locally; utilization alone does not guarantee a session survives.
+Sample sizes and suggested thresholds are in the proposal; they are planning choices, not forecasts. Next implementation is E0–E2 infrastructure. The old frozen-checkpoint scripts do not implement the new task.
 
-## Productive utilization is required
+## Resources and execution
 
-Persistently low GPU utilization delays the project and must be investigated promptly. During steady GPU-ready work, target 70–90% utilization where the workload permits. These are internal diagnostic targets, not claimed cluster rules. Record device utilization, memory, timestamps and progress every 5 seconds. If utilization remains below 30% for two minutes, or progress stalls, check input loading, batching, CPU synchronization, I/O and memory pressure. Separate warmup, downloads and CPU-only intervals from compute-stage statistics.
+- Design the study around the scientific question. The user removed the prior limited-resource assumption for planning. Old 20/24-hour and four-hour diagnostic envelopes describe the completed pilot, not the new research design.
+- Before actual submission, profile model/resolution, check nodes/current allocation and maintain a cumulative ledger. The last committed 2.0333 GPU-hour figure includes a running allocation and is not final usage. No new job was submitted during this planning update.
+- Use any suitable available GPU, including L4 or A100. Neither is mandatory. Match model size, precision, batch size and parallelism to measured memory/throughput; stage independent inference work for available nodes.
+- Prepare code, models/data and CPU preflight before allocation. Keep third-party reproduction environments separate from the original pilot. Save revisions, prompt hashes, sample IDs, cost and resume artifacts.
 
-Maintain a finite queue of needed extraction/inference tasks. Cache reusable features, batch text/crops, prepare inputs on CPU, and checkpoint completed stages. A lightweight cached-feature scorer or bootstrap belongs on CPU if GPU work is too small. Necessary subagents may prepare code, audit outputs or stage independent work; the main agent controls submissions, shared outputs and cumulative budget. Never duplicate experiments just to raise utilization. Per the latest user instruction, do not manually release or cancel any CPU/GPU allocation; leave reclamation to the server because manual release interrupts the task session.
+## Productive utilization and session continuity
 
-## Gate outcome and current state
+Persistently low utilization slows progress and must be diagnosed. Sample memory/utilization and progress every five seconds. During steady GPU-ready stages, target 70–90% where feasible; investigate <30% for two minutes or stalled throughput. These are internal diagnostics, not scheduler guarantees. Improve batching, data workers, I/O and caching. Move small statistical jobs to CPU.
 
-- P0 artifacts, provenance, visibility audit, and accounting recovery completed. The current encoder snapshot is hashed; the legacy training-time revision remains unknowable and is disclosed.
-- P1 reviewed all 100 stratified rows from rendered images/captions. Codex visual review found 44 valid, 53 invalid, and 3 uncertain rows. This is explicitly not human annotation; human-confirmed rows remain zero.
-- P2 evaluated the three deletion-trained checkpoints without optimization on deletion, matched, and natural interventions. Frozen prediction-ensemble Δ-Acc@1 was 0.7908/0.7317/0.5601, versus inverse cosine 0.8450/0.7575/0.5816.
-- The decision gate selects a rigorous negative course comparison and task repair/replacement. Current evidence does not authorize learned variants, untouched confirmation, Visual Genome, or CVPR expansion. Those conditional branches are correctly left unrun and unclaimed.
-- Code, audit records, compact metrics, proposal source, decision documents, final report, compute ledger, and Agent Log are the deliverables for this phase. Raw images, caches, weights, and predictions remain outside Git.
+Maintain a finite queue of necessary work. Subagents may prepare independent code/data/analysis; one owner controls GPU submissions, shared output paths and total cost. Never repeat experiments or generate synthetic load to inflate utilization. Under the latest HPC instruction, **do not manually cancel or release existing CPU/GPU allocations**; preserve the session and let the server handle reclamation.
 
-## Proposed conversation goal text
+## Suggested conversation goal
 
-`/goal 第一目标：在剩余已授权预算内验证 proposal 全局内容，先审计现有结果与标签，再运行已准备好的冻结模型迁移和有效性实验，根据证据决定保留、收缩或更换方向，不强行证明原假设。使用任何可用且合适的 GPU，不限定 A100/L4；提前准备代码与数据，持续监测并优化有效 GPU 占用，必要时用 subagent 并行准备工作。保持预算账本，更新 proposal、实验计划、报告和 repo；CVPR 扩展必须通过独立决策门槛。`
+`/goal 基于现有结果和文献，验证一个有可信正向效果与明确新意的新方向：给定已有描述，预测并执行最能补充正确视觉事实的观察，重点研究已提及实体的未覆盖属性/关系。先建设可靠数据并比较强 baseline 与 oracle，确认提升空间，再训练实际收益选择器和做独立测试。研究设计不受旧试验小时数限制，使用合适的可用 HPC 资源并保持有效占用、记账和会话连续性。若没有空间或与前作无实质区别，就换题；不得强行包装正结果。`
 
-The repository and conversation goal use this objective. Completion requires the deliverables above to be verified and pushed; it does not require running conditional experiments after their gate failed.
+This updates the repository objective; it does not claim the conversation-level goal was rewritten through an API.
