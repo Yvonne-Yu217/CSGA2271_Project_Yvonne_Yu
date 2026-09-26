@@ -4,6 +4,7 @@ import requests,zipfile
 URL='https://raw.githubusercontent.com/BryanPlummer/flickr30k_entities/master/annotations.zip'
 SIZE=29284070
 path=Path(__file__).resolve().parent/'data'/'annotations.zip'
+path.parent.mkdir(parents=True,exist_ok=True)
 if path.exists() and zipfile.is_zipfile(path):print('Already complete');raise SystemExit
 block=262144
 parts=list(range(0,SIZE,block))

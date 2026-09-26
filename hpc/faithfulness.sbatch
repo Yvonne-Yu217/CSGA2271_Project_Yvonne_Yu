@@ -1,5 +1,5 @@
 #!/bin/bash
-#SBATCH --job-name=visual-complementarity-pilot
+#SBATCH --job-name=visual-complementarity-faithfulness
 #SBATCH --account=ds_ga_1006_001-2026fa
 #SBATCH --partition=g2-standard-12
 #SBATCH --nodes=1
@@ -11,23 +11,13 @@
 #SBATCH --output=slurm-%x-%j.out
 set -euo pipefail
 cd "${SLURM_SUBMIT_DIR:?Submit from the repository root}"
-PROJECT_DATA_DIR="${PROJECT_DATA_DIR:-$SLURM_SUBMIT_DIR/pilot/data}"
-PROJECT_RESULTS_DIR="${PROJECT_RESULTS_DIR:-$SLURM_SUBMIT_DIR/pilot/results}"
 PYTHON="${PYTHON:-$SLURM_SUBMIT_DIR/.venv/bin/python}"
-MINUS_FIELD="${MINUS_FIELD:-tminus}"
-MODEL="${MODEL:-openai/clip-vit-base-patch16}"
-MODEL_TAG="$(printf '%s' "$MODEL" | tr '/:' '--')"
+RUN_DIR="${RUN_DIR:-${1:?Pass the formal tminus output directory as argument 1}}"
+OUT="${PROJECT_RESULTS_DIR:-$SLURM_SUBMIT_DIR/pilot/results}/faithfulness-${SLURM_JOB_ID}"
 export HF_HOME="${HF_HOME:-$HOME/.cache/huggingface}"
 export HF_HUB_DISABLE_XET=1
-test -s "$PROJECT_DATA_DIR/manifest.json"
-test -x "$PYTHON"
-"$PYTHON" -c 'import torch; assert torch.cuda.is_available(), "CUDA unavailable"; print(torch.__version__, torch.version.cuda, torch.cuda.get_device_name(0))'
-nvidia-smi
-OUT="$PROJECT_RESULTS_DIR/pilot-${MINUS_FIELD}-${MODEL_TAG}-${SLURM_JOB_ID}"
 mkdir -p "$OUT"
-("$PYTHON" -u pilot/run.py --device cuda --batch-size 64 --minus-field "$MINUS_FIELD" --model "$MODEL" \
-  --data-dir "$PROJECT_DATA_DIR" \
-  --output-dir "$OUT") &
+("$PYTHON" -u pilot/faithfulness.py --device cuda --batch-size 32 --run-dir "$RUN_DIR" --output-dir "$OUT") &
 RUN_PID=$!
 (
   while kill -0 "$RUN_PID" 2>/dev/null; do

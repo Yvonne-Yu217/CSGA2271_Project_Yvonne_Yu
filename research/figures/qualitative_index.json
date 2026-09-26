@@ -1,0 +1,347 @@
+{
+  "test_pairs": 337,
+  "target_rank1": 266,
+  "target_not_rank1": 71,
+  "nonpositive_target_gap": 24,
+  "off_target_drift_exceeds_abs_target_gap": 75,
+  "examples": [
+    {
+      "row_index": 1133,
+      "rank": 1,
+      "target_gap": 0.023385584354400635,
+      "off_target_drift": 0.007494926452636719,
+      "delta": [
+        0.023385584354400635,
+        0.007494926452636719
+      ],
+      "category": "success",
+      "file": "01-success-3456579559.jpg",
+      "image_id": "3456579559",
+      "target_phrase": "A skateboarder",
+      "tminus": "is airborne between a white building and an American flag .",
+      "tplus": "A skateboarder is airborne between a white building and an American flag .",
+      "regions": [
+        {
+          "id": "119537",
+          "box": [
+            92,
+            194,
+            238,
+            337
+          ],
+          "phrase": "A skateboarder"
+        },
+        {
+          "id": "119540",
+          "box": [
+            0,
+            183,
+            35,
+            214
+          ],
+          "phrase": "an American flag"
+        }
+      ]
+    },
+    {
+      "row_index": 871,
+      "rank": 1,
+      "target_gap": 0.01603400707244873,
+      "off_target_drift": 0.0088118314743042,
+      "delta": [
+        0.01603400707244873,
+        0.008324384689331055,
+        0.009299278259277344
+      ],
+      "category": "success",
+      "file": "02-success-511749704.jpg",
+      "image_id": "511749704",
+      "target_phrase": "a skateboard",
+      "tminus": "Little boy with red shirt and gray shorts does a trick on .",
+      "tplus": "Little boy with red shirt and gray shorts does a trick on a skateboard .",
+      "regions": [
+        {
+          "id": "229258",
+          "box": [
+            133,
+            277,
+            234,
+            333
+          ],
+          "phrase": "a skateboard"
+        },
+        {
+          "id": "229259",
+          "box": [
+            120,
+            25,
+            331,
+            159
+          ],
+          "phrase": "red shirt"
+        },
+        {
+          "id": "229262",
+          "box": [
+            154,
+            109,
+            246,
+            243
+          ],
+          "phrase": "gray shorts"
+        }
+      ]
+    },
+    {
+      "row_index": 906,
+      "rank": 1,
+      "target_gap": 0.015089631080627441,
+      "off_target_drift": 0.005074143409729004,
+      "delta": [
+        0.015089631080627441,
+        0.005074143409729004
+      ],
+      "category": "success",
+      "file": "03-success-4895355979.jpg",
+      "image_id": "4895355979",
+      "target_phrase": "a lion statue",
+      "tminus": "Man wearing a black and red striped shirt taking a photo next to .",
+      "tplus": "Man wearing a black and red striped shirt taking a photo next to a lion statue .",
+      "regions": [
+        {
+          "id": "215983",
+          "box": [
+            193,
+            25,
+            500,
+            340
+          ],
+          "phrase": "a lion statue"
+        },
+        {
+          "id": "215982",
+          "box": [
+            25,
+            207,
+            141,
+            340
+          ],
+          "phrase": "a black and red striped shirt"
+        }
+      ]
+    },
+    {
+      "row_index": 995,
+      "rank": 5,
+      "target_gap": -0.0007444620132446289,
+      "off_target_drift": 0.0004855543375015259,
+      "delta": [
+        -0.0007444620132446289,
+        0.001122117042541504,
+        0.0003445744514465332,
+        0.0003045797348022461,
+        0.0001709461212158203
+      ],
+      "category": "failure",
+      "file": "04-failure-4966861386.jpg",
+      "image_id": "4966861386",
+      "target_phrase": "a tank",
+      "tminus": "A firefighter wearing a hard hat , carrying on his back stands behind another man who is reaching in behind a fire hose in a metal cabinet .",
+      "tplus": "A firefighter wearing a hard hat , carrying a tank on his back stands behind another man who is reaching in behind a fire hose in a metal cabinet .",
+      "regions": [
+        {
+          "id": "224138",
+          "box": [
+            418,
+            194,
+            482,
+            335
+          ],
+          "phrase": "a tank"
+        },
+        {
+          "id": "224137",
+          "box": [
+            262,
+            49,
+            367,
+            131
+          ],
+          "phrase": "a hard hat"
+        },
+        {
+          "id": "224133",
+          "box": [
+            47,
+            87,
+            258,
+            375
+          ],
+          "phrase": "another man"
+        },
+        {
+          "id": "224131",
+          "box": [
+            0,
+            0,
+            121,
+            138
+          ],
+          "phrase": "a fire hose"
+        },
+        {
+          "id": "224132",
+          "box": [
+            3,
+            2,
+            158,
+            157
+          ],
+          "phrase": "a metal cabinet"
+        }
+      ]
+    },
+    {
+      "row_index": 1084,
+      "rank": 5,
+      "target_gap": 0.0006369352340698242,
+      "off_target_drift": 0.0012653947342187166,
+      "delta": [
+        0.0006369352340698242,
+        0.0011709928512573242,
+        0.00105363130569458,
+        0.002089083194732666,
+        0.00034737586975097656,
+        0.0016658902168273926
+      ],
+      "category": "failure",
+      "file": "05-failure-3311724634.jpg",
+      "image_id": "3311724634",
+      "target_phrase": "a microphone",
+      "tminus": "A woman is holding a toy snake , she is on stage with a guy speaking through , and a man in clown makeup holding a guitar .",
+      "tplus": "A woman is holding a toy snake , she is on stage with a guy speaking through a microphone , and a man in clown makeup holding a guitar .",
+      "regions": [
+        {
+          "id": "108569",
+          "box": [
+            100,
+            110,
+            129,
+            142
+          ],
+          "phrase": "a microphone"
+        },
+        {
+          "id": "108567",
+          "box": [
+            234,
+            112,
+            357,
+            375
+          ],
+          "phrase": "A woman"
+        },
+        {
+          "id": "108568",
+          "box": [
+            153,
+            152,
+            317,
+            242
+          ],
+          "phrase": "a toy snake"
+        },
+        {
+          "id": "108571",
+          "box": [
+            369,
+            141,
+            478,
+            375
+          ],
+          "phrase": "a man"
+        },
+        {
+          "id": "108574",
+          "box": [
+            407,
+            146,
+            445,
+            195
+          ],
+          "phrase": "clown makeup"
+        },
+        {
+          "id": "108575",
+          "box": [
+            355,
+            143,
+            470,
+            327
+          ],
+          "phrase": "a guitar"
+        }
+      ]
+    },
+    {
+      "row_index": 964,
+      "rank": 4,
+      "target_gap": -0.0004349946975708008,
+      "off_target_drift": 0.0008030533790588379,
+      "delta": [
+        -0.0004349946975708008,
+        0.0011882185935974121,
+        0.0009536147117614746,
+        -0.00026732683181762695
+      ],
+      "category": "failure",
+      "file": "06-failure-3126753745.jpg",
+      "image_id": "3126753745",
+      "target_phrase": "his band-mates",
+      "tminus": "A drummer in a red hat and black shirt hits the snare drum on his kit during a performance with .",
+      "tplus": "A drummer in a red hat and black shirt hits the snare drum on his kit during a performance with his band-mates .",
+      "regions": [
+        {
+          "id": "95336",
+          "box": [
+            385,
+            12,
+            445,
+            112
+          ],
+          "phrase": "his band-mates"
+        },
+        {
+          "id": "95332",
+          "box": [
+            51,
+            22,
+            335,
+            332
+          ],
+          "phrase": "A drummer"
+        },
+        {
+          "id": "95333",
+          "box": [
+            81,
+            19,
+            182,
+            94
+          ],
+          "phrase": "a red hat"
+        },
+        {
+          "id": "95334",
+          "box": [
+            56,
+            103,
+            277,
+            308
+          ],
+          "phrase": "black shirt"
+        }
+      ]
+    }
+  ]
+}

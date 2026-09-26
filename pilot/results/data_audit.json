@@ -1,0 +1,28 @@
+{
+  "status": "pass",
+  "image_counts": {
+    "train": 200,
+    "val": 50,
+    "test": 100
+  },
+  "pair_counts": {
+    "train": 661,
+    "val": 167,
+    "test": 337
+  },
+  "total_images": 350,
+  "total_pairs": 1165,
+  "natural_pair_counts": {
+    "train": 505,
+    "val": 126,
+    "test": 251
+  },
+  "region_count": {
+    "min": 2,
+    "max": 6,
+    "mean": 2.409442060085837
+  },
+  "verified_image_hashes": 350,
+  "errors": [],
+  "warnings": []
+}

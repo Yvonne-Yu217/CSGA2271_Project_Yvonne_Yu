@@ -26,6 +26,25 @@ def overlap(a,b):
     x=max(0,min(a[2],b[2])-max(a[0],b[0])); y=max(0,min(a[3],b[3])-max(a[1],b[1]))
     return x*y>0
 
+def contains_phrase(text,phrase):
+    clean=lambda x:re.sub(r'[^a-z0-9 ]+',' ',x.lower()).split()
+    words,target=clean(text),clean(phrase)
+    return any(words[i:i+len(target)]==target for i in range(len(words)-len(target)+1))
+
+def matched_generalization(phrase,types):
+    base='thing'
+    mapping={'people':'person','animals':'animal','vehicles':'vehicle','instruments':'object','clothing':'clothing','bodyparts':'body part','scene':'scene','other':'thing'}
+    for kind in types:
+        if kind in mapping:base=mapping[kind];break
+    words=phrase.split(); generic=base.split()
+    if len(words)==1:return 'entity' if generic[-1].lower()==words[0].lower() else generic[-1]
+    lead=words[0] if words[0].lower() in {'a','an','the','one','two','three','four','five','six','several','many'} else 'unspecified'
+    replacement=[lead]+['unspecified']*max(0,len(words)-len(generic)-1)+generic
+    candidate=' '.join(replacement[:len(words)])
+    if contains_phrase(candidate,phrase):
+        replacement[-1]='entity';candidate=' '.join(replacement[:len(words)])
+    return candidate
+
 def build(image_id,xml,lines,split):
     tree=ET.fromstring(xml); size=tree.find('size'); w=int(size.findtext('width'));h=int(size.findtext('height'))
     boxes=collections.defaultdict(list)
@@ -46,11 +65,19 @@ def build(image_id,xml,lines,split):
             if not controls:continue
             # Deliberately basic deletion pilot: no claim of grammatical or semantic audit.
             minus=' '.join(text.split()[:p['start']]+text.split()[p['end']:])
-            if len(minus.split())<3:continue
+            if len(minus.split())<3 or contains_phrase(minus,p['phrase']):continue
             q=controls[0]; ctrl=' '.join(text.split()[:q['start']]+text.split()[q['end']:])
+            replacement=matched_generalization(p['phrase'],p['types'])
+            matched=' '.join(text.split()[:p['start']]+replacement.split()+text.split()[p['end']:])
+            natural=None
+            for oi,other_line in enumerate(lines):
+                if oi==ci:continue
+                other_text,other_phrases=parse_caption(other_line)
+                if p['id'] not in {x['id'] for x in other_phrases} and not contains_phrase(other_text,p['phrase']):
+                    natural=other_text;break
             # Both edits start from the same full caption; the unrelated edit should preserve target coverage.
             regions=[p]+controls
-            result.append(dict(image_id=image_id,split=split,caption_index=ci,tminus=minus,tplus=text,tcontrol=ctrl,target_phrase=p['phrase'],regions=[dict(id=x['id'],box=boxes[x['id']][0],phrase=x['phrase']) for x in regions]))
+            result.append(dict(image_id=image_id,split=split,caption_index=ci,tminus=minus,tmatched=matched,tnatural=natural,tplus=text,tcontrol=ctrl,target_phrase=p['phrase'],regions=[dict(id=x['id'],box=boxes[x['id']][0],phrase=x['phrase']) for x in regions]))
         if len(result)>=4:break
     return result[:4]
 

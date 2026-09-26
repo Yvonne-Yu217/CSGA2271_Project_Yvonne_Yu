@@ -1,2 +1,124 @@
 Annotation index ready
 ['Annotations/', 'Annotations/4812170955.xml', 'Annotations/6911531738.xml', 'Annotations/3420660565.xml', 'Annotations/382151094.xml']
+Image index ready
+train 10 images 32 pairs
+train 20 images 60 pairs
+train 30 images 95 pairs
+train 40 images 131 pairs
+train 50 images 166 pairs
+train 60 images 197 pairs
+train 70 images 230 pairs
+train 80 images 259 pairs
+train 90 images 287 pairs
+train 100 images 324 pairs
+train 110 images 356 pairs
+train 120 images 389 pairs
+train 130 images 421 pairs
+train 140 images 457 pairs
+train 150 images 487 pairs
+train 160 images 527 pairs
+train 170 images 564 pairs
+train 180 images 601 pairs
+train 190 images 633 pairs
+train 200 images 663 pairs
+val 10 images 701 pairs
+val 20 images 732 pairs
+val 30 images 767 pairs
+val 40 images 802 pairs
+val 50 images 832 pairs
+test 10 images 866 pairs
+test 20 images 900 pairs
+test 30 images 931 pairs
+test 40 images 959 pairs
+test 50 images 995 pairs
+test 60 images 1027 pairs
+test 70 images 1064 pairs
+test 80 images 1101 pairs
+test 90 images 1137 pairs
+test 100 images 1173 pairs
+downloaded 1 / 350
+downloaded 11 / 350
+downloaded 21 / 350
+downloaded 31 / 350
+downloaded 41 / 350
+downloaded 51 / 350
+downloaded 61 / 350
+downloaded 71 / 350
+downloaded 81 / 350
+downloaded 91 / 350
+Annotation index ready
+['Annotations/', 'Annotations/4812170955.xml', 'Annotations/6911531738.xml', 'Annotations/3420660565.xml', 'Annotations/382151094.xml']
+Annotation index ready
+['Annotations/', 'Annotations/4812170955.xml', 'Annotations/6911531738.xml', 'Annotations/3420660565.xml', 'Annotations/382151094.xml']
+Image index ready
+train 10 images 32 pairs
+train 20 images 60 pairs
+train 30 images 95 pairs
+train 40 images 131 pairs
+train 50 images 166 pairs
+train 60 images 197 pairs
+train 70 images 230 pairs
+train 80 images 259 pairs
+train 90 images 287 pairs
+train 100 images 324 pairs
+train 110 images 356 pairs
+train 120 images 389 pairs
+train 130 images 421 pairs
+train 140 images 457 pairs
+train 150 images 487 pairs
+train 160 images 527 pairs
+train 170 images 564 pairs
+train 180 images 601 pairs
+train 190 images 633 pairs
+train 200 images 663 pairs
+val 10 images 701 pairs
+val 20 images 732 pairs
+val 30 images 767 pairs
+val 40 images 802 pairs
+val 50 images 832 pairs
+test 10 images 866 pairs
+test 20 images 900 pairs
+test 30 images 931 pairs
+test 40 images 959 pairs
+test 50 images 995 pairs
+test 60 images 1027 pairs
+test 70 images 1064 pairs
+test 80 images 1101 pairs
+test 90 images 1137 pairs
+test 100 images 1173 pairs
+downloaded 1 / 350
+downloaded 11 / 350
+downloaded 21 / 350
+downloaded 31 / 350
+downloaded 41 / 350
+downloaded 51 / 350
+downloaded 61 / 350
+downloaded 71 / 350
+downloaded 81 / 350
+downloaded 91 / 350
+downloaded 101 / 350
+downloaded 111 / 350
+downloaded 121 / 350
+downloaded 131 / 350
+downloaded 141 / 350
+downloaded 151 / 350
+downloaded 161 / 350
+downloaded 171 / 350
+downloaded 181 / 350
+downloaded 191 / 350
+downloaded 201 / 350
+downloaded 211 / 350
+downloaded 221 / 350
+downloaded 231 / 350
+downloaded 241 / 350
+downloaded 251 / 350
+downloaded 261 / 350
+downloaded 271 / 350
+downloaded 281 / 350
+downloaded 291 / 350
+downloaded 301 / 350
+downloaded 311 / 350
+downloaded 321 / 350
+downloaded 331 / 350
+downloaded 341 / 350
+DONE Counter({'train': 663, 'test': 341, 'val': 169})

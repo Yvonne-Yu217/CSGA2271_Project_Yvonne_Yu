@@ -1,6 +1,6 @@
 # Local entity-omission pilot
 
-This pilot tests a restricted entity-phrase deletion task on actual Flickr30K images and official Entities annotations. It does **not** establish semantic complementarity, human annotation agreement, or publication readiness. The original proposal's full Visual Genome, automatic-region, SigLIP, attribution, and downstream experiments remain future work.
+This bounded validation tests entity-phrase deletion on actual Flickr30K images and official Entities annotations. It does **not** establish semantic complementarity, human annotation agreement, or publication readiness. SigLIP transfer, attribution adaptations, patch-cluster sensitivity, and recoverability are included; Visual Genome, an independent proposal-generator benchmark, and downstream studies remain future work.
 
 ## Reproduce
 
@@ -9,10 +9,16 @@ Run from the repository root with Python 3.12 and the packages recorded in `resu
 ```sh
 python3 -u pilot/fetch_annotations.py
 python3 -u pilot/prepare.py --counts 200,50,100
+python3 -u pilot/audit.py
 python3 -u pilot/run.py
+python3 -u pilot/baselines.py --device cuda
+python3 -u pilot/faithfulness.py --device cuda --run-dir RUN_DIR
+python3 -u pilot/make_report.py --formal-root FORMAL_RUN_DIR
 ```
 
 No paid services are used. Public image samples are read from the `nlphuji/flickr30k` archive; annotations and split lists come from Bryan Plummer's official repository. This mirror is not the official image request channel. Respect original Flickr image rights and research/education restrictions. Images and model caches are excluded from Git.
+
+For the formal L4 bundle, submit `sbatch hpc/full_l4.sbatch`. It runs deterministic deletion, length-matched generalization, natural same-image caption pairs, and the held-out spatial proxies serially on one L4 while recording utilization every ten seconds. `pilot/run.py --minus-field {tminus,tmatched,tnatural}` selects an intervention and `--model` selects a compatible Hugging Face vision-language encoder.
 
 ## Protocol
 
@@ -37,6 +43,8 @@ No paid services are used. Public image samples are read from the `nlphuji/flick
 - `results/predictions.npz`: raw per-region scores for every method.
 - `results/checkpoints/`: fitted scorer states.
 - `results/*.log`: preparation and execution logs.
+- `results/final_metrics.json`: compact aggregate evidence across interventions, encoders, attribution methods, cluster-count ablations, and faithfulness checks.
+- `../research/FINAL_REPORT.md`: generated claim-to-evidence report and measured compute ledger.
 
 The feature cache fingerprint covers the manifest; changing the model version or preprocessing requires deleting the feature cache. Record model revision before a formal reproduction.
 
@@ -48,4 +56,4 @@ A further task-directed baseline, `max_ngram_cosine`, uses the maximum crop simi
 
 ## HPC status
 
-Local preparation was stopped at the user's request. No end-to-end or GPU experiment has run. The runner now accepts `--device cuda`, `--batch-size`, `--data-dir`, and `--output-dir`; CUDA functionality is not yet verified on the cluster. Small scorer fitting currently uses CPU; GPU acceleration is used for feature extraction. Follow `../hpc/RESOURCE_PLAN.md` for the full project scope.
+The bounded Flickr30K experiment has run end to end on NYU HPC. The runner accepts `--device cuda`, `--batch-size`, `--data-dir`, `--output-dir`, `--minus-field`, and `--model`; both frozen feature extraction and small-scorer fitting use the selected CUDA device. See `../research/FINAL_REPORT.md` for results and limitations and `../hpc/RESOURCE_PLAN.md` for the resource policy.
