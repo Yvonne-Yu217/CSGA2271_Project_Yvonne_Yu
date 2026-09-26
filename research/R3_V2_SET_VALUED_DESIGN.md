@@ -70,3 +70,16 @@ the global fact-selection family rather than tune this selector indefinitely.
 
 The implemented module contains only the architecture and preregistered losses.
 It performs no data loading or training until the E0 gate opens.
+
+## Label-free feature staging
+
+The frozen feature store is prepared at
+`acquisition/results/r3-v2-feature-store/feature_store.pt` with SHA-256
+`27d08f2a8ee24dccbc5339f94ecc212841caf0365bb3824001981b8ef651b09a`.
+It covers 100 images, 500 original/paraphrased/full-image-completion context
+states, and 643 grounded-entity/full-image/STOP actions. Candidate vectors have
+2,315 dimensions: frozen crop, full-image and detector-phrase SigLIP blocks,
+geometry, action family, proposal score and normalized cost. A separate audit
+verified finite/unit-normalized blocks, unique IDs, valid per-image offsets,
+family semantics, cost bounds and absence of outcome-label inputs. This cache
+prepares computation only; it is not evidence and does not open the human gate.

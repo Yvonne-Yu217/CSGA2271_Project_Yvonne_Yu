@@ -188,3 +188,22 @@ PYTHONPATH=. python -m acquisition.audit_r2_reviews \
 
 The current generated packet has 300 rows per reviewer and is deliberately
 `awaiting_reviews`. Blank fields are incomplete work, never negative labels.
+
+R3-v2 label-free feature staging can run while those reviews are pending. It
+reuses the frozen R3-v0/v1 caches and encodes only missing context text; it must
+not load action outcomes:
+
+```sh
+PYTHONPATH=. python -m acquisition.build_r3_feature_store \
+  --staging acquisition/data/e0-dev-100 \
+  --grid-cache acquisition/results/r3-v0-proxy-siglip/features.pt \
+  --grounded-cache acquisition/results/r3-v1-grounded-binding-proxy/features.pt \
+  --grounded-candidates acquisition/results/r1-v2-grounded-candidates.jsonl \
+  --paraphrase-contexts acquisition/results/r2-v3-paraphrases/paraphrased_contexts.jsonl \
+  --completion-output acquisition/results/qwen-full-image-completion-e0-dev-100 \
+  --output acquisition/results/r3-v2-feature-store
+
+PYTHONPATH=. python -m acquisition.audit_r3_feature_store \
+  --store-output acquisition/results/r3-v2-feature-store \
+  --grounded-candidates acquisition/results/r1-v2-grounded-candidates.jsonl
+```

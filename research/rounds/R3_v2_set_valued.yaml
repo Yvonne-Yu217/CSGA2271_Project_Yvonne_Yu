@@ -15,6 +15,15 @@ continuation_rule: gain at least 3 percentage points with image-cluster paired 9
 failure_action: archive the selector family and move to global fact selection
 implementation: acquisition/set_valued_selector.py
 design: research/R3_V2_SET_VALUED_DESIGN.md
+feature_store:
+  status: complete_label_free_audit_pass
+  path: acquisition/results/r3-v2-feature-store/feature_store.pt
+  sha256: 27d08f2a8ee24dccbc5339f94ecc212841caf0365bb3824001981b8ef651b09a
+  images: 100
+  contexts: 500
+  actions: 643
+  candidate_feature_dim: 2315
+  warning: contains no action outcomes and does not open the human training gate
 official_code_revisions:
   mdetr: ea09acc44ca067072c4b143b726447ee7ff66f5f
   blip: 056a169437371659074aa2732649d5de3bffb4a8

@@ -128,3 +128,8 @@ scorer, uniform multi-positive human targets, unknown masking, STOP, and
 reviewed paraphrase consistency. The implementation currently contains only
 unit-tested architecture/loss components; the old inspected proxy split and
 automated semantic labels are prohibited for primary training or selection.
+
+The corresponding label-free frozen feature store is complete and mechanically
+audited: 100 images, 500 context states and 643 entity/full/STOP actions with no
+outcome-label sources. It may be consumed only after the human gate; its
+existence is not selector evidence.

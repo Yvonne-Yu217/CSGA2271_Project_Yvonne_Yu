@@ -260,3 +260,19 @@
 - Added unit-tested architecture and loss components only. Training remains
   prohibited until both R2 reviews and adjudication finish; the inspected proxy
   split and automated Qwen/Smol labels cannot be primary training targets.
+
+## 2026-09-26 — R3-v2 label-free feature staging
+
+- Reused frozen SigLIP visual/caption caches and encoded only the 500
+  paraphrases plus 500 first full-image completions. No semantic outcome label,
+  NLI judgment or complement type was loaded.
+- The first assembly attempt failed after text encoding because full/STOP rows
+  store `proposal_score: null`; retained the failed runtime, normalized null to
+  zero, and reran cleanly without changing the allocation.
+- The final 11 MiB store contains 643 actions over 100 images, three 768-D
+  frozen feature blocks plus geometry/family/score/cost (2,315 dimensions), and
+  three 500x768 context matrices. SHA-256 is
+  `27d08f2a8ee24dccbc5339f94ecc212841caf0365bb3824001981b8ef651b09a`.
+- Mechanical/leakage audit passed with no nonfinite values or outcome-like
+  sources; per-image lists contain 3--8 actions. This is compute preparation,
+  not training or evidence.
