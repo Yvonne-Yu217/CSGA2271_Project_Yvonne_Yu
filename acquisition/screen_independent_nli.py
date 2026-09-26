@@ -25,6 +25,7 @@ def main():
     parser.add_argument("--visual-support-output", type=Path, required=True)
     parser.add_argument("--selection-report-output", type=Path, required=True)
     parser.add_argument("--qwen-entailment-output", type=Path)
+    parser.add_argument("--reuse-entailments-from", type=Path)
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
@@ -67,6 +68,18 @@ def main():
     old_metadata = json.loads(metadata_path.read_text()) if metadata_path.is_file() else None
     if old_metadata and old_metadata.get("fingerprint") != fingerprint:
         raise RuntimeError("output belongs to another independent NLI run")
+    if args.reuse_entailments_from and not existing:
+        reuse_metadata_path = args.reuse_entailments_from / "runtime.json"
+        if not reuse_metadata_path.is_file():
+            raise RuntimeError("reuse source has no runtime metadata")
+        reuse_metadata = json.loads(reuse_metadata_path.read_text())
+        if reuse_metadata.get("fingerprint") != fingerprint or reuse_metadata.get("status") != "complete":
+            raise RuntimeError("reuse source is not a complete exact-fingerprint match")
+        reused = read_jsonl(args.reuse_entailments_from / "entailments.jsonl")
+        existing = {row["key"]: row for row in reused}
+        expected_keys = {row["key"] for row in work}
+        if set(existing) != expected_keys or any(row.get("status") != "ok" for row in existing.values()):
+            raise RuntimeError("reuse source entailments are incomplete or have unexpected keys")
     pending = [row for row in work if row["key"] not in existing and
                row["hypothesis"] != "NO_VISIBLE_FACT"]
     for row in work:
@@ -76,7 +89,7 @@ def main():
                                     "candidate_id": row["candidate_id"],
                                     "label": "UNINFORMATIVE", "probabilities": {},
                                     "status": "ok"}
-    metadata = {"scope": "independent text NLI sensitivity; visual support remains same-family",
+    metadata = {"scope": "independent text NLI sensitivity; visual support supplied separately",
                 "fingerprint": fingerprint, "model": args.model, "revision": args.revision,
                 "expected": len(work), "completed": len(existing),
                 "status": "running" if pending else "complete", "slurm_job_id": os.getenv("SLURM_JOB_ID")}
@@ -146,16 +159,19 @@ def main():
         for method in methods:
             candidate_id = selected[(context_id, method)]
             result_rows.append({"context_id": context_id, "staging_image_id": image_id,
-                                "method": method, "new_correct": values[candidate_id]})
+                                "method": method, "candidate_id": candidate_id,
+                                "new_correct": values[candidate_id]})
         budget = candidates[selected[(context_id, "montage_planner")]]["pixel_cost"]
         budget_ids = [candidate_id for candidate_id in values
                       if candidates[candidate_id]["pixel_cost"] <= budget]
         oracle_id = min(budget_ids, key=lambda cid: (-values[cid], candidates[cid]["pixel_cost"], cid))
         result_rows.append({"context_id": context_id, "staging_image_id": image_id,
                             "method": "recognition_oracle_cost_matched",
+                            "candidate_id": oracle_id,
                             "new_correct": values[oracle_id]})
         result_rows.append({"context_id": context_id, "staging_image_id": image_id,
                             "method": "random_cost_matched_to_montage",
+                            "candidate_id": None,
                             "new_correct": sum(values[cid] for cid in budget_ids) / len(budget_ids)})
     summaries = {}
     for method in sorted({row["method"] for row in result_rows}):
@@ -183,7 +199,7 @@ def main():
             "qwen_new_rate": sum(label == "NOT_ENTAILED" for _, label in paired) / len(paired),
         }
     report = {"status": "provisional_not_evidence",
-              "warning": "Independent text NLI only; crop visual support is still same-family and unreviewed.",
+              "warning": "Automated independent-model sensitivity only; crop support and NLI remain unreviewed by humans.",
               "images": len({row["staging_image_id"] for row in contexts.values()}),
               "contexts": len(contexts), "label_counts": dict(Counter(row["label"] for row in rows)),
               "qwen_comparison": agreement, "methods": summaries,

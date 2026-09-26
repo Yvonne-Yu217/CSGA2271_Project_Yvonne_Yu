@@ -10,6 +10,7 @@ from acquisition.metrics import (bootstrap_cluster, caption_necessity, expected_
                                  material_switch, pair_regret)
 from acquisition.planner_baseline import parse_choice
 from acquisition.screen_entailment import parse_label as parse_entailment
+from acquisition.screen_independent_visual import parse_independent_label
 from acquisition.screen_visual_support import parse_label as parse_visual_support
 from acquisition.schema import (
     GoldStore, PublicStore, SchemaError, derive_action_labels, observation_cache_key,
@@ -180,6 +181,8 @@ class AcquisitionTests(unittest.TestCase):
         self.assertEqual(parse_choice("STOP", candidates), 1)
         self.assertEqual(parse_entailment("NOT ENTAILED."), "NOT_ENTAILED")
         self.assertEqual(parse_visual_support("SUPPORTIVE"), "SUPPORTED")
+        self.assertEqual(parse_independent_label("Answer: INVALID."), "INVALID")
+        self.assertIsNone(parse_independent_label("SUPPORTED or INVALID"))
         self.assertIsNone(parse_entailment("probably new"))
 
     def test_random_rate_is_ratio_of_expected_counts(self):

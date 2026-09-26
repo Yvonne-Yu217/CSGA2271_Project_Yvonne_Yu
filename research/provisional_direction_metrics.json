@@ -40,12 +40,47 @@
     "oracle_minus_montage": {"mean": 0.142, "ci95": [0.098, 0.192]},
     "montage_minus_largest_area": {"mean": -0.026, "ci95": [-0.08, 0.026]}
   },
+  "independent_smolvlm_visual_plus_deberta_nli": {
+    "smolvlm_revision": "81cd9a775a4d644f2faf4e7becff4559b46b14c7",
+    "visual_counts": {"supported": 393, "invalid": 888, "uninformative": 119},
+    "supported_rate_among_nonempty": 0.30679156908665106,
+    "cost_matched_oracle": {"mean": 0.662, "ci95": [0.576, 0.744]},
+    "montage_planner": {"mean": 0.366, "ci95": [0.286, 0.45]},
+    "largest_area": {"mean": 0.708, "ci95": [0.628, 0.782]},
+    "clip_inverse_cost_matched": {"mean": 0.066, "ci95": [0.032, 0.106]},
+    "random_cost_matched_to_montage": {
+      "mean": 0.14013593073593072,
+      "ci95": [0.11594693223443221, 0.1648611047286047]
+    },
+    "oracle_minus_montage": {"mean": 0.296, "ci95": [0.222, 0.374]},
+    "oracle_minus_largest_area": {"mean": -0.046, "ci95": [-0.16, 0.07]}
+  },
   "core_target_strict_prompt": {
     "target_rows": 316,
     "oracle": {"mean": 0.348, "ci95": [0.29, 0.408]},
     "montage_planner": {"mean": 0.07, "ci95": [0.042, 0.102]},
     "random_expected": {"mean": 0.045142857142857144, "ci95": [0.035571, 0.056]},
     "oracle_minus_montage": {"mean": 0.278, "ci95": [0.226, 0.332]}
+  },
+  "core_target_after_independent_visual_and_text_filters": {
+    "broad": {
+      "target_rows": 866,
+      "oracle": {"mean": 0.738, "ci95": [0.67, 0.804]},
+      "montage_planner": {"mean": 0.222, "ci95": [0.158, 0.288]},
+      "largest_area": {"mean": 0.392, "ci95": [0.31595, 0.47]},
+      "random_expected": {"mean": 0.12371428571428571, "ci95": [0.10557142857142857, 0.14228571428571427]}
+    },
+    "strict": {
+      "target_rows": 228,
+      "oracle": {"mean": 0.308, "ci95": [0.244, 0.376]},
+      "montage_planner": {"mean": 0.076, "ci95": [0.042, 0.116]},
+      "largest_area": {"mean": 0.106, "ci95": [0.066, 0.152]},
+      "random_expected": {"mean": 0.03257142857142857, "ci95": [0.024714285714285716, 0.041]},
+      "oracle_minus_montage": {"mean": 0.232, "ci95": [0.176, 0.292]}
+    },
+    "broad_strict_target_jaccard": 0.2545871559633027,
+    "strict_rows_also_broad": 0.9736842105263158,
+    "broad_rows_retained_by_strict": 0.25635103926096997
   },
   "prompt_sensitivity": {
     "all_label_agreement": 0.5794285714285714,
@@ -69,7 +104,7 @@
     }
   },
   "limitations": [
-    "Observer and all judges use the same Qwen family.",
+    "The original screen used one Qwen family for observer and judges; independent SmolVLM visual and DeBERTa text sensitivity filters were added, but neither is human gold.",
     "There is no independent human fact adjudication.",
     "Utility is binary rather than an atomic-fact count.",
     "Broad and strict core-target prompts are highly unstable.",

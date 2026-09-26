@@ -1,5 +1,12 @@
 # Agent log
 
+## 2026-09-26 — Independent visual-support sensitivity
+
+- Ran a full 100-image, 1,400-crop support audit with pinned SmolVLM-Instruct revision `81cd9a775a4d644f2faf4e7becff4559b46b14c7`. It accepted 393 observations, rejected 888 as invalid, retained 119 deterministic uninformative rows, and had no parse failures. The prior same-family Qwen check accepted all 1,281 non-empty observer outputs, demonstrating substantial self-confirmation risk.
+- Combined independent SmolVLM crop support with the cached pinned DeBERTa novelty judgments. Cost-matched oracle was 66.2%, montage 36.6%, cost-matched random 14.01%, and unconstrained largest-area/full-image 70.8%. Oracle minus montage was 29.6 points [22.2, 37.4], but the present planner did not beat the strongest simple full-image rule.
+- Re-ran broad and strict mentioned-entity-detail typing only after both independent filters. Strict oracle remained 30.8% versus montage 7.6%, full-image 10.6%, and random 3.26%; oracle minus montage was 23.2 points [17.6, 29.2]. Broad oracle was 73.8%, but only 25.64% of broad target rows survived strict typing, so strict results remain the appropriate review target.
+- These are automated sensitivity checks, not E0 evidence or human gold. The result supports targeted human review of candidate-set headroom, not E3 training or a positive planner claim. Job 1979 remained allocated and was not manually canceled or released.
+
 ## 2026-09-26 — E0–E2 infrastructure, staging, and frozen model caches
 
 - Implemented the caption-conditioned visual-acquisition data boundary and strict schema. Public selectors cannot see context condition metadata, facts, visibility, observer claims, or derived utility. Atomic context/fact and candidate/fact matrices must be complete, twice reviewed, adjudicated, and image-consistent; STOP and observation semantics are hard-checked.

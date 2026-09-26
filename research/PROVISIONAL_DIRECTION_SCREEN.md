@@ -52,6 +52,24 @@ cost-matched CLIP by 10.6 points [3.8, 17.6], but was 2.6 points below full-imag
 with interval [−8.0, 2.6]. Thus oracle headroom survives an independent text NLI
 check; planner superiority over the strongest full-image rule does not.
 
+### Independent visual-support sensitivity
+
+A pinned SmolVLM-Instruct model (`81cd9a775a4d644f2faf4e7becff4559b46b14c7`)
+then judged each crop and observation without seeing the full image or caption. It
+accepted only 393 of the 1,281 non-empty Qwen observations (30.68%), rejected 888,
+and retained 119 deterministic `NO_VISIBLE_FACT` rows. There were no parse
+failures. The original same-family judge had accepted all 1,281 non-empty rows,
+so its visual-support result was substantially inflated by self-confirmation.
+
+Combining SmolVLM crop support with independent DeBERTa novelty reduced the
+cost-matched oracle to 66.2% [57.6, 74.4] and montage to 36.6% [28.6, 45.0].
+Cost-matched random was 14.01% [11.59, 16.49] and cost-matched CLIP was 6.6%
+[3.2, 10.6]. Oracle minus montage remained 29.6 points [22.2, 37.4], showing
+actionable candidate-set headroom. However, the unconstrained largest-area/full-
+image rule reached 70.8% [62.8, 78.2], above both montage and the cost-matched
+oracle (the latter is constrained to montage's pixel budget). This screen supports
+the existence of useful observations, not superiority of the current planner.
+
 ## Core target: details of already-mentioned entities
 
 The provisional semantic classifier marked 1,751/7,000 context-actions as
@@ -96,6 +114,16 @@ their mentioned-entity-detail sets have Jaccard 16.65%. The strict set contains
 the first human review. Prompt sensitivity is direct evidence that model-only
 semantic labels cannot establish the result.
 
+After applying both independent visual support and independent text novelty, the
+strict core-target oracle remained 30.8% [24.4, 37.6], versus montage 7.6%
+[4.2, 11.6], largest-area/full-image 10.6% [6.6, 15.2], and random expectation
+3.26% [2.47, 4.10]. Oracle minus montage was 23.2 points [17.6, 29.2]. The broad
+semantic prompt gave a much higher 73.8% oracle and 22.2% montage. Broad/strict
+target-set Jaccard was 25.46%; 222 of 228 strict rows were also broad, but only
+25.64% of broad rows survived strict typing. Thus the conservative result still
+shows candidate-set headroom, while confirming that the broad formulation is not
+a reliable effect-size estimate.
+
 ## E2 screen and failure found
 
 Model-authored enriched/paraphrase/saturated captions failed the first E2
@@ -113,11 +141,13 @@ they are not evidence of natural caption dependence.
 
 ## Decision
 
-**Continue to targeted human validation, but do not train E3 yet.** The
-provisional core-target oracle gap is large enough to justify review, and the
-montage planner beats cost-matched CLIP/random on the broader proxy. However,
-same-model observer/judge circularity, binary utility, generic grids, high easy
-random success, and failed natural E2 construction prevent a positive claim.
+**Continue to targeted human validation, but do not train E3 yet.** The strict
+core-target oracle gap survives independent visual-support and text-NLI filters,
+so the direction has enough signal to justify review. The current planner is not
+a positive method result: it loses to the unconstrained full-image rule on the
+independent any-new-fact screen and on strict core-target success. Model-generated
+observations, automated semantic typing, binary utility, generic grids, and failed
+natural E2 construction still prevent a positive claim.
 
 The highest-value next human task is not a broad 100-image polish pass. First
 adjudicate a stratified subset enriched for:

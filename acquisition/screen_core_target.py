@@ -50,6 +50,8 @@ def main():
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
     parser.add_argument("--prompt-variant", choices=("default", "strict"), default="default")
+    parser.add_argument("--novel-entailment-label", default="NOT_ENTAILED",
+                        help="NLI label treated as novel (for example NOT_ENTAILED or NEUTRAL)")
     args = parser.parse_args()
     if not torch.cuda.is_available():
         parser.error("CUDA is required")
@@ -69,7 +71,8 @@ def main():
     for key, row in entailments.items():
         context = contexts[row["context_id"]]
         observation = observations[row["candidate_id"]]["observed_text"]
-        eligible = row["label"] == "NOT_ENTAILED" and visual[row["candidate_id"]] == "SUPPORTED"
+        eligible = (row["label"] == args.novel_entailment_label and
+                    visual[row["candidate_id"]] == "SUPPORTED")
         work.append({"key": key, "context_id": row["context_id"],
                      "staging_image_id": row["staging_image_id"],
                      "candidate_id": row["candidate_id"], "caption": context["initial_caption"],
@@ -81,7 +84,9 @@ def main():
     prompt_template = STRICT_PROMPT if args.prompt_variant == "strict" else PROMPT
     payload = {"files": {str(path): hashlib.sha256(path.read_bytes()).hexdigest() for path in sources},
                "model": args.model, "revision": args.revision, "prompt": prompt_template,
-               "batch_size": args.batch_size, "implementation": "provisional-core-target-v1"}
+               "batch_size": args.batch_size,
+               "novel_entailment_label": args.novel_entailment_label,
+               "implementation": "provisional-core-target-v2-configurable-nli-label"}
     fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
     args.output.mkdir(parents=True, exist_ok=True)
     rows_path, metadata_path = args.output / "complement_types.jsonl", args.output / "runtime.json"
@@ -103,6 +108,7 @@ def main():
     metadata = {"scope": "provisional same-model semantic type screen; not human gold",
                 "fingerprint": fingerprint, "model": args.model, "revision": args.revision,
                 "prompt_variant": args.prompt_variant,
+                "novel_entailment_label": args.novel_entailment_label,
                 "prompt_sha256": hashlib.sha256(prompt_template.encode()).hexdigest(),
                 "expected": len(work), "completed": len(existing),
                 "status": "running" if pending else "complete", "slurm_job_id": os.getenv("SLURM_JOB_ID")}
@@ -198,8 +204,8 @@ def main():
         [by_key[(context_id, method)] for context_id in context_ids], clusters,
         samples=10000, seed=2271) for method in methods}
     report = {"status": "provisional_not_evidence",
-              "warning": ("Same-family semantic classifier over same-family observer outputs; "
-                          "no independent or human fact typing."),
+              "warning": ("Automated semantic classifier over generated observer outputs; "
+                          "no independent human fact typing."),
               "images": len({row["staging_image_id"] for row in contexts.values()}),
               "contexts": len(contexts), "type_counts": dict(Counter(row["label"] for row in rows)),
               "core_target_success": summaries, "oracle_minus_baseline": gaps,
