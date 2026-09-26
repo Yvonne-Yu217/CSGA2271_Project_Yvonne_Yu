@@ -1,5 +1,12 @@
 # Agent log
 
+## 2026-09-26 — Claim-conditioned crop-verification pivot screen
+
+- After the fixed-candidate complement-selection design failed against direct full-image completion, screened an adjacent claim-conditioned evidence-verification pivot rather than training E3. Predeclared continuation required proper-zoom recall at least 80% and false support at most 20%, plus a novelty distinction from generic crop verification.
+- Ran 7,000 pinned-SmolVLM crop judgments for 500 low-resolution full-image claims. Proper zoom views excluding the full image reached 80.30% supported-claim recall [72.68, 87.40] but 57.56% false support [47.72, 66.90]. Nine local tiles reduced false support to 14.38% but recall fell to 42.76%. The pivot fails its predeclared reliability condition.
+- Five rows initially transcribed image text instead of returning a label. A stricter format retry fixed four and an A/B/C/D retry fixed the final row; retry prompts, variants and raw outputs are retained. No manual label assignment occurred.
+- Primary-source review found direct overlap with AdaptVision, TEVA, CropVLM, ROI binary verification and evidence-sufficiency work. Generic zoom/verification and cross-family judge disagreement are not defensible novelty claims. Do not train this pivot; move to a genuinely different CV task with externally verifiable labels.
+
 ## 2026-09-26 — Strong full-image baseline and stopping decision
 
 - Implemented and ran the proposal-required caption-conditioned direct full-image completion baseline on all 500 natural caption states. Qwen default-resolution generation completed in 180.09 seconds on one L4 (7.55 GiB peak torch allocation); a 50,176-pixel capped repeat completed in 140.64 seconds (7.39 GiB). Both were screened by pinned SmolVLM visual support and pinned DeBERTa novelty.

@@ -143,6 +143,21 @@ PYTHONPATH=. python acquisition/export_stopping_audit.py \
   --output acquisition/data/stopping-audit-full-image-vs-crop-100
 ```
 
+An adjacent claim-conditioned crop-verification screen is also reproducible:
+
+```sh
+PYTHONPATH=. python -u acquisition/screen_claim_crop_support.py \
+  --staging acquisition/data/e0-dev-100 \
+  --full-image-screen-output acquisition/results/provisional-full-image-completion-lowres-100 \
+  --output acquisition/results/provisional-claim-crop-support-lowres-100 \
+  --batch-size 8
+```
+
+It failed the predeclared continuation rule: proper zoom views retained 80.30%
+of supported claims but falsely supported 57.56% of rejected/partial claims.
+This cache is a negative direction screen, not training data or evidence for a
+crop-verification method.
+
 `export_screen_review.py` converts selected oracle/baseline disagreements into
 method-blind crop packets with blank fields for two independent reviewers. It
 does not expose model scores or predicted semantic types in reviewer CSV files.

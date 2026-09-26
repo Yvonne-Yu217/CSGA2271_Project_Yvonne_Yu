@@ -78,6 +78,22 @@
     },
     "interpretation": "Low-resolution direct full-image completion beats the current fixed-candidate oracle on the primary strict core target; do not train the selector on this action design."
   },
+  "claim_conditioned_crop_verification_screen": {
+    "contexts": 500,
+    "context_crop_pairs": 7000,
+    "judge": "HuggingFaceTB/SmolVLM-Instruct",
+    "judge_revision": "81cd9a775a4d644f2faf4e7becff4559b46b14c7",
+    "proper_zoom_excluding_full_image": {
+      "supported_claim_recall": {"mean": 0.8030487804878048, "ci95": [0.7268292682926829, 0.8739837398373983]},
+      "unsupported_claim_false_support": {"mean": 0.5756410256410257, "ci95": [0.4771730769230769, 0.668974358974359]}
+    },
+    "local_quarter_area_or_less": {
+      "supported_claim_recall": {"mean": 0.4276422764227642, "ci95": [0.3373983739837398, 0.5193089430894309]},
+      "unsupported_claim_false_support": {"mean": 0.14384615384615382, "ci95": [0.08102564102564104, 0.2146153846153846]}
+    },
+    "predeclared_thresholds": {"minimum_recall": 0.8, "maximum_false_support": 0.2},
+    "decision": "fail; do not train a crop-verification selector"
+  },
   "core_target_strict_prompt": {
     "target_rows": 316,
     "oracle": {"mean": 0.348, "ci95": [0.29, 0.408]},

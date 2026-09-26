@@ -70,3 +70,12 @@ Do **not** train E3 on this candidate design. Use only a small blinded stopping
 audit to test whether the ordering is a judge artifact; otherwise replace the
 task/action design or change topic, as required by the goal, rather than expanding
 annotation or presenting the earlier oracle gap as a positive result.
+
+An adjacent claim-conditioned crop-verification pivot was also screened and
+failed its predeclared stop rule. Proper zoom views recovered 80.30% of
+full-image-supported claims but falsely supported 57.56% of rejected/partial
+claims, versus a 20% ceiling. Local tiles reduced false support to 14.38% only by
+collapsing recall to 42.76%. Generic zoom/verification also has direct recent
+prior art. Do not train this pivot. Preserve both negative screens and move to a
+genuinely different CV task with externally verifiable labels; do not skip to
+finance or reweight these proxies to manufacture a positive result.

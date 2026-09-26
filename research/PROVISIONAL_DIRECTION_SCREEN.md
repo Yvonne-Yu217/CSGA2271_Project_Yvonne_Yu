@@ -208,3 +208,9 @@ A second, smaller stopping-audit packet now targets the decisive comparison:
 independently shuffled blank rows covering the direct completion and crop claim;
 method names, automated strata, and scores are confined to a private manifest.
 This packet is ready in `acquisition/data/stopping-audit-full-image-vs-crop-100`.
+
+The adjacent claim-conditioned crop-verification fallback was separately
+falsified and must not be used to continue this action family: proper zoom views
+gave 80.30% recall but 57.56% false support, failing the predeclared 20% ceiling.
+Its primary-source novelty boundary, exact screen and stop decision are recorded
+in `research/NEXT_DIRECTION_AFTER_STOPPING_SCREEN.md`.

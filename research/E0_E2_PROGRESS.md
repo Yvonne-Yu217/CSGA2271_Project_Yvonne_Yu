@@ -71,6 +71,10 @@ audit comparing low-resolution direct completion with crop-oracle claims. If
 independent humans reverse the automated ordering, resume canonical fact review
 and formal E0. Otherwise retain the negative diagnostic, replace the action/task
 design or change topic, and use new development data for the next candidate.
+The subsequent automated claim-conditioned crop-verification screen already
+failed its separate recall/false-support rule and must not be trained. It does
+not change the value of the small human stopping audit for closing the original
+direction, but it is not a fallback research route.
 
 ## Resource/session note
 
