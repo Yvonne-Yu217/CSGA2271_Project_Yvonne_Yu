@@ -32,8 +32,16 @@ Persistently low GPU utilization delays the project and must be investigated pro
 
 Maintain a finite queue of needed extraction/inference tasks. Cache reusable features, batch text/crops, prepare inputs on CPU, and checkpoint completed stages. A lightweight cached-feature scorer or bootstrap belongs on CPU if GPU work is too small. Necessary subagents may prepare code, audit outputs or stage independent work; the main agent controls submissions, shared outputs and cumulative budget. Never duplicate experiments just to raise utilization. Release the node when no useful in-scope GPU task is ready.
 
+## Gate outcome and current state
+
+- P0 artifacts, provenance, visibility audit, and accounting recovery completed. The current encoder snapshot is hashed; the legacy training-time revision remains unknowable and is disclosed.
+- P1 reviewed all 100 stratified rows from rendered images/captions. Codex visual review found 44 valid, 53 invalid, and 3 uncertain rows. This is explicitly not human annotation; human-confirmed rows remain zero.
+- P2 evaluated the three deletion-trained checkpoints without optimization on deletion, matched, and natural interventions. Frozen prediction-ensemble Δ-Acc@1 was 0.7908/0.7317/0.5601, versus inverse cosine 0.8450/0.7575/0.5816.
+- The decision gate selects a rigorous negative course comparison and task repair/replacement. Current evidence does not authorize learned variants, untouched confirmation, Visual Genome, or CVPR expansion. Those conditional branches are correctly left unrun and unclaimed.
+- Code, audit records, compact metrics, proposal source, decision documents, final report, compute ledger, and Agent Log are the deliverables for this phase. Raw images, caches, weights, and predictions remain outside Git.
+
 ## Proposed conversation goal text
 
 `/goal 第一目标：在剩余已授权预算内验证 proposal 全局内容，先审计现有结果与标签，再运行已准备好的冻结模型迁移和有效性实验，根据证据决定保留、收缩或更换方向，不强行证明原假设。使用任何可用且合适的 GPU，不限定 A100/L4；提前准备代码与数据，持续监测并优化有效 GPU 占用，必要时用 subagent 并行准备工作。保持预算账本，更新 proposal、实验计划、报告和 repo；CVPR 扩展必须通过独立决策门槛。`
 
-This file updates the repository goal. It does not assert that the conversation-level goal was changed; the available goal API cannot rewrite an existing goal's objective.
+The repository and conversation goal use this objective. Completion requires the deliverables above to be verified and pushed; it does not require running conditional experiments after their gate failed.

@@ -10,6 +10,8 @@ The original MLP superiority claim is unsupported: 77.22% versus 84.50% inverse-
 
 Direction A below is conditional. Direction B may become a replacement project (budgeted acquisition of new correct facts), rather than an added module used to rescue the original story. Verify its novelty and annotation feasibility first. Direction C remains deferred. The immediately scheduled code implements Gate 1; later annotation, models and reader experiments are intentionally not represented as ready-to-run completed implementations.
 
+**Gate outcome (HPC follow-up): closed.** Frozen deletion-checkpoint transfer did not beat inverse cosine, and only 44/100 Codex-reviewed diagnostic rows passed all semantic checks (53 invalid, 3 uncertain; zero human-confirmed rows). This document is retained as a conditional research design, but no CVPR expansion is active. Reopening it requires a repaired task, independent human labels, strong direct coverage baselines, and a new explicit decision; current compute is not authorized for that purpose.
+
 See `RESULTS_REVIEW_AND_NEXT_STEPS.md` for stop criteria and `../GOAL.md` for hardware flexibility, productive utilization and cumulative budget. CVPR is a conference; this document targets that research standard without implying submission readiness.
 
 ## Abstract

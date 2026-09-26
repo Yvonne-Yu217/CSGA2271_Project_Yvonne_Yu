@@ -1,5 +1,17 @@
 # Agent log
 
+## 2026-09-26 — Frozen transfer, semantic review, and decision gate
+
+- Recovered the persistent formal artifacts and ran `pilot/next_round.py preflight` against the deletion source. It verified split separation, staged images, checkpoint dimensions, hashes, cached encoder identity, and emitted a 100-row stratified semantic-audit sample. The legacy training-time encoder revision remains unprovable and is disclosed.
+- Ran `pilot/visibility_audit.py`: among 342 unique historical regions, 190 are fully visible in the center crop, 141 partially visible, and 11 invisible; 19 require the historical nearest-patch fallback. This invalidates an unqualified crop-versus-patch comparison.
+- Ran one bounded frozen inference pass on L4 job 1972. All 925 pairs were encoded jointly; the same three deletion-trained checkpoints produced predictions for 337 deletion, 337 matched, and 251 natural-caption pairs without retraining. Five-second monitoring captured a 91% utilization peak. Job 1972 was canceled after GPU work and CPU summary completed; final elapsed time was 683 seconds.
+- Frozen prediction-ensemble delta Acc@1 was 0.7908/0.7317/0.5601 for deletion/matched/natural, versus inverse cosine 0.8450/0.7575/0.5816. On the full deletion set, the paired ensemble-minus-inverse interval remained below zero. Frozen transfer therefore does not reverse the primary negative result.
+- Rendered all 100 semantic-audit rows with target/control boxes and original/edited captions, then visually reviewed every page. This was a Codex model review, explicitly **not** a human annotation: 44 rows passed all checks, 53 failed, and 3 were uncertain. Common failures were broken deletion grammar, invalid `unspecified` generalizations, target synonyms/implications retained in natural captions, and changed non-target facts.
+- Updated the summary schema to distinguish reviewed-valid rows from human-confirmed rows. Human-confirmed rows remain zero; downstream reporting must not relabel the model review as human ground truth.
+- Decision gate outcome: finish the course project as a rigorous negative comparison and task-validity analysis. Do not run learned variants, untouched-set confirmation, Visual Genome, or CVPR expansion on the current labels. Repair or replace the task before additional method development.
+- The interactive notebook repeatedly received a fresh L4 allocation after cancellation. Each allocation with no valid GPU-ready task was released rather than filled with duplicate or synthetic computation; this session overhead is recorded in the final Slurm ledger.
+- The compute node had no `pdflatex`. A downloaded glibc Tectonic binary was incompatible with the node's older libc; the static musl build succeeded. The revised proposal compiled to four pages and all four rendered pages were visually checked for clipping and layout failures.
+
 ## 2026-09-26 — Post-HPC evidence review and prepared follow-up
 
 - Pulled HPC result commit `6d67ef4`. Reviewed compact metrics and implementations with an independent audit subagent. No HPC connection, new training, or GPU allocation occurred in this session.

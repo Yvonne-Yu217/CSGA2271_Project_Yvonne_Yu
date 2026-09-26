@@ -24,6 +24,8 @@ The course quota of 300 GPU hours must not be used as the project budget. The im
 3. CPU: bootstrap, normalization, tables and decision report. Do not retain GPU allocation for manual review or report writing.
 4. Stop if evidence is invalid or no meaningful progress is possible. Do not launch model variants, Visual Genome or new direction experiments before their decision gate.
 
+P0–P2 are complete. Job 1972 performed the frozen inference in 683 allocated seconds and was released after output generation; the five-second trace captured a 91% utilization peak. The semantic gate failed (44 valid / 53 invalid / 3 uncertain in a Codex visual diagnostic, with zero human-confirmed rows), so stage 4 applies: no additional GPU experiment is currently authorized. Notebook allocations created for CPU reporting are released rather than filled with duplicate work.
+
 For GPU-ready stages, seek 70–90% utilization where feasible, monitor every 5 seconds, and diagnose sustained <30% for two minutes or missing progress. These thresholds are internal targets, not scheduler rules. Improve batching/workers/I/O, move small CPU work off GPU allocations, or release the node. Keep useful fallback tasks ready, never synthetic load. Subagents may prepare independent work; one owner controls submissions and budget.
 
 ## Original proposal coverage
@@ -31,11 +33,11 @@ For GPU-ready stages, seek 70–90% utilization where feasible, monitor every 5 
 | Component | Current evidence | Remaining limitation |
 |---|---|---|
 | Learned score / RQ1 | Three seeds and strong baselines | Superiority unsupported |
-| Intervention response / RQ2 | Three intervention families, separately trained | Semantic audit and frozen transfer missing |
+| Intervention response / RQ2 | Three intervention families plus frozen deletion-checkpoint transfer | Semantic diagnostic validity is weak; no human confirmation |
 | Generalization / RQ3 | Separately trained SigLIP sensitivity | Not weight transfer; Visual Genome unrun |
-| Data | 350 images / 1,165 pairs, split/hash audit | No independent semantic audit |
-| Spatial attribution | Task-adapted CCI, Grad-ECLIP, patch methods | Visibility confounds, not full official reproduction |
-| Single-caption localization | Historical metrics | Tie handling needs correction |
+| Data | 350 images / 1,165 pairs, split/hash audit, 100-row Codex visual review | Only 44/100 diagnostic rows valid; no human labels |
+| Spatial attribution | Task-adapted CCI, Grad-ECLIP, patch methods; crop visibility audited | 11/342 regions invisible and 141 partial; not full official reproduction |
+| Single-caption localization | Tie-aware frozen summary completed | Existing set is exploratory; audited subset is small |
 | Recoverability | Same-CLIP masked similarity | No independent reader or new-fact measurement |
 | Automatic regions | Patch cluster sensitivity mapped to boxes | Independent region recall/quality unverified |
 

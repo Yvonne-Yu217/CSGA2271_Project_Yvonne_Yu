@@ -48,6 +48,10 @@ def metric_cell(method, metric):
     return f"{item['mean']:.4f} [{item['ci95'][0]:.4f}, {item['ci95'][1]:.4f}]"
 
 
+def followup_cell(method, metric):
+    return metric_cell(method['metrics'], metric)
+
+
 def ledger(job_ids):
     if not job_ids:
         return []
@@ -101,6 +105,7 @@ def main():
     ap.add_argument('--spatial-matched-dir', type=Path)
     ap.add_argument('--spatial-natural-dir', type=Path)
     ap.add_argument('--spatial-cluster-dir', type=Path, action='append', default=[])
+    ap.add_argument('--frozen-followup-dir', type=Path)
     args = ap.parse_args()
     audit = json.loads(args.audit.read_text())
     interventions = {field: aggregate(args.formal_root / field / 'metrics.json') for field in ['tminus', 'tmatched', 'tnatural']}
@@ -122,15 +127,25 @@ def main():
                              ('tnatural', args.faithfulness_natural_dir)]:
         if directory:
             faithfulness[field] = json.loads((directory / 'metrics.json').read_text())
+    frozen = json.loads((args.frozen_followup_dir / 'summary.json').read_text()) if args.frozen_followup_dir else None
+    visibility = json.loads((args.frozen_followup_dir / 'visibility_audit.json').read_text()) if args.frozen_followup_dir else None
     compute = ledger([value for value in args.job_ids.split(',') if value])
     utilization = {'formal_l4': utilization_summary(args.formal_root / 'utilization.csv')}
     if args.siglip_dir:
         utilization['siglip_l4'] = utilization_summary(args.siglip_dir / 'utilization.csv')
     if args.faithfulness_dir:
         utilization['faithfulness_l4'] = utilization_summary(args.faithfulness_dir / 'utilization.csv')
+    if args.frozen_followup_dir:
+        traces = sorted(args.frozen_followup_dir.glob('utilization-*.log'))
+        if traces:
+            utilization['frozen_followup'] = utilization_summary(traces[-1])
     compact = {'data_audit': audit, 'interventions': interventions, 'spatial_baselines': spatial,
                'spatial_cluster_ablation': cluster_ablation,
                'faithfulness': faithfulness, 'encoder_transfer': {'siglip': siglip} if siglip else {},
+               'frozen_checkpoint_followup': frozen or {},
+               'visibility_audit': ({k: visibility[k] for k in ('scope', 'images', 'unique_regions',
+                   'region_visibility_counts', 'nearest_patch_fallback_regions', 'target_pair_visibility_counts')}
+                   if visibility else {}),
                'utilization': utilization, 'compute_ledger': compute,
                'interpretation': {'encoder_transfer_key_is_legacy': True,
                    'siglip_protocol': 'independently retrained, not frozen transfer',
@@ -144,7 +159,9 @@ def main():
     shuffle = det['shuffled-image control']['delta_acc1']['mean']
     natural = interventions['tnatural']['methods']['rank+locality+control']['delta_acc1']['mean']
     rq1 = 'not supported' if learned <= inverse else 'supported on the controlled benchmark'
-    rq2 = 'controlled-edit evidence only; semantic locality and frozen transfer remain unresolved' if learned > shuffle and natural < learned else 'mixed'
+    rq2 = ('frozen transfer completed, but task validity is weak and superiority remains unsupported'
+           if frozen else ('controlled-edit evidence only; semantic locality and frozen transfer remain unresolved'
+                           if learned > shuffle and natural < learned else 'mixed'))
     lines = [
         '# Final evidence report: What Does the Image Add?', '',
         '## Summary', '',
@@ -155,7 +172,7 @@ def main():
         f"automatic patch-cluster sensitivity is included, but Visual Genome and an independent region-proposal transfer benchmark are not.", '',
         'This is a bounded validation, not a publication-ready confirmation. Deterministic and matched edits are synthetic; natural captions differ in multiple facts and remain noisy even after exact entity-ID and phrase exclusion.', '',
         '## Validity limitations', '',
-        'Each intervention and SigLIP scorer was independently retrained, not transferred. Structural audits do not establish semantic validity. Natural captions may alter non-target facts; raw TIG/drift are scale-sensitive. Historical absolute localization needs tie correction, and masked same-CLIP similarity is not independent factual recovery. Spatial crop visibility may differ. See research/RESULTS_REVIEW_AND_NEXT_STEPS.md.', '',
+        'The historical intervention and SigLIP scorers were independently retrained. The new frozen-checkpoint follow-up below is the actual transfer test. Natural captions may alter non-target facts; raw TIG/drift are scale-sensitive. Historical masked same-CLIP similarity is not independent factual recovery. See research/RESULTS_REVIEW_AND_NEXT_STEPS.md.', '',
         '## Data and audit', '',
         f"- Flickr30K Entities: {audit['total_images']} images and {audit['total_pairs']} intervention pairs; "
         f"train/val/test images = {audit['image_counts']['train']}/{audit['image_counts']['val']}/{audit['image_counts']['test']}.",
@@ -164,6 +181,25 @@ def main():
         '## Intervention results', '',
         'All cells are image-level means with 95% bootstrap confidence intervals. Seeded rows average per-image metrics across three fixed seeds before the image bootstrap; this is not a prediction ensemble; seed-level Accuracy@1 values remain in `pilot/results/final_metrics.json`.', ''
     ]
+    audit_insert = lines.index('## Intervention results')
+    audit_details = []
+    if frozen:
+        audit_details += [f"- Semantic diagnostic review: {sum(frozen['audit_counts'].values())} stratified rows; "
+                          f"valid/invalid/uncertain = {frozen['audit_counts'].get('valid', 0)}/"
+                          f"{frozen['audit_counts'].get('invalid', 0)}/{frozen['audit_counts'].get('uncertain', 0)}. "
+                          f"All were reviewed by Codex from rendered images and captions, not by a human annotator; "
+                          f"human-confirmed rows = {frozen['human_confirmed_valid_rows']}."]
+        per_field = frozen['audit_counts_by_intervention']
+        audit_details += ["- Diagnostic valid rows by intervention: " + ', '.join(
+            f"{field} {values.get('valid', 0)}/{sum(values.values())}"
+            for field, values in per_field.items()) + '.']
+    if visibility:
+        counts = visibility['region_visibility_counts']
+        audit_details += [f"- Historical center-crop visibility: {counts['full']} full, {counts['partial']} partial, "
+                          f"{counts['invisible']} invisible regions; {visibility['nearest_patch_fallback_regions']} "
+                          f"regions used the nearest-patch fallback."]
+    if audit_details:
+        lines[audit_insert:audit_insert] = audit_details + ['']
     for field, title in [('tminus', 'Deterministic deletion'), ('tmatched', 'Length-matched generalization'), ('tnatural', 'Natural same-image caption')]:
         lines += [f'### {title}', '', '| Method | Acc@1 | MRR | TIG | Off-target drift |', '|---|---:|---:|---:|---:|']
         methods = interventions[field]['methods']
@@ -172,6 +208,29 @@ def main():
         for method in order:
             value = methods[method]
             lines.append(f"| {method} | {metric_cell(value, 'delta_acc1')} | {metric_cell(value, 'delta_mrr')} | {metric_cell(value, 'TIG')} | {metric_cell(value, 'off_target_drift')} |")
+        lines.append('')
+    if frozen:
+        lines += ['## Frozen deletion-checkpoint transfer', '',
+                  'The same three deletion-trained checkpoints are evaluated without optimization on every intervention. '
+                  'The prediction ensemble averages scores before ranking; `seed metric mean` averages the three independently computed metrics. '
+                  'The reviewed-valid subset is a small Codex visual diagnostic, not human gold data.', '',
+                  '| Intervention | Subset | Pairs | Method | Delta Acc@1 | Absolute Acc@1 |',
+                  '|---|---|---:|---|---:|---:|']
+        for field in ['tminus', 'tmatched', 'tnatural']:
+            for subset in ['all_exploratory', 'audited_valid']:
+                result = frozen['interventions'][field][subset]
+                for method in ['inverse_cosine', 'seed_metric_mean', 'prediction_ensemble']:
+                    value = result['methods'][method]
+                    lines.append(f"| {field} | {subset} | {result['pairs']} | {method} | "
+                                 f"{followup_cell(value, 'delta_acc1')} | {followup_cell(value, 'absolute_acc1')} |")
+        lines += ['', '### Frozen ensemble paired against inverse cosine', '',
+                  '| Intervention | Subset | Delta Acc@1 difference | Absolute Acc@1 difference |',
+                  '|---|---|---:|---:|']
+        for field in ['tminus', 'tmatched', 'tnatural']:
+            for subset in ['all_exploratory', 'audited_valid']:
+                value = frozen['interventions'][field][subset]['paired_vs_inverse_cosine']['prediction_ensemble']
+                lines.append(f"| {field} | {subset} | {followup_cell(value, 'delta_acc1')} | "
+                             f"{followup_cell(value, 'absolute_acc1')} |")
         lines.append('')
     lines += ['## Spatial attribution proxies', '',
         'These are held-out, task-adapted Hugging Face CLIP implementations. Grad-ECLIP uses the published final-attention gradient/value/key-similarity formula; CCI uses cosine patch clustering and final-block CLS-to-cluster attention masking. They are algorithm adaptations, not execution of the authors’ repositories.', '',
@@ -216,7 +275,7 @@ def main():
     lines += ['', '## Claim-to-evidence audit', '',
               '| Claim | Evidence | Status |', '|---|---|---|',
               f'| RQ1: learned region complementarity is measurable | Positive controlled gaps and visual-shuffle degradation, but learned Acc@1 `{learned:.4f}` does not beat inverse cosine `{inverse:.4f}` | Mixed / primary superiority claim not supported |',
-              f'| RQ2: response is local under text intervention | Locality losses reduce off-target drift; natural-caption Acc@1 is `{natural:.4f}` | Controlled diagnostic evidence; semantic validity unresolved |',
+              f"| RQ2: response is local under text intervention | Frozen transfer is complete; only {frozen['reviewed_valid_rows'] if frozen else 0}/100 diagnostic rows passed all semantic checks, with no human confirmation | Task validity weak; no confirmatory claim |",
               f"| RQ3: transfer across datasets/encoders/regions | {'SigLIP independently retrained encoder check completed; ' if siglip else ''}automatic patch-cluster sensitivity completed; Visual Genome and independent region proposals not completed | {'Partially tested' if siglip else 'Unverified'} |",
               '| Existing importance methods solve complementarity | Algorithm-adapted CCI and Grad-ECLIP metrics are reported on the same boxes | Adaptation evidence; authors’ repository execution not performed |', '',
               '## Failure taxonomy', '',
@@ -225,6 +284,12 @@ def main():
               '- Locality/strength tradeoff: rank-only training creates large TIG but also large off-target drift; locality losses reduce both.',
               '- Attribution mismatch: pooled-patch, CCI, and Grad-ECLIP importance need not encode “unmentioned visual content.”',
               '- Annotation validity: exact phrase/ID filtering cannot rule out synonymous or implicit target mention in natural captions.', '',
+              '## Decision gate', '',
+              ('The gate selects **finish the rigorous course comparison and repair or replace the task before further learned-method development**. '
+               'The frozen ensemble does not beat inverse cosine on the full deletion benchmark, while fewer than half of the stratified semantic-review rows pass all checks. '
+               'No learned variant, untouched-set confirmation, Visual Genome expansion, or CVPR experiment is authorized by this evidence. '
+               'Human review remains desirable, but cannot rescue claims from the current labels without a revised task.') if frozen else
+              'The decision gate remains pending frozen transfer and semantic review.', '',
               '## Compute ledger', '', '| Job | Partition | Elapsed (s) | GPU-hours | State |', '|---|---|---:|---:|---|']
     for row in compute:
         if 'error' in row:
@@ -243,6 +308,11 @@ def main():
               'python3 -u pilot/prepare.py --counts 200,50,100',
               'python3 -u pilot/audit.py',
               'sbatch hpc/full_l4.sbatch',
+              'python3 -u pilot/next_round.py preflight --source SOURCE_TMINUS --output FOLLOWUP_DIR',
+              'python3 -u pilot/visibility_audit.py --manifest SOURCE_TMINUS/manifest_snapshot.json --output FOLLOWUP_DIR/visibility_audit.json',
+              'python3 -u pilot/next_round.py gpu --source SOURCE_TMINUS --output FOLLOWUP_DIR',
+              'python3 -u pilot/render_semantic_audit.py --audit FOLLOWUP_DIR/semantic_audit.csv --output FOLLOWUP_DIR/audit-pages',
+              'python3 -u pilot/next_round.py summarize --output FOLLOWUP_DIR',
               'python3 -u pilot/make_report.py --formal-root pilot/results/formal-l4-JOB_ID --job-ids JOB_ID',
               '```', '',
               'The dataset, model cache, raw predictions, and checkpoints are intentionally excluded from Git. Compact audited metrics and this report are committed.', '']

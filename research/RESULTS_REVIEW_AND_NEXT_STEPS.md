@@ -2,6 +2,14 @@
 
 日期：2026-09-26。依据：HPC 提交 `6d67ef4`、`pilot/results/final_metrics.json`、原始报告及实现代码。本次没有连接 HPC 重新计算预测，也没有提交 GPU 作业。
 
+## 执行更新：有效性门槛已经触发停止条件
+
+随后在 HPC 上完成了预定的 P0–P2，而不是继续调参。冻结 deletion checkpoint 的 prediction ensemble 在 deletion/matched/natural 上的 Δ-Acc@1 分别为 79.08%/73.17%/56.01%，对应 inverse cosine 为 84.50%/75.75%/58.16%；冻结迁移没有翻转原负结果。
+
+100 条分层样本全部通过带框审阅图逐条检查：44 条通过 target change、control preservation 和 grammar 三项，53 条失败，3 条不确定。审阅者是 Codex 视觉检查，**不是人工标注者**，因此 human-confirmed count 仍为 0。尽管如此，低于一半的通过率已经足以否定“现有自动标签可直接支持 confirmatory claim”。342 个历史区域中另有 11 个在 CLIP center crop 中完全不可见、141 个仅部分可见、19 个触发 nearest-patch fallback。
+
+决策门选择方向 A：课程项目保留为严格的负结果、强基线比较和任务有效性分析；在修复或更换标签任务前，不运行两个 learned variants，不启动 untouched confirmation、Visual Genome 或 CVPR 扩展。后文 P3/P4 现在是被门槛明确停止的条件分支，而不是待执行清单。
+
 ## 我的建议
 
 **停止把现有轻量 MLP 的性能优势当成既定研究主线。先完成一次规模受限的有效性检查，再决定保留问题、改成分析项目，或换题。** 不应为了维护原 proposal，不断增加模块和数据集来寻找偶然正结果。

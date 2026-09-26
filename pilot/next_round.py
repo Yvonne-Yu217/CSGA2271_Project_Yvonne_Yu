@@ -15,6 +15,12 @@ FIELDS = ('tminus', 'tmatched', 'tnatural')
 SEEDS = (0, 1, 2)
 
 
+def is_human_reviewer(name):
+    normalized = name.strip().lower()
+    nonhuman_markers = ('codex', 'nonhuman', 'non-human', 'model review', 'ai review')
+    return bool(normalized) and not any(marker in normalized for marker in nonhuman_markers)
+
+
 def read(path):
     return json.loads(path.read_text())
 
@@ -277,10 +283,17 @@ def summary(args):
              and all(r[k].strip().lower() == 'yes' for k in
                      ('target_change_valid', 'controls_preserved', 'grammar_acceptable'))
              and r['reviewer'].strip()}
+    human_valid = {r['row_id'] for r in audit if r['row_id'] in valid
+                   and is_human_reviewer(r['reviewer'])}
     report = {'scope': 'Frozen deletion-trained checkpoint follow-up; no retraining',
               'audit_counts': dict(collections.Counter(r['audit_decision'] for r in audit)),
-              'confirmed_valid_rows': len(valid),
+              'audit_counts_by_intervention': {field: dict(collections.Counter(
+                  r['audit_decision'] for r in audit if r['intervention'] == field)) for field in FIELDS},
+              'reviewer_counts': dict(collections.Counter(r['reviewer'] or 'unreviewed' for r in audit)),
+              'reviewed_valid_rows': len(valid),
+              'human_confirmed_valid_rows': len(human_valid),
               'limitations': ['Unreviewed natural-caption delta/locality scores are exploratory because multiple entities may change.',
+                 'Reviewer identity is explicit; model visual review is diagnostic and is never labeled human confirmation.',
                  'Image bootstrap conditions on the three existing seeds; it is not a training-seed uncertainty interval.',
                  'Normalized deltas divide by each pair mean absolute delta; values with denominator <= 1e-8 map to zero.',
                  'Audited subsets are small stratified diagnostic samples, not unbiased population estimates.'],
@@ -310,7 +323,8 @@ def summary(args):
                     for image in value}, np) for key, value in per.items() if key != 'inverse_cosine'}}
         report['interventions'][field] = result
     write(args.output / 'summary.json', report)
-    print(f'CPU summary saved: {args.output / "summary.json"}; confirmed valid audit rows: {len(valid)}')
+    print(f'CPU summary saved: {args.output / "summary.json"}; reviewed valid rows: {len(valid)}; '
+          f'human-confirmed valid rows: {len(human_valid)}')
 
 
 def main():

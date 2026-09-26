@@ -2,21 +2,23 @@
 
 ## Summary
 
-The core learned-method claim is **not supported** at this scale: the three-seed rank+locality+control seed mean reached Accuracy@1 `0.7722`, versus `0.8450` for inverse crop-text cosine. The shuffled-image control fell to `0.4326`, showing that the learned scorer uses visual input, but that does not establish an advantage over the simple baseline. RQ2 is **controlled-edit evidence only; semantic locality and frozen transfer remain unresolved**. RQ3 remains partial: a SigLIP encoder check is included; automatic patch-cluster sensitivity is included, but Visual Genome and an independent region-proposal transfer benchmark are not.
+The core learned-method claim is **not supported** at this scale: the three-seed rank+locality+control seed mean reached Accuracy@1 `0.7722`, versus `0.8450` for inverse crop-text cosine. The shuffled-image control fell to `0.4326`, showing that the learned scorer uses visual input, but that does not establish an advantage over the simple baseline. RQ2 is **frozen transfer completed, but task validity is weak and superiority remains unsupported**. RQ3 remains partial: a SigLIP encoder check is included; automatic patch-cluster sensitivity is included, but Visual Genome and an independent region-proposal transfer benchmark are not.
 
 This is a bounded validation, not a publication-ready confirmation. Deterministic and matched edits are synthetic; natural captions differ in multiple facts and remain noisy even after exact entity-ID and phrase exclusion.
 
-## Interpretation corrections (2026-09-26)
+## Validity limitations
 
-Historical numeric values below are preserved, not recomputed. The natural-caption test set has 97 images / 251 pairs. The audit passed structural/hash checks, not independent semantic coverage checks. Each caption variant and SigLIP model was trained separately; these are not frozen transfer results. The seed-mean paired learned-minus-inverse deletion difference is −0.07278, CI [−0.11695, −0.03333].
-
-Natural-caption locality/supervised labels may incorrectly assume other entities stay covered. Raw TIG/drift are scale-sensitive. Absolute localization favors target index zero on ties and needs recomputation; masking uses the same CLIP and is not independent recoverability. Spatial center-crop visibility may differ from crop baselines. The snapshot ledger includes a running job; it is not a final budget balance. See [review and next steps](RESULTS_REVIEW_AND_NEXT_STEPS.md) and [next-round workflow](../hpc/NEXT_ROUND.md).
+The historical intervention and SigLIP scorers were independently retrained. The new frozen-checkpoint follow-up below is the actual transfer test. Natural captions may alter non-target facts; raw TIG/drift are scale-sensitive. Historical masked same-CLIP similarity is not independent factual recovery. See research/RESULTS_REVIEW_AND_NEXT_STEPS.md.
 
 ## Data and audit
 
 - Flickr30K Entities: 350 images and 1165 intervention pairs; train/val/test images = 200/50/100.
 - Natural-caption eligible pairs: 882; test = 251.
 - Audit status: `pass`; verified image hashes = 350; errors = 0; warnings = 0.
+
+- Semantic diagnostic review: 100 stratified rows; valid/invalid/uncertain = 44/53/3. All were reviewed by Codex from rendered images and captions, not by a human annotator; human-confirmed rows = 0.
+- Diagnostic valid rows by intervention: tminus 10/33, tmatched 25/34, tnatural 9/33.
+- Historical center-crop visibility: 190 full, 141 partial, 11 invisible regions; 19 regions used the nearest-patch fallback.
 
 ## Intervention results
 
@@ -66,6 +68,42 @@ All cells are image-level means with 95% bootstrap confidence intervals. Seeded 
 | text-only control | 0.4334 [0.4153, 0.4495] | 0.6907 [0.6739, 0.7056] | 0.0001 [-0.0000, 0.0003] | 0.0009 [0.0008, 0.0010] |
 | image-only control | 0.4334 [0.4153, 0.4495] | 0.6907 [0.6739, 0.7056] | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] |
 | constant | 0.4334 [0.4160, 0.4505] | 0.6907 [0.6740, 0.7066] | 0.0000 [0.0000, 0.0000] | 0.0000 [0.0000, 0.0000] |
+
+## Frozen deletion-checkpoint transfer
+
+The same three deletion-trained checkpoints are evaluated without optimization on every intervention. The prediction ensemble averages scores before ranking; `seed metric mean` averages the three independently computed metrics. The reviewed-valid subset is a small Codex visual diagnostic, not human gold data.
+
+| Intervention | Subset | Pairs | Method | Delta Acc@1 | Absolute Acc@1 |
+|---|---|---:|---|---:|---:|
+| tminus | all_exploratory | 337 | inverse_cosine | 0.8450 [0.7992, 0.8892] | 0.6050 [0.5575, 0.6517] |
+| tminus | all_exploratory | 337 | seed_metric_mean | 0.7722 [0.7264, 0.8153] | 0.6133 [0.5700, 0.6550] |
+| tminus | all_exploratory | 337 | prediction_ensemble | 0.7908 [0.7400, 0.8358] | 0.6233 [0.5725, 0.6700] |
+| tminus | audited_valid | 10 | inverse_cosine | 0.8333 [0.6111, 1.0000] | 0.5000 [0.2222, 0.8333] |
+| tminus | audited_valid | 10 | seed_metric_mean | 0.8704 [0.6852, 1.0000] | 0.5741 [0.3519, 0.7963] |
+| tminus | audited_valid | 10 | prediction_ensemble | 0.8889 [0.6667, 1.0000] | 0.6111 [0.3319, 0.8889] |
+| tmatched | all_exploratory | 337 | inverse_cosine | 0.7575 [0.7000, 0.8059] | 0.6167 [0.5658, 0.6633] |
+| tmatched | all_exploratory | 337 | seed_metric_mean | 0.7183 [0.6675, 0.7661] | 0.5811 [0.5386, 0.6231] |
+| tmatched | all_exploratory | 337 | prediction_ensemble | 0.7317 [0.6792, 0.7809] | 0.5988 [0.5483, 0.6454] |
+| tmatched | audited_valid | 25 | inverse_cosine | 0.6364 [0.4091, 0.8182] | 0.6818 [0.5000, 0.8636] |
+| tmatched | audited_valid | 25 | seed_metric_mean | 0.6742 [0.5303, 0.8182] | 0.4545 [0.2803, 0.6288] |
+| tmatched | audited_valid | 25 | prediction_ensemble | 0.6818 [0.5000, 0.8636] | 0.5000 [0.3170, 0.7273] |
+| tnatural | all_exploratory | 251 | inverse_cosine | 0.5816 [0.5180, 0.6409] | 0.5550 [0.4871, 0.6186] |
+| tnatural | all_exploratory | 251 | seed_metric_mean | 0.5515 [0.4903, 0.6114] | 0.5137 [0.4565, 0.5682] |
+| tnatural | all_exploratory | 251 | prediction_ensemble | 0.5601 [0.4957, 0.6220] | 0.5266 [0.4579, 0.5885] |
+| tnatural | audited_valid | 9 | inverse_cosine | 0.5556 [0.2222, 0.8889] | 0.7778 [0.4444, 1.0000] |
+| tnatural | audited_valid | 9 | seed_metric_mean | 0.6296 [0.3333, 0.8889] | 0.4815 [0.1481, 0.7778] |
+| tnatural | audited_valid | 9 | prediction_ensemble | 0.5556 [0.2222, 0.8889] | 0.4444 [0.1111, 0.7778] |
+
+### Frozen ensemble paired against inverse cosine
+
+| Intervention | Subset | Delta Acc@1 difference | Absolute Acc@1 difference |
+|---|---|---:|---:|
+| tminus | all_exploratory | -0.0542 [-0.1042, -0.0067] | 0.0183 [-0.0350, 0.0725] |
+| tminus | audited_valid | 0.0556 [-0.1667, 0.3333] | 0.1111 [-0.2222, 0.4444] |
+| tmatched | all_exploratory | -0.0258 [-0.0792, 0.0275] | -0.0179 [-0.0750, 0.0413] |
+| tmatched | audited_valid | 0.0455 [-0.0909, 0.1818] | -0.1818 [-0.3864, 0.0227] |
+| tnatural | all_exploratory | -0.0215 [-0.0498, 0.0060] | -0.0284 [-0.1023, 0.0412] |
+| tnatural | audited_valid | 0.0000 [-0.3333, 0.3333] | -0.3333 [-0.6667, 0.0000] |
 
 ## Spatial attribution proxies
 
@@ -147,7 +185,7 @@ Recoverability is the CLIP similarity drop for the target phrase after mean-colo
 | Claim | Evidence | Status |
 |---|---|---|
 | RQ1: learned region complementarity is measurable | Positive controlled gaps and visual-shuffle degradation, but learned Acc@1 `0.7722` does not beat inverse cosine `0.8450` | Mixed / primary superiority claim not supported |
-| RQ2: response is local under text intervention | Locality losses reduce off-target drift; natural-caption Acc@1 is `0.5017` | Controlled diagnostic evidence; semantic validity unresolved |
+| RQ2: response is local under text intervention | Frozen transfer is complete; only 44/100 diagnostic rows passed all semantic checks, with no human confirmation | Task validity weak; no confirmatory claim |
 | RQ3: transfer across datasets/encoders/regions | SigLIP independently retrained encoder check completed; automatic patch-cluster sensitivity completed; Visual Genome and independent region proposals not completed | Partially tested |
 | Existing importance methods solve complementarity | Algorithm-adapted CCI and Grad-ECLIP metrics are reported on the same boxes | Adaptation evidence; authors’ repository execution not performed |
 
@@ -158,6 +196,10 @@ Recoverability is the CLIP similarity drop for the target phrase after mean-colo
 - Locality/strength tradeoff: rank-only training creates large TIG but also large off-target drift; locality losses reduce both.
 - Attribution mismatch: pooled-patch, CCI, and Grad-ECLIP importance need not encode “unmentioned visual content.”
 - Annotation validity: exact phrase/ID filtering cannot rule out synonymous or implicit target mention in natural captions.
+
+## Decision gate
+
+The gate selects **finish the rigorous course comparison and repair or replace the task before further learned-method development**. The frozen ensemble does not beat inverse cosine on the full deletion benchmark, while fewer than half of the stratified semantic-review rows pass all checks. No learned variant, untouched-set confirmation, Visual Genome expansion, or CVPR experiment is authorized by this evidence. Human review remains desirable, but cannot rescue claims from the current labels without a revised task.
 
 ## Compute ledger
 
@@ -175,8 +217,11 @@ Recoverability is the CLIP similarity drop for the target phrase after mean-colo
 | 1964 | g2-standard-12 | 0 | 0.0000 | CANCELLED by 4645820 |
 | 1966 | g2-standard-12 | 70 | 0.0194 | COMPLETED |
 | 1967 | g2-standard-12 | 39 | 0.0108 | COMPLETED |
-| 1969 | g2-standard-12 | 1668 | 0.4633 | RUNNING |
+| 1969 | g2-standard-12 | 1719 | 0.4775 | CANCELLED by 4645820 |
 | 1971 | g2-standard-12 | 41 | 0.0114 | COMPLETED |
+| 1972 | g2-standard-12 | 683 | 0.1897 | CANCELLED by 4645820 |
+| 1973 | g2-standard-12 | 304 | 0.0844 | CANCELLED by 4645820 |
+| 1974 | g2-standard-12 | 1427 | 0.3964 | RUNNING |
 
 ## Utilization monitoring
 
@@ -185,8 +230,9 @@ Recoverability is the CLIP similarity drop for the target phrase after mean-colo
 | formal_l4 | 19 | 16.2% | 100% | 36.8% |
 | siglip_l4 | 7 | 15.9% | 59% | 28.6% |
 | faithfulness_l4 | 20 | 3.9% | 73% | 10.0% |
+| frozen_followup | 8 | 11.6% | 91% | 25.0% |
 
-Recorded allocation total at report generation: `1.1267` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The ledger is a generation-time snapshot; final job state and cumulative usage must be recovered from sacct before new allocation.
+Recorded allocation total at report generation: `1.8114` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The ledger is a generation-time snapshot; final job state and cumulative usage must be recovered from sacct before new allocation.
 
 ## Reproduction
 
@@ -195,6 +241,11 @@ python3 -u pilot/fetch_annotations.py
 python3 -u pilot/prepare.py --counts 200,50,100
 python3 -u pilot/audit.py
 sbatch hpc/full_l4.sbatch
+python3 -u pilot/next_round.py preflight --source SOURCE_TMINUS --output FOLLOWUP_DIR
+python3 -u pilot/visibility_audit.py --manifest SOURCE_TMINUS/manifest_snapshot.json --output FOLLOWUP_DIR/visibility_audit.json
+python3 -u pilot/next_round.py gpu --source SOURCE_TMINUS --output FOLLOWUP_DIR
+python3 -u pilot/render_semantic_audit.py --audit FOLLOWUP_DIR/semantic_audit.csv --output FOLLOWUP_DIR/audit-pages
+python3 -u pilot/next_round.py summarize --output FOLLOWUP_DIR
 python3 -u pilot/make_report.py --formal-root pilot/results/formal-l4-JOB_ID --job-ids JOB_ID
 ```
 

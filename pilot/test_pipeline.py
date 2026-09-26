@@ -7,6 +7,7 @@ import numpy as np
 
 import prepare
 import run
+import next_round
 
 
 class PipelineTests(unittest.TestCase):
@@ -37,6 +38,11 @@ class PipelineTests(unittest.TestCase):
             path = Path(directory) / 'manifest.json'
             path.write_text(json.dumps([row]))
             self.assertTrue(path.is_file())
+
+    def test_reviewer_type_is_not_invented(self):
+        self.assertFalse(next_round.is_human_reviewer('Codex visual review (not human)'))
+        self.assertFalse(next_round.is_human_reviewer(''))
+        self.assertTrue(next_round.is_human_reviewer('Yvonne Yu'))
 
 
 if __name__ == '__main__':
