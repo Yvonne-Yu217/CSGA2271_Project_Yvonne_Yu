@@ -92,6 +92,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--staging", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--candidates-file", type=Path,
+                        help="Candidate JSONL; defaults to STAGING/automatic_candidates.jsonl")
     parser.add_argument("--input-mode", choices=sorted(VIEW_INSTRUCTIONS), required=True)
     parser.add_argument("--context-mode", choices=sorted(PROMPTS), default="conditioned")
     parser.add_argument("--model", default=DEFAULT_MODEL)
@@ -110,9 +112,9 @@ def main():
     if args.max_images < 0 or args.max_pixels < 1:
         parser.error("max-images must be nonnegative and max-pixels positive")
 
-    source_names = ("staging_images.jsonl", "natural_contexts.jsonl",
-                    "automatic_candidates.jsonl")
-    source_paths = [args.staging / name for name in source_names]
+    candidates_path = args.candidates_file or args.staging / "automatic_candidates.jsonl"
+    source_paths = [args.staging / "staging_images.jsonl",
+                    args.staging / "natural_contexts.jsonl", candidates_path]
     images = {row["staging_image_id"]: row for row in read_jsonl(source_paths[0])}
     image_ids = sorted(images)
     if args.max_images:
@@ -146,7 +148,7 @@ def main():
     }, sort_keys=True).encode()).hexdigest()
     run_payload = {
         "implementation": IMPLEMENTATION,
-        "sources": {name: digest(path) for name, path in zip(source_names, source_paths)},
+        "sources": {str(path): digest(path) for path in source_paths},
         "input_mode": args.input_mode, "context_mode": args.context_mode,
         "model": args.model, "revision": args.revision, "prompt_sha256": prompt_hash,
         "batch_size": args.batch_size, "max_new_tokens": args.max_new_tokens,

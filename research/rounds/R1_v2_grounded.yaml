@@ -1,0 +1,37 @@
+round_id: R1-v2-grounded
+status: predeclared_observation_pending
+date: 2026-09-26
+parent_failure: research/rounds/R3_v0_proxy.yaml
+objective: test whether grounded entity geometry and binding preserve R2 residual headroom with fewer, interpretable actions
+grounder: IDEA-Research/grounding-dino-tiny@a2bb814dd30d776dcf7e30523b00659f4f141c71
+grounder_configuration:
+  dtype: float32
+  box_threshold: 0.30
+  text_threshold: 0.25
+  class_agnostic_nms_iou: 0.70
+  max_detections_per_image: 6
+  query: all five natural captions joined in sorted context-id order
+candidate_builder:
+  entity_boxes: 443
+  padded_entity_boxes: 443
+  padding_fraction: 0.15
+  relation_unions: 162
+  max_relation_unions_per_image: 2
+  full_image: 100
+  stop: 100
+  total: 1248
+  candidate_manifest_sha256: 95ba782e6d375b0a3b6c2dc2381f0a4d27331055c7eb52d59c20137cc0b412d4
+text_leakage_note: candidate generation uses captions; caption-independent observer ablations would not be end-to-end text-independent
+observation_scope: all 100 images, five natural captions per image, all non-STOP grounded views
+observer: Qwen/Qwen2.5-VL-3B-Instruct@66285546d2b821cf421d4f5eb2576359d3770cd3
+primary_automated_metric: strict caption-specific recognition-oracle success after independent support and novelty filters
+comparisons:
+  - grounded pooled versus fixed-grid R2 oracle
+  - entity versus padded entity versus relation union versus full image
+  - candidate count and pixel cost
+continuation_rule: grounded pooled strict oracle is noninferior to fixed-grid within 5 percentage points while using fewer actions, and at least one deployable grounded family retains positive caption-specific value over full-image completion
+uncertainty_unit: image/duplicate group
+human_gate: automated sensitivity cannot replace E0 review
+gpu_policy: any suitable available GPU; exact device and five-second trace recorded
+results: pending
+decision: pending
