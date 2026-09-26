@@ -42,6 +42,16 @@ A pinned SigLIP-base repeat gave 76.6% for unconstrained inverse similarity and
 10.2 points [4.0, 16.6], respectively. The semantic-baseline conclusion is not
 specific to the original CLIP backbone under this provisional judge.
 
+An independently trained DeBERTa-v3 NLI model was then substituted for Qwen text
+entailment (visual support was still the same-family Qwen check). Its binary
+new/not-new decisions agreed with Qwen on 73.63% of 7,000 rows and were less
+liberal: 81.79% versus 89.24% new. Under DeBERTa, the cost-matched oracle was
+99.8%, montage 85.6%, full-image/largest-area 88.2%, and cost-matched CLIP 75.0%.
+Oracle minus montage remained 14.2 points [9.8, 19.2]. Montage exceeded
+cost-matched CLIP by 10.6 points [3.8, 17.6], but was 2.6 points below full-image
+with interval [−8.0, 2.6]. Thus oracle headroom survives an independent text NLI
+check; planner superiority over the strongest full-image rule does not.
+
 ## Core target: details of already-mentioned entities
 
 The provisional semantic classifier marked 1,751/7,000 context-actions as

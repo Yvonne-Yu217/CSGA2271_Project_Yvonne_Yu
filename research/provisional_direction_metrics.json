@@ -29,6 +29,17 @@
     "random_expected": {"mean": 0.25014285714285717, "ci95": [0.222425, 0.278575]},
     "oracle_minus_montage": {"mean": 0.578, "ci95": [0.512, 0.644]}
   },
+  "independent_deberta_nli": {
+    "binary_agreement_with_qwen": 0.7362857142857143,
+    "deberta_new_rate": 0.8178571428571428,
+    "qwen_new_rate": 0.8924285714285715,
+    "cost_matched_oracle": {"mean": 0.998, "ci95": [0.994, 1.0]},
+    "montage_planner": {"mean": 0.856, "ci95": [0.808, 0.9]},
+    "largest_area": {"mean": 0.882, "ci95": [0.842, 0.918]},
+    "clip_inverse_cost_matched": {"mean": 0.75, "ci95": [0.682, 0.814]},
+    "oracle_minus_montage": {"mean": 0.142, "ci95": [0.098, 0.192]},
+    "montage_minus_largest_area": {"mean": -0.026, "ci95": [-0.08, 0.026]}
+  },
   "core_target_strict_prompt": {
     "target_rows": 316,
     "oracle": {"mean": 0.348, "ci95": [0.29, 0.408]},

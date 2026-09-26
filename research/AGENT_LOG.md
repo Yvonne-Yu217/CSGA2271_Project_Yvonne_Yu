@@ -17,6 +17,7 @@
 - Ran a strict same-instance prompt sensitivity check. Core-target oracle availability fell from 87.8% to 34.8%, while montage fell from 30.0% to 7.0%; the strict oracle-minus-montage gap remained 27.8 points [22.6, 33.2]. Broad/strict labels agreed overall on 57.94%, and target-set Jaccard was only 16.65%, confirming that model-only semantic typing is unstable.
 - Exported a method-blind targeted packet with 400 unique crop/context items across all 100 images, independently shuffled for two reviewers. The packet prioritizes prompt disagreements and oracle/baseline choices but exposes no method identity or scores.
 - Added a pinned SigLIP-base semantic baseline (`7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed`): 7,000 scores in 22.22 seconds on one L4. SigLIP inverse reached 76.6% and its cost-matched variant 73.4%; montage exceeded them by 7.0 points [0.8, 13.6] and 10.2 points [4.0, 16.6] under the same provisional labels.
+- Added an independently trained DeBERTa-v3 NLI sensitivity check pinned at `6f5cf0a2b59cabb106aca4c287eed12e357e90eb`. It agreed with Qwen binary new/not-new labels on 73.63%. Cost-matched oracle remained 99.8% versus montage 85.6%, gap 14.2 points [9.8, 19.2]. Full-image/largest-area reached 88.2%; montage minus full image was −2.6 points [−8.0, 2.6], so planner superiority is not supported even though oracle headroom is.
 
 ## 2026-09-26 — Milestone priorities and conditional finance downstream
 
