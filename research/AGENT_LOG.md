@@ -218,7 +218,9 @@
 
 - Generated 500 deterministic paraphrases and reran the frozen observer and
   independent screen over 7,000 fixed-grid actions. The visual screen used
-  batch 128 and independently sampled up to 100% A100 utilization.
+  batch 128 and was live-sampled at 100% A100 utilization; the separate monitor
+  captured startup samples but exited early, so it is not claimed as a complete
+  utilization trace for that screen.
 - The first partial observer run revealed that identical generated captions
   could collide because the cache key omitted `context_id`. Stopped only that
   experiment process, retained its failed cache, added `context_id`, bumped the
