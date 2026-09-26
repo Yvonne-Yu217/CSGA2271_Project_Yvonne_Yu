@@ -8,6 +8,7 @@ from acquisition.audit import audit_report
 from acquisition.fixture import write_fixture
 from acquisition.metrics import (bootstrap_cluster, caption_necessity, expected_random_metrics,
                                  material_switch, pair_regret)
+from acquisition.observe_conditioned import cache_key as conditioned_cache_key
 from acquisition.planner_baseline import parse_choice
 from acquisition.screen_entailment import parse_label as parse_entailment
 from acquisition.screen_independent_visual import parse_independent_label
@@ -90,6 +91,14 @@ class AcquisitionTests(unittest.TestCase):
             image["image_sha256"], candidate, "obs-v1", "prompt-v1"))
         self.assertNotEqual(key, observation_cache_key(
             image["image_sha256"], candidate, "obs-v2", "prompt-v1"))
+
+    def test_conditioned_cache_key_retains_equal_text_context_rows(self):
+        candidate = {"candidate_id": "cand", "kind": "box", "boxes": [[0, 0, 1, 1]]}
+        common = ("image-sha", candidate, "region_only", "prompt-sha", "revision", 48, 50176)
+        first = {"context_id": "ctx-a", "context_mode": "conditioned", "caption": "Same."}
+        second = {"context_id": "ctx-b", "context_mode": "conditioned", "caption": "Same."}
+        self.assertNotEqual(conditioned_cache_key(common[0], first, *common[1:]),
+                            conditioned_cache_key(common[0], second, *common[1:]))
 
     def test_e1_e2_report_is_diagnostic_without_e0_and_strong_baseline(self):
         report = evaluate_bundle(self.root, "proposal_score", bootstrap_samples=200, seed=7)

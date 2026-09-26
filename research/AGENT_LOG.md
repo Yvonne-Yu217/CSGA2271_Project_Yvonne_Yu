@@ -213,3 +213,18 @@
   utilization); very short classifier runs completed before multiple monitor
   samples and retain direct utilization observations. No allocation was
   cancelled or released.
+
+## 2026-09-26 — R2 paraphrase stability
+
+- Generated 500 deterministic paraphrases and reran the frozen observer and
+  independent screen over 7,000 fixed-grid actions. The visual screen used
+  batch 128 and independently sampled up to 100% A100 utilization.
+- The first partial observer run revealed that identical generated captions
+  could collide because the cache key omitted `context_id`. Stopped only that
+  experiment process, retained its failed cache, added `context_id`, bumped the
+  implementation version, and added an exact 7,000-row assertion before a
+  successful clean rerun.
+- Paraphrase oracle was 88.0% Qwen and 91.6% SmolVLM versus 90.4% and 93.0%
+  originally. On 435 bidirectionally entailed paraphrases, paired changes were
+  -1.53 points [-4.0, 0.9] and -0.15 points [-2.25, 1.95]. Action-set Jaccard
+  remained 0.718/0.736, motivating noisy or set-valued selector targets.

@@ -1,0 +1,39 @@
+round_id: R2-v3-paraphrase-stability
+status: complete_mixed_stability
+date: 2026-09-26
+parent_round: research/rounds/R2_v2_equal_call_refinement.yaml
+objective: test whether caption-dependent region-action value is stable to content-preserving wording changes
+data_status: same 100 development images and 500 development captions; no confirmation claim
+paraphraser: HuggingFaceTB/SmolVLM-Instruct revision 81cd9a775a4d644f2faf4e7becff4559b46b14c7, deterministic
+observer: frozen Qwen conditioned region observer and fixed-grid candidates from R2-v1
+primary_metrics: paired oracle success difference and successful-action-set Jaccard between original and paraphrased captions
+continuation_rule: report all results; instability triggers prompt/state redesign rather than selector tuning
+limitation: automated paraphrases require later human semantic-preservation audit
+gpu_policy: any suitable available GPU with exact device and five-second utilization trace
+results:
+  generated_paraphrases: 500
+  bidirectional_nli_entailment: 435
+  either_direction_contradiction: 1
+  all_contexts:
+    qwen_original_oracle: 0.904
+    qwen_paraphrase_oracle: 0.880
+    qwen_paraphrase_minus_original_ci95: [-0.046, -0.002]
+    qwen_oracle_agreement: 0.936
+    qwen_action_set_jaccard: 0.701
+    smol_original_oracle: 0.930
+    smol_paraphrase_oracle: 0.916
+    smol_paraphrase_minus_original_ci95: [-0.038, 0.006]
+    smol_oracle_agreement: 0.946
+    smol_action_set_jaccard: 0.718
+  bidirectional_entailment_subset:
+    contexts: 435
+    qwen_paraphrase_minus_original: -0.0153
+    qwen_paraphrase_minus_original_ci95: [-0.040, 0.009]
+    qwen_oracle_agreement: 0.938
+    qwen_action_set_jaccard: 0.718
+    smol_paraphrase_minus_original: -0.0015
+    smol_paraphrase_minus_original_ci95: [-0.0225, 0.0195]
+    smol_oracle_agreement: 0.952
+    smol_action_set_jaccard: 0.736
+decision: oracle availability is largely stable on automatically preserved paraphrases, but exact successful-action sets are only moderately stable; require human preservation audit and robust set-valued selector design
+execution_note: an initial partial observer run exposed cache-key collisions for identical paraphrases; the failed cache was retained and v2 includes context_id plus a cardinality assertion

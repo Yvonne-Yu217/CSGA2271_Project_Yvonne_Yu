@@ -35,6 +35,8 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--staging", type=Path, required=True)
     parser.add_argument("--observer-output", type=Path, required=True)
+    parser.add_argument("--contexts-file", type=Path,
+                        help="Context JSONL; defaults to STAGING/natural_contexts.jsonl")
     parser.add_argument("--visual-output", type=Path, required=True)
     parser.add_argument("--nli-output", type=Path, required=True)
     parser.add_argument("--full-image-core-output", type=Path, required=True)
@@ -51,8 +53,8 @@ def main():
     args = parser.parse_args()
     if not torch.cuda.is_available():
         parser.error("CUDA is required")
-    contexts = {row["context_id"]: row
-                for row in read_jsonl(args.staging / "natural_contexts.jsonl")}
+    contexts_path = args.contexts_file or args.staging / "natural_contexts.jsonl"
+    contexts = {row["context_id"]: row for row in read_jsonl(contexts_path)}
     observations = read_jsonl(args.observer_output / "observations.jsonl")
     visual = {row["cache_key"]: row for row in read_jsonl(
         args.visual_output / "visual_support.jsonl")}
@@ -71,7 +73,7 @@ def main():
             "observation": row["observed_text"],
             "eligible": visual[key]["label"] == "SUPPORTED" and "NEUTRAL" in nli[key]["label"],
         })
-    source_paths = [args.staging / "natural_contexts.jsonl",
+    source_paths = [contexts_path,
                     args.observer_output / "observations.jsonl",
                     args.visual_output / "visual_support.jsonl",
                     args.nli_output / "entailments.jsonl"]

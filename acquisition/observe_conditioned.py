@@ -19,7 +19,7 @@ from acquisition.observe import (DEFAULT_MODEL, DEFAULT_REVISION, atomic_jsonl,
                                  crop_candidate, read_jsonl)
 
 
-IMPLEMENTATION = "conditioned-observer-r1-v1"
+IMPLEMENTATION = "conditioned-observer-r1-v2-context-id-key"
 PROMPTS = {
     "conditioned": (
         "Existing image description: {caption}\n"
@@ -59,6 +59,7 @@ def cache_key(image_sha, context, candidate, input_mode, prompt_hash, revision,
     payload = {
         "implementation": IMPLEMENTATION,
         "image_sha256": image_sha,
+        "context_id": context["context_id"],
         "context_hash": context_hash(context["context_mode"], context["caption"]),
         "candidate_id": candidate["candidate_id"],
         "candidate_kind": candidate["kind"],
@@ -94,6 +95,8 @@ def main():
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--candidates-file", type=Path,
                         help="Candidate JSONL; defaults to STAGING/automatic_candidates.jsonl")
+    parser.add_argument("--contexts-file", type=Path,
+                        help="Context JSONL; defaults to STAGING/natural_contexts.jsonl")
     parser.add_argument("--input-mode", choices=sorted(VIEW_INSTRUCTIONS), required=True)
     parser.add_argument("--context-mode", choices=sorted(PROMPTS), default="conditioned")
     parser.add_argument("--model", default=DEFAULT_MODEL)
@@ -113,8 +116,8 @@ def main():
         parser.error("max-images must be nonnegative and max-pixels positive")
 
     candidates_path = args.candidates_file or args.staging / "automatic_candidates.jsonl"
-    source_paths = [args.staging / "staging_images.jsonl",
-                    args.staging / "natural_contexts.jsonl", candidates_path]
+    contexts_path = args.contexts_file or args.staging / "natural_contexts.jsonl"
+    source_paths = [args.staging / "staging_images.jsonl", contexts_path, candidates_path]
     images = {row["staging_image_id"]: row for row in read_jsonl(source_paths[0])}
     image_ids = sorted(images)
     if args.max_images:
@@ -248,6 +251,8 @@ def main():
         runtime_path.write_text(json.dumps(runtime, indent=2, sort_keys=True) + "\n")
         print(f"conditioned observer {len(existing)}/{len(work)}", flush=True)
     failures = sum(row["status"] != "ok" for row in existing.values())
+    if len(existing) != len(work):
+        raise RuntimeError(f"cache cardinality mismatch: {len(existing)} != {len(work)}")
     runtime.update({
         "status": "complete" if not failures else "fail", "failures": failures,
         "completed_outputs": len(existing), "elapsed_seconds": time.time() - started,

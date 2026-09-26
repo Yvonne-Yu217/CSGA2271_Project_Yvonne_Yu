@@ -107,3 +107,10 @@ the fixed-grid oracle and 27.8 points below the pooled grounded oracle. These
 are automated development results, not human evidence. The next gate remains
 human E0 and blinded review preparation; do not tune another selector on the
 already-inspected proxy split.
+
+R2 paraphrase stability is also complete on development data. Oracle
+availability is stable on the 435/500 paraphrases that pass bidirectional NLI,
+but exact successful-action sets have only 0.72--0.74 mean Jaccard across
+wordings. Treat selector targets as noisy/set-valued, and include the 65
+automatically disputed paraphrases in human review rather than excluding them
+from the evidence record.

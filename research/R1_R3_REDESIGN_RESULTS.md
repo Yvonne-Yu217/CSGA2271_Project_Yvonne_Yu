@@ -109,3 +109,23 @@ still exceeded that equal-call control by 31.2 points [24.0, 38.4], and the
 pooled grounded oracle exceeded it by 27.8 points [20.2, 35.4]. Thus the
 automated region headroom is not explained by merely allowing a second
 full-image call. This remains a development diagnostic pending human E0.
+
+## Paraphrase stability
+
+SmolVLM deterministically generated one wording change for each of the 500
+development captions. The frozen region observer and full independent screening
+chain were rerun over all 7,000 context-action pairs. Qwen-typed oracle success
+changed from 90.4% to 88.0% (paired change -2.4 points, interval [-4.6, -0.2]);
+SmolVLM-typed oracle success changed from 93.0% to 91.6% (-1.4 points,
+[-3.8, 0.6]). Oracle availability agreed for 93.6% and 94.6% of contexts,
+respectively, but successful-action-set Jaccard was only 0.701 and 0.718.
+
+Independent bidirectional NLI marked 435/500 paraphrases as mutually entailed,
+64 as neutral in at least one direction, and one as contradictory in one
+direction. On the 435 automatically preserved pairs, Qwen oracle change was
+-1.53 points [-4.0, 0.9] and SmolVLM change was -0.15 points [-2.25, 1.95];
+action-set Jaccard rose only to 0.718 and 0.736. Thus oracle availability is
+largely wording-stable after automated preservation filtering, while individual
+successful actions remain moderately unstable. Human preservation review is
+still required, and a learned method should treat action utility as set-valued
+or noisy rather than a single deterministic target.

@@ -1,0 +1,16 @@
+{
+  "date": "2026-09-26",
+  "scope": "automated development sensitivity; not human gold",
+  "contexts": 500,
+  "actions": 7000,
+  "bidirectional_nli_entailment_contexts": 435,
+  "either_direction_contradiction_contexts": 1,
+  "all_contexts": {
+    "qwen": {"original_oracle": 0.904, "paraphrase_oracle": 0.88, "difference_ci95": [-0.046, -0.002], "oracle_agreement": 0.936, "action_set_jaccard": 0.7006},
+    "smolvlm": {"original_oracle": 0.93, "paraphrase_oracle": 0.916, "difference_ci95": [-0.038, 0.006], "oracle_agreement": 0.946, "action_set_jaccard": 0.7184}
+  },
+  "bidirectional_entailment_subset": {
+    "qwen": {"difference": -0.0153, "difference_ci95": [-0.04, 0.009], "oracle_agreement": 0.9379, "action_set_jaccard": 0.7179},
+    "smolvlm": {"difference": -0.0015, "difference_ci95": [-0.0225, 0.0195], "oracle_agreement": 0.9517, "action_set_jaccard": 0.7364}
+  }
+}
