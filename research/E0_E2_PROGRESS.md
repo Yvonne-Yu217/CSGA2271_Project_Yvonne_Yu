@@ -41,10 +41,10 @@ Date: 2026-09-26. This is a status record, not a positive-results claim.
   reviews and no adjudicated exhaustive fact inventory. Existing generated
   review packets are templates only; fact/instance review must precede context
   and observation-claim labeling.
-- **E1 is not evaluated.** Recognition-oracle utility and strong-baseline
-  utility need adjudicated action outcomes. Built-in area, proposal-score,
-  center, random, and STOP rules are diagnostics and are prohibited from
-  passing the evidence gate. Full inference cost must be included.
+- **E1 is not formally evaluated.** Recognition-oracle utility and strong-baseline
+  utility still need adjudicated action outcomes. Independent-model sensitivity
+  screens and the direct full-image completion baseline are decision diagnostics,
+  not E1 evidence. Built-in rules remain prohibited from passing the gate.
 - **E2 is not evaluated.** Enriched, paraphrase, and saturated contexts still
   need independent construction/review. STOP must be measured using the frozen
   deployable baseline, never the recognition oracle.
@@ -53,22 +53,24 @@ Date: 2026-09-26. This is a status record, not a positive-results claim.
 
 ## Provisional automated direction screen
 
-The non-independent 100-image/500-caption screen in
-`research/PROVISIONAL_DIRECTION_SCREEN.md` found a 16.4-point binary any-new-fact
-oracle gap over the montage planner and a much larger provisional gap for the
-intended mentioned-entity-detail target. This is sufficient to prioritize human
-validation, not sufficient to pass E0/E1/E2 or claim a positive result.
-The strict instance-linkage prompt preserves a 27.8-point oracle-minus-montage
-gap but reduces oracle availability to 34.8%; broad/strict target labels have
-only 16.65% Jaccard. This prompt sensitivity is now part of the review design.
+The 100-image/500-caption screen in `research/PROVISIONAL_DIRECTION_SCREEN.md`
+began with same-family judgments, then added independent SmolVLM crop support and
+DeBERTa novelty filters. The latter preserve a 23.2-point strict core-target
+oracle-minus-montage gap. However, the proposal-required caption-conditioned
+direct full-image baseline changes the decision: at a 50,176-pixel cap it reaches
+48.6% provisional strict core-target success versus 30.8% for the fixed-candidate
+oracle. Direct completion minus oracle is 17.8 points [9.2, 26.2]. Automated
+semantic typing is not E1 evidence, but this is strong evidence against investing
+in the current candidate/action design before a small stopping audit.
 
 ## Immediate next decision
 
-Complete two-person fact/instance annotation on at least 100 images, adjudicate
-unknowns, freeze canonical IDs, then independently label context coverage,
-candidate visibility/sufficiency, and observer claims. Only then compute E1/E2
-with image/duplicate-cluster macro intervals. If oracle headroom or genuine
-caption dependence is absent, change direction before selector training.
+Do not start E3 or a broad 100-image annotation campaign on the current action
+inventory. First complete the prepared 80-context, 160-row-per-reviewer stopping
+audit comparing low-resolution direct completion with crop-oracle claims. If
+independent humans reverse the automated ordering, resume canonical fact review
+and formal E0. Otherwise retain the negative diagnostic, replace the action/task
+design or change topic, and use new development data for the next candidate.
 
 ## Resource/session note
 

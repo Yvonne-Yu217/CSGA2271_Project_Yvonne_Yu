@@ -52,16 +52,21 @@ This updates the repository objective; it does not claim the conversation-level 
 
 ## Current implementation state (2026-09-26)
 
-The E0–E2 infrastructure and 100-image staging/frozen-observer caches now exist;
-see `research/E0_E2_PROGRESS.md`. This is engineering progress only. E0 has no
-completed pair of independent human annotations or adjudication and therefore
-has **not passed**. E1/E2 have not been evaluated, and selector training remains
-gated. Frozen full-image prompted-planner inference and review-only E2 context
-drafts have also completed, but cannot be scored or promoted to labels before
-human review. No current artifact establishes a positive result or novelty.
+The E0–E2 infrastructure, 100-image staging, frozen observer/planners, independent
+SmolVLM visual-support screen and independent DeBERTa novelty screen now exist;
+see `research/E0_E2_PROGRESS.md` and `research/PROVISIONAL_DIRECTION_SCREEN.md`.
+E0 still has no completed pair of independent human annotations or adjudication
+and therefore has **not passed**. Generated saturated contexts failed the natural
+E2 screen, so E2 has not passed either.
 
-A provisional same-model screen now shows enough apparent core-target oracle
-headroom to justify targeted human validation; see
-`research/PROVISIONAL_DIRECTION_SCREEN.md`. It does not change the gates above:
-same-family self-judging is not gold, generated saturated contexts failed the
-natural E2 screen, and E3 training remains prohibited until E0–E2 are credible.
+The required caption-conditioned direct full-image completion baseline changes
+the provisional direction decision. At a 50,176-pixel cap it retained 55.8%
+automated any-new-fact success and 48.6% strict mentioned-entity-detail success.
+The fixed-candidate strict core-target oracle reached only 30.8%; direct completion
+exceeded it by 17.8 points with image-bootstrap interval [9.2, 26.2]. These are
+automated sensitivity labels rather than human evidence, but the current action
+inventory cannot beat a goal-aligned strong baseline even with oracle selection.
+Do **not** train E3 on this candidate design. Use only a small blinded stopping
+audit to test whether the ordering is a judge artifact; otherwise replace the
+task/action design or change topic, as required by the goal, rather than expanding
+annotation or presenting the earlier oracle gap as a positive result.

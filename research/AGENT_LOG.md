@@ -1,5 +1,13 @@
 # Agent log
 
+## 2026-09-26 — Strong full-image baseline and stopping decision
+
+- Implemented and ran the proposal-required caption-conditioned direct full-image completion baseline on all 500 natural caption states. Qwen default-resolution generation completed in 180.09 seconds on one L4 (7.55 GiB peak torch allocation); a 50,176-pixel capped repeat completed in 140.64 seconds (7.39 GiB). Both were screened by pinned SmolVLM visual support and pinned DeBERTa novelty.
+- Default-resolution direct completion achieved 56.8% any-new-fact success and the low-resolution repeat 55.8%. Low-resolution completion exceeded montage by 19.2 points [9.0, 29.2], while the cost-matched recognition oracle exceeded completion by 10.4 points [0.2, 20.4]. This leaves narrow any-new-fact oracle headroom at lower pixel cost, but no current learned or prompted selector captures it.
+- On the primary strict mentioned-entity target, default- and low-resolution direct completion reached 51.0% and 48.6%. The low-resolution direct baseline exceeded the fixed-candidate core-target oracle (30.8%) by 17.8 points [9.2, 26.2]. Semantic type remains automatically judged and the generator prompt targets mentioned entities, so this is a stopping diagnostic rather than human evidence.
+- Decision: do not train E3 or expand broad annotation on the current candidate/action design. A small blinded audit may test whether the ordering is a judge artifact; absent reversal, replace the action design or change topic. The allocation was kept intact and only scientifically necessary inference was run.
+- Exported that stopping audit: 80 contexts stratified as 30 direct-only, 30 crop-oracle-only, 10 both and 10 neither, yielding 160 blank method-hidden rows per independently shuffled reviewer plus a private manifest. No human fields were prefilled.
+
 ## 2026-09-26 — Independent visual-support sensitivity
 
 - Ran a full 100-image, 1,400-crop support audit with pinned SmolVLM-Instruct revision `81cd9a775a4d644f2faf4e7becff4559b46b14c7`. It accepted 393 observations, rejected 888 as invalid, retained 119 deterministic uninformative rows, and had no parse failures. The prior same-family Qwen check accepted all 1,281 non-empty observer outputs, demonstrating substantial self-confirmation risk.

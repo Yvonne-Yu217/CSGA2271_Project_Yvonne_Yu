@@ -102,10 +102,46 @@ labels are genuinely reviewed.
 
 The `screen_*` commands are deliberately provisional diagnostics. They separate
 crop support, text entailment, and complement type, cache every raw model answer,
-and report image-clustered intervals. Because the observer and judges share the
-same Qwen family, their output cannot pass E0/E1/E2. The current diagnostic
-result and exact limitations are recorded in
+and report image-clustered intervals. The initial screen shared one Qwen family;
+the sensitivity analysis adds pinned SmolVLM visual support and pinned DeBERTa
+text novelty, but automated judges still cannot pass E0/E1/E2. The current
+diagnostic result and exact limitations are recorded in
 `research/PROVISIONAL_DIRECTION_SCREEN.md`.
+
+The required caption-conditioned full-image baseline is reproducible at both
+default and low resolution. The low-resolution setting caps Qwen input at 224²
+pixels; its outputs are independently screened before semantic typing:
+
+```sh
+PYTHONPATH=. python -u acquisition/full_image_completion.py \
+  --staging acquisition/data/e0-dev-100 \
+  --output acquisition/results/qwen-full-image-completion-lowres-e0-dev-100 \
+  --max-pixels 50176 --batch-size 4
+PYTHONPATH=. python -u acquisition/screen_full_image_completion.py \
+  --staging acquisition/data/e0-dev-100 \
+  --completion-output acquisition/results/qwen-full-image-completion-lowres-e0-dev-100 \
+  --comparison-output acquisition/results/provisional-independent-both-100 \
+  --output acquisition/results/provisional-full-image-completion-lowres-100
+PYTHONPATH=. python -u acquisition/screen_completion_core_target.py \
+  --staging acquisition/data/e0-dev-100 \
+  --full-image-screen-output acquisition/results/provisional-full-image-completion-lowres-100 \
+  --comparison-output acquisition/results/provisional-core-target-independent-strict-100 \
+  --output acquisition/results/provisional-full-image-completion-lowres-core-strict-100
+```
+
+The stopping audit samples 80 stratified context disagreements and emits 160
+independently shuffled, blank rows per reviewer. Method names and automated
+labels appear only in the private manifest:
+
+```sh
+PYTHONPATH=. python acquisition/export_stopping_audit.py \
+  --staging acquisition/data/e0-dev-100 \
+  --observer-output acquisition/results/qwen-observer-e0-dev-100 \
+  --full-image-screen-output acquisition/results/provisional-full-image-completion-lowres-100 \
+  --full-image-core-output acquisition/results/provisional-full-image-completion-lowres-core-strict-100 \
+  --candidate-core-output acquisition/results/provisional-core-target-independent-strict-100 \
+  --output acquisition/data/stopping-audit-full-image-vs-crop-100
+```
 
 `export_screen_review.py` converts selected oracle/baseline disagreements into
 method-blind crop packets with blank fields for two independent reviewers. It

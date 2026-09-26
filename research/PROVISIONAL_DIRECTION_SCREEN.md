@@ -70,6 +70,27 @@ image rule reached 70.8% [62.8, 78.2], above both montage and the cost-matched
 oracle (the latter is constrained to montage's pixel budget). This screen supports
 the existence of useful observations, not superiority of the current planner.
 
+### Required direct full-image completion baseline
+
+The preceding largest-area row still used the caption-independent frozen crop
+observer. A stronger baseline therefore gave the same pinned Qwen model the full
+image and existing caption and asked it to directly add one grounded missing fact.
+SmolVLM independently checked visual support and DeBERTa checked novelty. At the
+model's default image resolution, direct completion succeeded on 56.8% [48.8,
+64.8] of contexts. It exceeded montage by 20.2 points [9.6, 30.6], but trailed
+the caption-independent largest-area observation by 14.0 points [5.4, 22.6]. It
+trailed the cost-matched recognition oracle by 9.4 points, with interval [−1.6,
+20.2] for oracle minus completion, so the proposal's predeclared 10-point,
+interval-supported E1 margin was not met.
+
+A low-resolution repeat capped the full image at 50,176 input pixels, below the
+montage-selected action's approximately 63k mean pixels. It retained 55.8%
+[48.2, 63.2] success. The cost-matched recognition oracle exceeded it by 10.4
+points [0.2, 20.4], establishing a narrow any-new-fact selection headroom at this
+lower image budget. However, this is an oracle, not a learned or deployable
+selector, and the full-image baseline still exceeded montage by 19.2 points
+[9.0, 29.2].
+
 ## Core target: details of already-mentioned entities
 
 The provisional semantic classifier marked 1,751/7,000 context-actions as
@@ -124,6 +145,17 @@ target-set Jaccard was 25.46%; 222 of 228 strict rows were also broad, but only
 shows candidate-set headroom, while confirming that the broad formulation is not
 a reliable effect-size estimate.
 
+The direct full-image baseline changes the core-target decision. After the same
+independent visual and text filters, the strict semantic screen marked 51.0%
+[43.4, 58.8] of default-resolution completions and 48.6% [41.2, 55.8] of
+50,176-pixel completions as mentioned-entity details. The low-resolution direct
+baseline exceeded the fixed-candidate core-target oracle by 17.8 points [9.2,
+26.2]. This semantic type is still automatically judged and the generation
+prompt explicitly asks for mentioned-entity details, so the absolute rates are
+not human evidence. Nevertheless, it is the required goal-aligned strong
+baseline: the current candidate action space cannot beat it on the proposed
+primary target even with oracle selection.
+
 ## E2 screen and failure found
 
 Model-authored enriched/paraphrase/saturated captions failed the first E2
@@ -141,16 +173,18 @@ they are not evidence of natural caption dependence.
 
 ## Decision
 
-**Continue to targeted human validation, but do not train E3 yet.** The strict
-core-target oracle gap survives independent visual-support and text-NLI filters,
-so the direction has enough signal to justify review. The current planner is not
-a positive method result: it loses to the unconstrained full-image rule on the
-independent any-new-fact screen and on strict core-target success. Model-generated
-observations, automated semantic typing, binary utility, generic grids, and failed
-natural E2 construction still prevent a positive claim.
+**Do not train E3 on the current candidate/action design.** A narrow low-resolution
+any-new-fact oracle gap exists, but the required direct full-image baseline beats
+the fixed-candidate oracle on the primary strict mentioned-entity target. The
+current action inventory therefore does not expose a useful method advantage,
+and its prompted planner is much weaker still. A small blinded human audit can
+verify that this automated comparison is not a judge artifact; it should not
+become a broad annotation or selector-training campaign unless it reverses the
+ordering. Otherwise replace the task/action design or change topic, rather than
+presenting the earlier oracle gap as a positive result.
 
-The highest-value next human task is not a broad 100-image polish pass. First
-adjudicate a stratified subset enriched for:
+The highest-value next human task is a small stopping audit, not a broad 100-image
+polish pass. First adjudicate a stratified subset enriched for:
 
 1. core-target oracle choices;
 2. montage successes and failures;
@@ -167,3 +201,10 @@ A method-blind packet with four selected context-actions per image (400 unique
 crop assets, independently shuffled for two reviewers) has been generated in
 the ignored data workspace. It prioritizes strict/broad disagreements and
 oracle/baseline choices without revealing method identity in the review CSV.
+
+A second, smaller stopping-audit packet now targets the decisive comparison:
+80 contexts stratified into 30 direct-only, 30 crop-oracle-only, 10 both, and
+10 neither according to automated strict labels. Each reviewer receives 160
+independently shuffled blank rows covering the direct completion and crop claim;
+method names, automated strata, and scores are confined to a private manifest.
+This packet is ready in `acquisition/data/stopping-audit-full-image-vs-crop-100`.

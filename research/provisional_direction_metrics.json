@@ -55,6 +55,29 @@
     "oracle_minus_montage": {"mean": 0.296, "ci95": [0.222, 0.374]},
     "oracle_minus_largest_area": {"mean": -0.046, "ci95": [-0.16, 0.07]}
   },
+  "direct_full_image_completion": {
+    "generator": "Qwen/Qwen2.5-VL-3B-Instruct",
+    "generator_revision": "66285546d2b821cf421d4f5eb2576359d3770cd3",
+    "visual_judge": "HuggingFaceTB/SmolVLM-Instruct",
+    "visual_judge_revision": "81cd9a775a4d644f2faf4e7becff4559b46b14c7",
+    "default_resolution": {
+      "any_new_fact": {"mean": 0.568, "ci95": [0.488, 0.648]},
+      "completion_minus_montage": {"mean": 0.202, "ci95": [0.096, 0.306]},
+      "completion_minus_largest_area": {"mean": -0.14, "ci95": [-0.226, -0.054]},
+      "completion_minus_cost_matched_oracle": {"mean": -0.094, "ci95": [-0.202, 0.016]},
+      "strict_core_target": {"mean": 0.51, "ci95": [0.434, 0.588]},
+      "strict_core_target_minus_candidate_oracle": {"mean": 0.202, "ci95": [0.112, 0.29]}
+    },
+    "max_50176_pixels": {
+      "any_new_fact": {"mean": 0.558, "ci95": [0.482, 0.632]},
+      "completion_minus_montage": {"mean": 0.192, "ci95": [0.09, 0.292]},
+      "completion_minus_largest_area": {"mean": -0.15, "ci95": [-0.234, -0.066]},
+      "completion_minus_cost_matched_oracle": {"mean": -0.104, "ci95": [-0.204, -0.002]},
+      "strict_core_target": {"mean": 0.486, "ci95": [0.412, 0.558]},
+      "strict_core_target_minus_candidate_oracle": {"mean": 0.178, "ci95": [0.092, 0.262]}
+    },
+    "interpretation": "Low-resolution direct full-image completion beats the current fixed-candidate oracle on the primary strict core target; do not train the selector on this action design."
+  },
   "core_target_strict_prompt": {
     "target_rows": 316,
     "oracle": {"mean": 0.348, "ci95": [0.29, 0.408]},
