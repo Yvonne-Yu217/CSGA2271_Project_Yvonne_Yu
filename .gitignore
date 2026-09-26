@@ -11,6 +11,7 @@ pilot/results/gpu-training-smoke/
 pilot/results/automodel-smoke/
 pilot/results/siglip-smoke/
 pilot/results/formal-l4-*/
+pilot/results/next-round-*/
 pilot/results/spatial-baselines*/
 pilot/results/siglip-l4-*/
 pilot/results/siglip-*-l4-*/

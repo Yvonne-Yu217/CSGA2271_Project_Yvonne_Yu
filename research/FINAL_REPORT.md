@@ -1,10 +1,16 @@
 # Final evidence report: What Does the Image Add?
 
-## Bottom line
+## Summary
 
-The core learned-method claim is **not supported** at this scale: the three-seed rank+locality+control ensemble reached Accuracy@1 `0.7722`, versus `0.8450` for inverse crop-text cosine. The shuffled-image control fell to `0.4326`, showing that the learned scorer uses visual input, but that does not establish an advantage over the simple baseline. RQ2 is **supported for deterministic/matched edits, but weak on natural-caption pairs**. RQ3 remains partial: a SigLIP encoder check is included; automatic patch-cluster sensitivity is included, but Visual Genome and an independent region-proposal transfer benchmark are not.
+The core learned-method claim is **not supported** at this scale: the three-seed rank+locality+control seed mean reached Accuracy@1 `0.7722`, versus `0.8450` for inverse crop-text cosine. The shuffled-image control fell to `0.4326`, showing that the learned scorer uses visual input, but that does not establish an advantage over the simple baseline. RQ2 is **controlled-edit evidence only; semantic locality and frozen transfer remain unresolved**. RQ3 remains partial: a SigLIP encoder check is included; automatic patch-cluster sensitivity is included, but Visual Genome and an independent region-proposal transfer benchmark are not.
 
 This is a bounded validation, not a publication-ready confirmation. Deterministic and matched edits are synthetic; natural captions differ in multiple facts and remain noisy even after exact entity-ID and phrase exclusion.
+
+## Interpretation corrections (2026-09-26)
+
+Historical numeric values below are preserved, not recomputed. The natural-caption test set has 97 images / 251 pairs. The audit passed structural/hash checks, not independent semantic coverage checks. Each caption variant and SigLIP model was trained separately; these are not frozen transfer results. The seed-mean paired learned-minus-inverse deletion difference is −0.07278, CI [−0.11695, −0.03333].
+
+Natural-caption locality/supervised labels may incorrectly assume other entities stay covered. Raw TIG/drift are scale-sensitive. Absolute localization favors target index zero on ties and needs recomputation; masking uses the same CLIP and is not independent recoverability. Spatial center-crop visibility may differ from crop baselines. The snapshot ledger includes a running job; it is not a final budget balance. See [review and next steps](RESULTS_REVIEW_AND_NEXT_STEPS.md) and [next-round workflow](../hpc/NEXT_ROUND.md).
 
 ## Data and audit
 
@@ -14,7 +20,7 @@ This is a bounded validation, not a publication-ready confirmation. Deterministi
 
 ## Intervention results
 
-All cells are image-level means with 95% bootstrap confidence intervals. Seeded rows ensemble the three fixed seeds before the image bootstrap; seed-level Accuracy@1 values remain in `pilot/results/final_metrics.json`.
+All cells are image-level means with 95% bootstrap confidence intervals. Seeded rows average per-image metrics across three fixed seeds before the image bootstrap; this is not a prediction ensemble; seed-level Accuracy@1 values remain in `pilot/results/final_metrics.json`.
 
 ### Deterministic deletion
 
@@ -94,7 +100,7 @@ These are held-out, task-adapted Hugging Face CLIP implementations. Grad-ECLIP u
 | 8 | 0.7558 [0.7016, 0.8067] | 0.8645 [0.8335, 0.8935] |
 | 12 | 0.7675 [0.7141, 0.8150] | 0.8729 [0.8421, 0.8996] |
 
-## Encoder transfer: SigLIP
+## Encoder replication: independently retrained SigLIP
 
 | Intervention | Method | Acc@1 | MRR | TIG | Off-target drift |
 |---|---|---:|---:|---:|---:|
@@ -141,14 +147,14 @@ Recoverability is the CLIP similarity drop for the target phrase after mean-colo
 | Claim | Evidence | Status |
 |---|---|---|
 | RQ1: learned region complementarity is measurable | Positive controlled gaps and visual-shuffle degradation, but learned Acc@1 `0.7722` does not beat inverse cosine `0.8450` | Mixed / primary superiority claim not supported |
-| RQ2: response is local under text intervention | Locality losses reduce off-target drift; natural-caption Acc@1 is `0.5017` | Supported only for controlled edits |
-| RQ3: transfer across datasets/encoders/regions | SigLIP encoder transfer completed; automatic patch-cluster sensitivity completed; Visual Genome and independent region proposals not completed | Partially tested |
+| RQ2: response is local under text intervention | Locality losses reduce off-target drift; natural-caption Acc@1 is `0.5017` | Controlled diagnostic evidence; semantic validity unresolved |
+| RQ3: transfer across datasets/encoders/regions | SigLIP independently retrained encoder check completed; automatic patch-cluster sensitivity completed; Visual Genome and independent region proposals not completed | Partially tested |
 | Existing importance methods solve complementarity | Algorithm-adapted CCI and Grad-ECLIP metrics are reported on the same boxes | Adaptation evidence; authors’ repository execution not performed |
 
 ## Failure taxonomy
 
-- Shortcut baseline dominance: inverse crop-text cosine is stronger than the learned scorer on controlled deletion.
-- Intervention shift: performance drops substantially for natural captions, which change more than the target entity.
+- Strong simple baseline: inverse crop-text cosine is stronger than the learned scorer on controlled deletion.
+- Natural-caption difficulty: independently retrained performance is lower for natural captions, which change more than the target entity.
 - Locality/strength tradeoff: rank-only training creates large TIG but also large off-target drift; locality losses reduce both.
 - Attribution mismatch: pooled-patch, CCI, and Grad-ECLIP importance need not encode “unmentioned visual content.”
 - Annotation validity: exact phrase/ID filtering cannot rule out synonymous or implicit target mention in natural captions.
@@ -180,7 +186,7 @@ Recoverability is the CLIP similarity drop for the target phrase after mean-colo
 | siglip_l4 | 7 | 15.9% | 59% | 28.6% |
 | faithfulness_l4 | 20 | 3.9% | 73% | 10.0% |
 
-Recorded allocation total at report generation: `1.1267` GPU-hours. This is below the 24 GPU-hour hard cap. The ledger is a generation-time snapshot; the interactive job marked RUNNING is released immediately after the final repository push.
+Recorded allocation total at report generation: `1.1267` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The ledger is a generation-time snapshot; final job state and cumulative usage must be recovered from sacct before new allocation.
 
 ## Reproduction
 

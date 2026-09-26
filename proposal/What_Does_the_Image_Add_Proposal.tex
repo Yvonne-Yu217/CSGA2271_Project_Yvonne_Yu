@@ -1,6 +1,7 @@
 \documentclass[10pt,twocolumn]{article}
 \usepackage[letterpaper,margin=0.66in,columnsep=0.23in]{geometry}
 \usepackage{times}
+\renewcommand{\ttdefault}{cmtt}
 \usepackage{microtype}
 \usepackage{amsmath,amssymb}
 \usepackage{booktabs}
@@ -24,7 +25,7 @@
 {\fontsize{16}{18}\selectfont\bfseries
 What Does the Image Add? Text-Conditioned Localization of Complementary Visual Information\par}
 \vspace{0.45em}
-{\small CSCI-GA 2271 Computer Vision \hspace{1.0em} Fall 2026 Project Proposal\par}
+{\small CSCI-GA 2271 Computer Vision \hspace{1.0em} Revised Proposal, September 26, 2026\par}
 \vspace{0.28em}
 {\small\bfseries Track: Agent Track \hspace{1.4em} Format: Research Project\par}
 \vspace{0.58em}
@@ -32,7 +33,7 @@ What Does the Image Add? Text-Conditioned Localization of Complementary Visual I
 ]
 
 \begin{abstract}
-Vision-language models such as CLIP are commonly interpreted by asking which image regions support an image-text similarity score or prediction. We study a different question: \emph{given the paired text, which regions of the image contain semantic information that the text has not already covered?} We formulate \taskname{} as a region-level, text-conditioned interpretability task. Our method assigns each image region a complementarity score and is trained and evaluated using controlled text interventions: when a visual detail is added to the caption, the score of the corresponding region should decrease while unrelated regions remain stable. Flickr30K Entities provides grounded phrase-box correspondences for a controlled benchmark; Visual Genome provides a second, denser testbed. We will compare against similarity, gradient, decomposition, and masking-based CLIP explanations. The core contribution is a new interpretability target and intervention-based verification protocol, not a finance-specific predictor. If time and data access permit, financial news will serve only as a real-world downstream testbed for whether complementary visual content can matter outside standard benchmarks.
+Given an image and caption, can regional scores identify visible facts that the caption leaves uncovered? The initial 350-image Flickr30K pilot does not support our lightweight scorer's superiority: its three-seed mean intervention Accuracy@1 is 77.22\%, versus 84.50\% for inverse crop--text similarity. We will validate labels, correct evaluation ambiguities, and test frozen-model transfer before further model development. A rigorous comparison and failure analysis is a valid course outcome. Publication expansion is conditional on new evidence; if the task is unreliable or adequately solved by strong simple baselines, we will recommend changing direction.
 \end{abstract}
 
 \section{Problem, Significance, and Research Questions}
@@ -45,14 +46,12 @@ We therefore study three questions:
 \textbf{RQ2:} Does this score respond correctly to controlled changes in the text, decreasing specifically when the missing visual detail is added?
 \textbf{RQ3:} Does the resulting complementarity map generalize across datasets and vision-language encoders, and does it capture a different explanatory signal from ordinary saliency or region importance?
 
-\textbf{Proposed novelty.} We do not claim that complementary multimodal information, spatial CLIP interpretation, or text intervention is individually new. Our contribution is their combination into a specific interpretability target: \emph{region-level, text-conditioned visual complementarity}, together with a locality-constrained intervention test that can falsify the explanation. CIEA extracts complementary features for retrieval \cite{zeng2025}; CLIP decomposition, Grad-ECLIP, and CCI explain spatial evidence or importance \cite{gandelsman2024,zhao2026,agarwal2026}; Counterfactual Phrase Intervention (CPI) measures phrase sensitivity for pretraining data selection \cite{go2026}. Our task instead asks whether a visual region is informative \emph{because its semantics are not yet present in the paired text}.
+\textbf{Novelty hypothesis.} Complementarity, spatial interpretation and text interventions have substantial precedent. An MLP combining them is insufficient evidence of publication-level novelty. A future contribution must establish valid semantic-coverage labels, a meaningful failure of strong direct baselines, and a useful downstream consequence. An updated comparison with grounded caption coverage and region-acquisition methods is required before claiming novelty.
 
 \section{Related Work}
-\textbf{Vision-language representation.} CLIP learns a shared image-text space using contrastive learning \cite{radford2021}. This makes text a natural interface for probing visual representations, but global similarity does not identify which visual semantics are omitted from a particular caption.
+CLIP provides shared image--text representations \cite{radford2021}. Decomposition, Grad-ECLIP and CCI localize representation or decision evidence \cite{gandelsman2024,zhao2026,agarwal2026}. They motivate spatial baselines but do not alone establish coverage of a caption's missing facts.
 
-\textbf{Spatial interpretation of CLIP.} Gandelsman et al. decompose CLIP's image representation over patches, layers, and attention heads and uncover emergent spatial localization \cite{gandelsman2024}. Grad-ECLIP produces image and word heatmaps explaining a specific CLIP matching result \cite{zhao2026}. CCI clusters CLIP patch embeddings into coherent concept regions and measures importance by masking them, achieving strong faithfulness on retrieval benchmarks \cite{agarwal2026}. These methods answer which regions support a representation or decision, not whether those regions contain information redundant with or complementary to the paired text.
-
-\textbf{Complementarity and interventions.} CIEA explicitly extracts visual information complementary to text to improve multimodal retrieval \cite{zeng2025}. Zur et al. distinguish captions from fuller image descriptions and show that standard CLIPScore does not capture this distinction well \cite{zur2024}. CPI uses controlled phrase substitution to measure whether individual caption phrases materially affect image-text alignment, but its target is phrase-sensitive data curation rather than spatial complementarity localization \cite{go2026}. Visual Credit Audit asks whether a multimodal decision receives additional support from an image beyond text-only controls, but operates at the whole-image decision level rather than localizing which visual region contributes uncovered semantics \cite{liu2026vca}. These works motivate our use of intervention as a verification tool.
+CIEA extracts complementary retrieval features \cite{zeng2025}; caption/description work tests limits of global similarity \cite{zur2024}. CPI measures phrase sensitivity for data selection \cite{go2026}, and Visual Credit Audit tests image contribution beyond text \cite{liu2026vca}. Our hypothesis needs an explicit comparison with these and grounded coverage methods, rather than treating their combination as established novelty.
 
 \section{Method}
 \subsection{Task Definition and Regions}
@@ -62,7 +61,7 @@ q_k = C_\theta(r_k\mid T) \in [0,1],
 \end{equation}
 where a high value means that region $r_k$ contains visually grounded semantics that are not adequately covered by $T$. We use \emph{complementarity} as an operational, intervention-defined quantity rather than claiming an exact information-theoretic mutual-information decomposition. In the controlled benchmark, regions come from ground-truth Flickr30K Entities boxes. We will later test model-generated regions from CCI-style patch clustering or GroundedSAM to remove dependence on annotations.
 
-A frozen vision-language encoder produces a region feature $v_k$ and text feature $t$. The primary model is a small scorer
+A frozen vision-language encoder produces a region feature $v_k$ and text feature $t$. The historical model, now treated as a comparator, is a small scorer
 \begin{equation}
 q_k = g_\theta([v_k,t,v_k\odot t,|P_vv_k-P_tt|]),
 \end{equation}
@@ -77,11 +76,11 @@ We train with a margin-ranking loss
 \begin{equation}
 \mathcal L_{rank}=\max(0,m-q_k(I,T^{-})+q_k(I,T^{+})).
 \end{equation}
-To enforce locality, an intervention about $r_k$ should minimally change scores of unrelated regions:
+Locality is valid only for the verified set $U$ of regions whose relevant facts remain unchanged:
 \begin{equation}
-\mathcal L_{loc}=\frac{1}{K-1}\sum_{j\neq k}|q_j(I,T^{-})-q_j(I,T^{+})|.
+\mathcal L_{loc}=\frac{1}{|U|}\sum_{j\in U}|q_j(I,T^{-})-q_j(I,T^{+})|.
 \end{equation}
-We will add a matched-control loss using captions in which a non-target phrase is changed. The full objective is $\mathcal L=\mathcal L_{rank}+\lambda_{loc}\mathcal L_{loc}+\lambda_{ctrl}\mathcal L_{ctrl}$.
+Omit locality when $U$ is empty. The historical implementation assumed all non-target regions unchanged, which can fail for natural captions. We will add a verified matched-control loss using captions in which a non-target phrase is changed. The full objective is $\mathcal L=\mathcal L_{rank}+\lambda_{loc}\mathcal L_{loc}+\lambda_{ctrl}\mathcal L_{ctrl}$.
 
 Intervention generation is a major validity concern. We will use three levels of control: (i) deterministic phrase removal/generalization, (ii) matched edits that preserve length and syntax as closely as possible, and (iii) natural multi-caption pairs for the same image when one caption mentions a grounded entity or attribute and another does not. Agent-assisted candidate edits may be used in the Agent Track, but they will be automatically checked for target coverage and manually audited on a stratified sample; failures will be documented in the Agent Log.
 
@@ -93,7 +92,7 @@ Intervention generation is a major validity concern. We will use three levels of
 \node[box,below=5mm of img] (enc) {Frozen CLIP / SigLIP\\region features $v_k$};
 \node[box,below=5mm of text] (tenc) {Text encoder\\feature $t$};
 \node[box,below right=5mm and -7mm of enc] (score) {Complementarity scorer\\$q_k=C_\theta(r_k\mid T)$};
-\node[box,below=4mm of score] (verify) {Target score drops under $T^{+}$\\non-target regions stay stable};
+\node[box,below=4mm of score] (verify) {Target score drops under $T^{+}$\\verified unaffected regions stay stable};
 \draw[arr] (img)--(enc); \draw[arr] (text)--(tenc);
 \draw[arr] (enc)--(score); \draw[arr] (tenc)--(score); \draw[arr] (score)--(verify);
 \end{tikzpicture}
@@ -102,33 +101,54 @@ Intervention generation is a major validity concern. We will use three levels of
 \vspace{-1mm}
 \end{figure}
 
+\section{Initial Evidence and Validity Gate}
+The existing pilot uses 200/50/100 train/validation/test images and 1,165 pairs. Natural captions retain 97 test images and 251 pairs. Automated split/hash checks passed; independent semantic annotation is incomplete. Historical Acc@1 results are:
+\begin{center}\small
+\begin{tabular}{lrr}
+\toprule
+Intervention & Inverse cosine & Learned mean\\
+\midrule
+Deletion & 84.50\% & 77.22\%\\
+Length-matched & 75.75\% & 74.86\%\\
+Natural caption & 58.16\% & 50.17\%\\
+\bottomrule
+\end{tabular}
+\end{center}
+These are means of three seed metrics, not prediction ensembles. Each intervention and SigLIP scorer was independently trained: neither establishes frozen-model transfer. The deletion paired learned-minus-inverse difference is $-7.28$ percentage points, 95\% image-bootstrap CI $[-11.70,-3.33]$. This favors the baseline at this scale without proving the broader question impossible.
+
+Phrase deletion is a proxy for semantic coverage. A category word may cover identity while omitting an attribute. Define fact granularity and distinguish omitted, covered, contradicted and uncertain facts. Natural captions may change multiple regions; phrase/ID exclusion cannot rule out synonyms. Repeated filler tokens do not ensure syntax-matched edits. Audit 100 stratified pairs for visibility, omission, grammaticality and non-target changes before interpreting comparative scores.
+
+Historical absolute-localization code favors target index zero on ties and needs recomputation. Raw TIG and drift are scale-sensitive. Spatial center-crop features and full region crops may see different target content. Attribution baselines are task adaptations, not complete official reproductions. Preserve these historical measurements with caveats.
+
+The next executable experiment holds deletion-trained checkpoints fixed and evaluates matched/natural captions without fitting. Report per-seed results, true prediction ensembles, tie-aware absolute and difference rankings, normalized changes and paired image-bootstrap intervals. Semantic labels remain human-review dependent. Strong direct region-description plus textual entailment/coverage baselines and an independent reader are required before publication expansion.
+
 \section{Experiments and Evaluation}
 \textbf{Primary benchmark.} Flickr30K Entities contains 31,783 images, 158,915 captions, and 276k manually annotated bounding boxes linked to caption phrases \cite{plummer2017}. It is well suited to controlled region-text interventions. We will split intervention templates and images by the official train/validation/test partitions to prevent leakage.
 
-\textbf{Generalization benchmark.} Visual Genome provides dense region descriptions, boxes, objects, attributes, and relations \cite{krishna2017}. We will use it to test whether a scorer trained on Flickr30K Entities transfers to a denser vocabulary and different annotation style.
+\textbf{Conditional, unrun generalization benchmark.} Visual Genome provides dense region descriptions, boxes, objects, attributes, and relations \cite{krishna2017}. We will use it to test whether a scorer trained on Flickr30K Entities transfers to a denser vocabulary and different annotation style.
 
 \textbf{Baselines.} We will compare against (i) random and region-area controls; (ii) inverse region-text cosine similarity; (iii) Gandelsman-style patch contribution; (iv) Grad-ECLIP saliency aggregated over regions; and (v) CCI masking importance. If implementation time permits, we will also compare to a CIEA-inspired complementary feature score. The key question is whether these existing importance or similarity signals satisfy our intervention-specific tests without being trained for complementarity.
 
-\textbf{Metrics.} Our primary metric is the \emph{Target Intervention Gap}
+\textbf{Metrics.} Distinguish single-caption ranking from intervention-difference ranking. The latter is a sensitivity diagnostic. A supplementary metric is the \emph{Target Intervention Gap}
 \begin{equation}
 \mathrm{TIG}=q_k(I,T^{-})-q_k(I,T^{+}),
 \end{equation}
-which should be positive and large for the targeted region. \emph{Off-Target Stability} measures the mean absolute score change over $j\neq k$ and should be small. With ground-truth regions, we report target-region ranking Accuracy@1 and MRR; with free-form masks, we report pointing accuracy and IoU against the grounded box. We also report deletion faithfulness by masking high-complementarity regions and measuring loss of recoverability for the omitted phrase. Results will be averaged over multiple seeds with confidence intervals where practical.
+which should be positive for a valid target edit; magnitude depends on score scale. \emph{Off-Target Stability} measures the mean absolute score change over verified unchanged regions and should be small. With ground-truth regions, we report target-region ranking Accuracy@1 and MRR; with free-form masks, we report pointing accuracy and IoU against the grounded box. We also report deletion faithfulness by masking high-complementarity regions and measuring loss of recoverability for the omitted phrase. Report three seeds, a separately labeled prediction ensemble, paired image-bootstrap intervals, expected ranking under random tie-breaking, candidate-count strata, and scale-normalized gaps. Same-CLIP masked similarity is only a proxy for recoverability. An independent reader is required to measure newly recovered correct facts.
 
 \textbf{Ablations.} We will test ground-truth boxes versus model-generated regions, CLIP versus SigLIP, crop features versus pooled patch features, each loss term, different intervention constructions, and training on one dataset versus transfer to the other. A critical negative control edits an unrelated caption phrase; a valid complementarity method should not move the target region score substantially.
 
-\textbf{Optional real-world testbed.} Only after the core CV method is validated, we will apply it to paired financial-news images and headlines. The existing Sina corpus provides a ready testbed; licensed WSJ data will be used only if access is available. The finance experiment is not required for the method to succeed and is not the source of the novelty. It asks whether regions identified as visually complementary to a headline correspond to externally meaningful signals such as volatility, volume, or attention after controlling for text and visual sentiment.
+\textbf{Deferred applications.} Finance and other downstream domains are outside the next round. They should be reconsidered only after valid core evidence and a clear scientific reason for expansion.
 
 \section{Deliverables, Risks, Verification, and Timeline}
-\textbf{Expected deliverables.} (1) A reproducible benchmark builder for text-conditioned region interventions; (2) a complementarity scorer and visualization pipeline; (3) implementations of strong spatial-interpretability baselines; (4) quantitative evaluation on Flickr30K Entities and Visual Genome; (5) ablations and qualitative failure analysis; (6) code repository with incremental commits and a research-paper-style final report; and (7) the required Agent Log. The optional finance testbed is an extension rather than a core deliverable.
+\textbf{Expected deliverables.} (1) A reproducible benchmark builder for text-conditioned region interventions; (2) a complementarity scorer and visualization pipeline; (3) implementations of strong spatial-interpretability baselines; (4) quantitative Flickr30K evaluation, with Visual Genome conditional on the validity gate; (5) ablations and qualitative failure analysis; (6) code repository with incremental commits and a research-paper-style final report; and (7) the required Agent Log. The optional finance testbed is an extension rather than a core deliverable.
 
-\textbf{Risks and fallbacks.} The largest risk is that the model exploits textual shortcuts rather than visual complementarity. We address this with matched edits, unrelated-edit controls, natural multi-caption pairs, and manual audits. Region granularity may also confound results; we therefore begin with human boxes before testing CCI/GroundedSAM regions. If the learned scorer does not beat simple inverse similarity, the project will still produce a controlled benchmark and a systematic falsification analysis explaining when existing attribution signals do or do not measure complementarity, but the primary goal is to demonstrate a measurable gain on intervention consistency and locality.
+\textbf{Decision gates.} First establish label validity and frozen-model transfer. If simple baselines remain strongest, finish a rigorous course comparison and failure analysis. If labels cannot define a useful task, or no meaningful residual problem remains, stop the learned-method direction. A possible replacement is budgeted region acquisition: select the next region revealing the most new correct facts beyond an existing caption, using equal budgets and a fixed reader. This requires its own literature and feasibility checks, not an assumed novelty claim. At most two motivated variants (calibrated baseline residual and independently supervised coverage) may follow valid evidence; no unbounded tuning.
 
 \textbf{Agent Track verification.} Agent tools may assist with literature search, boilerplate code, experiment scripting, caption-edit candidates, and report/figure preparation. We will independently verify generated code through unit tests and small hand-checked examples, reproduce key baseline behaviors before extension, audit intervention data, rerun core experiments across seeds, and maintain an Agent Log emphasizing incorrect suggestions, implementation failures, and how each result was verified. Every team member will be prepared to explain any submitted code during the final walkthrough.
 
-\textbf{Compute.} Frozen CLIP/SigLIP inference and a small scorer are expected to fit on a single modern GPU. NYU HPC or Google Cloud credits will be used for feature extraction, multi-backbone ablations, and repeated runs. The design intentionally avoids training a foundation model from scratch.
+\textbf{Compute and execution.} Use any available compatible GPU, including L4 or A100; neither is mandatory. Reconcile the earlier 20-hour authorization and imported 24-hour HPC handoff, deduct final historical usage, and use the lower cap if unresolved. Next diagnostics have a maximum of four additional allocated GPU hours within the remaining balance. Stage code, models and data before allocation; run bootstrap/reporting on CPU. Monitor progress/utilization every five seconds. Target 70--90\% during steady GPU-ready work where feasible; diagnose sustained $<30$\% for two minutes. These are internal targets, not cluster rules. Release idle allocations; never repeat useless work to raise utilization. Subagents may prepare independent work; one owner controls submissions and budget.
 
-\textbf{Preliminary timeline.} Weeks 1--2: data pipeline, CLIP features, and reproduction of attribution baselines. Weeks 3--4: controlled intervention benchmark and shortcut audits. Weeks 5--7: scorer, ranking/locality objectives, and core Flickr30K experiments. Weeks 8--9: CCI/GroundedSAM regions and Visual Genome transfer. Weeks 10--11: full ablations, faithfulness tests, and multiple seeds. Week 12: optional financial-news testbed. Weeks 13--14: failure analysis, final report, poster/presentation, code walkthrough preparation, and Agent Log.
+\textbf{Revised sequence.} P0: recover artifacts, provenance and final accounting. P1: audit 100 stratified semantic pairs. P2: run frozen deletion-trained checkpoints on matched/natural captions, then CPU evaluation. P3: decide whether to conclude the course comparison, try at most two motivated variants, or change direction. P4: only after a meaningful validation signal, confirm on untouched images and expand to independent regions/readers/datasets. Existing test images are exploratory after repeated inspection. Runnable commands are in \texttt{hpc/NEXT\_ROUND.md}; publication work is separately gated.
 
 \balance
 \vspace{0.5mm}

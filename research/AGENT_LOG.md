@@ -1,5 +1,18 @@
 # Agent log
 
+## 2026-09-26 — Post-HPC evidence review and prepared follow-up
+
+- Pulled HPC result commit `6d67ef4`. Reviewed compact metrics and implementations with an independent audit subagent. No HPC connection, new training, or GPU allocation occurred in this session.
+- Corrected interpretation: three-seed metric means are not prediction ensembles; natural/matched/SigLIP scorers were independently retrained. Natural-caption locality assumptions, unreviewed semantics, scale sensitivity, fixed-index tie bias, spatial crop visibility, cache provenance and incomplete accounting remain material limitations. Historical metric values were preserved.
+- Revised GOAL.md, project memory, resources, proposal and extension gates. The first objective is global evidence-based proposal validation, with explicit permission to conclude a negative course analysis or change direction. Removed exclusive L4/A100 restrictions. Recorded five-second monitoring, productive utilization targets, CPU/GPU staging, subagent coordination, and release of unneeded allocations.
+- Imported HPC history states a revised 24-hour cap; earlier local authorization states 20. The next handoff must reconcile this and final usage, using the lower cap if unresolved. The 1.1267-hour historical snapshot is not a final balance. No extra allocation was authorized or consumed here.
+- Added `pilot/next_round.py` and `hpc/next_round.sbatch`: CPU preflight and 100-pair semantic audit template; one shared feature extraction across interventions; inference using the original three frozen deletion checkpoints; CPU tie-aware summaries, paired bootstrap, scale normalization, candidate-count strata, audit-valid/common subsets, and distinct seed mean versus prediction ensemble.
+- Preflight checks checkpoint/model dimensions, hashes images/source artifacts/current encoder snapshot/implementation, and fails on changed inputs. Legacy metadata cannot prove the original training-time encoder revision; this limitation remains explicit.
+- Added CPU `pilot/visibility_audit.py` for center-crop visibility and nearest-patch fallback counts. Corrected future ledger generation to multiply elapsed time by allocated GPU count without double-counting typed GRES entries.
+- Validation: Python compilation and both CLI help commands passed; Slurm shell syntax passed; subagent checks covered ties, normalization, bootstrap and in-memory summary/audit gating; root checks covered full/partial/invisible crop geometry and 0/1/2-GPU accounting. `git diff --check` passed. Actual dataset preflight, CUDA extraction and HPC throughput are not executed locally because the required HPC artifacts are unavailable here.
+- Recompiled the revised proposal to three pages and visually inspected all pages after rendering. No clipping or unresolved citations. A missing local Courier font was resolved by using Computer Modern typewriter for the file-path text.
+- Only the bounded validity/frozen-transfer round is runnable now. Conditional new models, independent reader studies and publication-scale confirmation are future gated work, not claimed implemented experiments. GOAL.md includes proposed `/goal` text; the existing conversation objective cannot be rewritten by the exposed goal API.
+
 ## 2026-09-26 — Review, planning, and local pilot
 
 - Read the complete proposal LaTeX source. Preserved the original `.tex` and `.pdf`, which already had user changes.

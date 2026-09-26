@@ -32,10 +32,10 @@ def aggregate(metrics_path):
         result['methods'][name] = metrics['metrics'][name]
     for family, members in FAMILIES.items():
         common = sorted(set.intersection(*(set(per[name]) for name in members)))
-        ensemble = {key: np.mean([np.array(per[name][key]) for name in members], axis=0) for key in common}
-        family_summary = summarize(ensemble)
+        seed_mean = {key: np.mean([np.array(per[name][key]) for name in members], axis=0) for key in common}
+        family_summary = summarize(seed_mean)
         seed_acc = [metrics['metrics'][name]['delta_acc1']['mean'] for name in members]
-        paired = {key: ensemble[key] - inverse[key] for key in common}
+        paired = {key: seed_mean[key] - inverse[key] for key in common}
         family_summary['seed_delta_acc1'] = seed_acc
         family_summary['seed_delta_acc1_sd'] = float(np.std(seed_acc, ddof=1))
         family_summary['paired_delta_acc1_vs_inverse'] = summarize(paired)['delta_acc1']
@@ -62,8 +62,14 @@ def ledger(job_ids):
         job, partition, seconds, state, tres = line.split('|')[:5]
         if '.' in job:
             continue
+        allocations = dict(item.split('=', 1) for item in tres.split(',') if '=' in item)
+        if 'gres/gpu' in allocations:
+            gpu_count = int(allocations['gres/gpu'])
+        else:
+            gpu_count = sum(int(value) for key, value in allocations.items() if key.startswith('gres/gpu:'))
         rows.append({'job_id': job, 'partition': partition, 'elapsed_seconds': int(seconds or 0),
-                     'gpu_hours': int(seconds or 0) / 3600, 'state': state, 'alloc_tres': tres})
+                     'allocated_gpus': gpu_count, 'gpu_hours': gpu_count * int(seconds or 0) / 3600,
+                     'state': state, 'alloc_tres': tres})
     return rows
 
 
@@ -125,7 +131,10 @@ def main():
     compact = {'data_audit': audit, 'interventions': interventions, 'spatial_baselines': spatial,
                'spatial_cluster_ablation': cluster_ablation,
                'faithfulness': faithfulness, 'encoder_transfer': {'siglip': siglip} if siglip else {},
-               'utilization': utilization, 'compute_ledger': compute}
+               'utilization': utilization, 'compute_ledger': compute,
+               'interpretation': {'encoder_transfer_key_is_legacy': True,
+                   'siglip_protocol': 'independently retrained, not frozen transfer',
+                   'seeded_intervention_rows': 'mean of per-image seed metrics, not prediction ensemble'}}
     args.compact.parent.mkdir(parents=True, exist_ok=True)
     args.compact.write_text(json.dumps(compact, indent=2))
 
@@ -135,23 +144,25 @@ def main():
     shuffle = det['shuffled-image control']['delta_acc1']['mean']
     natural = interventions['tnatural']['methods']['rank+locality+control']['delta_acc1']['mean']
     rq1 = 'not supported' if learned <= inverse else 'supported on the controlled benchmark'
-    rq2 = 'supported for deterministic/matched edits, but weak on natural-caption pairs' if learned > shuffle and natural < learned else 'mixed'
+    rq2 = 'controlled-edit evidence only; semantic locality and frozen transfer remain unresolved' if learned > shuffle and natural < learned else 'mixed'
     lines = [
         '# Final evidence report: What Does the Image Add?', '',
-        '## Bottom line', '',
-        f'The core learned-method claim is **{rq1}** at this scale: the three-seed rank+locality+control ensemble reached '
+        '## Summary', '',
+        f'The core learned-method claim is **{rq1}** at this scale: the three-seed rank+locality+control seed mean reached '
         f'Accuracy@1 `{learned:.4f}`, versus `{inverse:.4f}` for inverse crop-text cosine. The shuffled-image control fell to '
         f'`{shuffle:.4f}`, showing that the learned scorer uses visual input, but that does not establish an advantage over the simple baseline. '
         f"RQ2 is **{rq2}**. RQ3 remains partial: {'a SigLIP encoder check is included; ' if siglip else ''}"
         f"automatic patch-cluster sensitivity is included, but Visual Genome and an independent region-proposal transfer benchmark are not.", '',
         'This is a bounded validation, not a publication-ready confirmation. Deterministic and matched edits are synthetic; natural captions differ in multiple facts and remain noisy even after exact entity-ID and phrase exclusion.', '',
+        '## Validity limitations', '',
+        'Each intervention and SigLIP scorer was independently retrained, not transferred. Structural audits do not establish semantic validity. Natural captions may alter non-target facts; raw TIG/drift are scale-sensitive. Historical absolute localization needs tie correction, and masked same-CLIP similarity is not independent factual recovery. Spatial crop visibility may differ. See research/RESULTS_REVIEW_AND_NEXT_STEPS.md.', '',
         '## Data and audit', '',
         f"- Flickr30K Entities: {audit['total_images']} images and {audit['total_pairs']} intervention pairs; "
         f"train/val/test images = {audit['image_counts']['train']}/{audit['image_counts']['val']}/{audit['image_counts']['test']}.",
         f"- Natural-caption eligible pairs: {sum(audit['natural_pair_counts'].values())}; test = {audit['natural_pair_counts']['test']}.",
         f"- Audit status: `{audit['status']}`; verified image hashes = {audit['verified_image_hashes']}; errors = {len(audit['errors'])}; warnings = {len(audit['warnings'])}.", '',
         '## Intervention results', '',
-        'All cells are image-level means with 95% bootstrap confidence intervals. Seeded rows ensemble the three fixed seeds before the image bootstrap; seed-level Accuracy@1 values remain in `pilot/results/final_metrics.json`.', ''
+        'All cells are image-level means with 95% bootstrap confidence intervals. Seeded rows average per-image metrics across three fixed seeds before the image bootstrap; this is not a prediction ensemble; seed-level Accuracy@1 values remain in `pilot/results/final_metrics.json`.', ''
     ]
     for field, title in [('tminus', 'Deterministic deletion'), ('tmatched', 'Length-matched generalization'), ('tnatural', 'Natural same-image caption')]:
         lines += [f'### {title}', '', '| Method | Acc@1 | MRR | TIG | Off-target drift |', '|---|---:|---:|---:|---:|']
@@ -182,7 +193,7 @@ def main():
             value = result['metrics']['cci_cluster_inverse_importance']
             lines.append(f"| {result['cci_clusters']} | {metric_cell(value, 'delta_acc1')} | {metric_cell(value, 'delta_mrr')} |")
     if siglip:
-        lines += ['', '## Encoder transfer: SigLIP', '',
+        lines += ['', '## Encoder replication: independently retrained SigLIP', '',
                   '| Intervention | Method | Acc@1 | MRR | TIG | Off-target drift |', '|---|---|---:|---:|---:|---:|']
         for field, result in siglip.items():
             for method in ['inverse_cosine', 'max_ngram_cosine', 'rank+locality+control', 'shuffled-image control']:
@@ -205,12 +216,12 @@ def main():
     lines += ['', '## Claim-to-evidence audit', '',
               '| Claim | Evidence | Status |', '|---|---|---|',
               f'| RQ1: learned region complementarity is measurable | Positive controlled gaps and visual-shuffle degradation, but learned Acc@1 `{learned:.4f}` does not beat inverse cosine `{inverse:.4f}` | Mixed / primary superiority claim not supported |',
-              f'| RQ2: response is local under text intervention | Locality losses reduce off-target drift; natural-caption Acc@1 is `{natural:.4f}` | Supported only for controlled edits |',
-              f"| RQ3: transfer across datasets/encoders/regions | {'SigLIP encoder transfer completed; ' if siglip else ''}automatic patch-cluster sensitivity completed; Visual Genome and independent region proposals not completed | {'Partially tested' if siglip else 'Unverified'} |",
+              f'| RQ2: response is local under text intervention | Locality losses reduce off-target drift; natural-caption Acc@1 is `{natural:.4f}` | Controlled diagnostic evidence; semantic validity unresolved |',
+              f"| RQ3: transfer across datasets/encoders/regions | {'SigLIP independently retrained encoder check completed; ' if siglip else ''}automatic patch-cluster sensitivity completed; Visual Genome and independent region proposals not completed | {'Partially tested' if siglip else 'Unverified'} |",
               '| Existing importance methods solve complementarity | Algorithm-adapted CCI and Grad-ECLIP metrics are reported on the same boxes | Adaptation evidence; authors’ repository execution not performed |', '',
               '## Failure taxonomy', '',
-              '- Shortcut baseline dominance: inverse crop-text cosine is stronger than the learned scorer on controlled deletion.',
-              '- Intervention shift: performance drops substantially for natural captions, which change more than the target entity.',
+              '- Strong simple baseline: inverse crop-text cosine is stronger than the learned scorer on controlled deletion.',
+              '- Natural-caption difficulty: independently retrained performance is lower for natural captions, which change more than the target entity.',
               '- Locality/strength tradeoff: rank-only training creates large TIG but also large off-target drift; locality losses reduce both.',
               '- Attribution mismatch: pooled-patch, CCI, and Grad-ECLIP importance need not encode “unmentioned visual content.”',
               '- Annotation validity: exact phrase/ID filtering cannot rule out synonymous or implicit target mention in natural captions.', '',
@@ -226,7 +237,7 @@ def main():
         maximum = '-' if value['max_gpu_utilization_percent'] is None else f"{value['max_gpu_utilization_percent']}%"
         nonzero = '-' if value['nonzero_sample_fraction'] is None else f"{100 * value['nonzero_sample_fraction']:.1f}%"
         lines.append(f"| {name} | {value['samples']} | {mean} | {maximum} | {nonzero} |")
-    lines += ['', f"Recorded allocation total at report generation: `{sum(row.get('gpu_hours', 0) for row in compute):.4f}` GPU-hours. This is below the 24 GPU-hour hard cap. The ledger is a generation-time snapshot; the interactive job marked RUNNING is released immediately after the final repository push.", '',
+    lines += ['', f"Recorded allocation total at report generation: `{sum(row.get('gpu_hours', 0) for row in compute):.4f}` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The ledger is a generation-time snapshot; final job state and cumulative usage must be recovered from sacct before new allocation.", '',
               '## Reproduction', '', '```sh',
               'python3 -u pilot/fetch_annotations.py',
               'python3 -u pilot/prepare.py --counts 200,50,100',

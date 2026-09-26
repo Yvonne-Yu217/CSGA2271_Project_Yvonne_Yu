@@ -1,5 +1,7 @@
 # Proposal review and execution plan
 
+> Historical pre-experiment review. The current evidence-based plan is [RESULTS_REVIEW_AND_NEXT_STEPS.md](RESULTS_REVIEW_AND_NEXT_STEPS.md), with execution in [hpc/NEXT_ROUND.md](../hpc/NEXT_ROUND.md). Earlier scheduling or hardware assumptions below are superseded by GOAL.md.
+
 > 2026-09-26 更新：用户已将第一目标改为在 HPC 上完整验证原 proposal。本文的课程收缩建议与 local pilot 只是历史评审建议；当前执行范围以 `../GOAL.md` 和 `../hpc/RESOURCE_PLAN.md` 为准，不能用 pilot 代替全局验证。
 
 评审日期：2026-09-26。原稿：`proposal/What_Does_the_Image_Add_Proposal.tex`。本文是研究判断，不是课程教师的实际评分或会议录用预测。原稿已有未提交修改，评审与扩展另存，不覆盖原文件。

@@ -1,6 +1,6 @@
 # Local entity-omission pilot
 
-This bounded validation tests entity-phrase deletion on actual Flickr30K images and official Entities annotations. It does **not** establish semantic complementarity, human annotation agreement, or publication readiness. SigLIP transfer, attribution adaptations, patch-cluster sensitivity, and recoverability are included; Visual Genome, an independent proposal-generator benchmark, and downstream studies remain future work.
+This bounded validation tests entity-phrase deletion on actual Flickr30K images and official Entities annotations. It does **not** establish semantic complementarity, human annotation agreement, or publication readiness. Separately retrained SigLIP sensitivity, attribution adaptations, patch-cluster sensitivity, and same-CLIP masking proxies are included; Visual Genome, independent factual recovery, and an independent proposal-generator benchmark remain future work. The next frozen-checkpoint workflow is documented in [hpc/NEXT_ROUND.md](../hpc/NEXT_ROUND.md).
 
 ## Reproduce
 

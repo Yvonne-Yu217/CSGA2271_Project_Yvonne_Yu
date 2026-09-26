@@ -1,43 +1,39 @@
-# Goal: Validate the proposal within a strict 24 GPU-hour budget
+# Goal: Validate the proposal globally, then decide whether to continue
 
-Updated: 2026-09-26, following the user's instruction to run the proposal first without consuming the full 300 GPU-hour course quota.
+Updated: 2026-09-26. The latest user instructions supersede earlier device restrictions.
 
-## Primary objective
+## First objective
 
-Implement and validate the core claims of `proposal/What_Does_the_Image_Add_Proposal.tex` within a hard budget of 24 GPU hours. Test the three research questions at a representative, reproducible scale with the proposal's main controls, essential ablations, and failure analysis. Do not silently expand to the full course quota. A valid negative result counts as evidence; an unimplemented or unrun experiment does not.
+Evaluate the original proposal's full set of claims against valid evidence, within the remaining authorized compute budget. Establish what works, what fails, and what remains untested. A credible negative result is a valid outcome. Do not require an MLP improvement, force a CVPR narrative, or silently count unrun experiments as complete.
 
-## Completion criteria
+The learned scorer currently trails inverse cosine on deterministic deletion: 77.22% versus 84.50% Acc@1; paired difference −7.28 percentage points, 95% image-bootstrap CI [−11.70, −3.33]. This is a mean of seed metrics, not a prediction ensemble. Natural-caption and SigLIP runs used separate training and do not establish frozen-model transfer.
 
-- Flickr30K Entities: grounded intervention builder, documented official image splits, deterministic/matched/natural-caption intervention sets, data-quality audit, and leakage checks.
-- Frozen CLIP scorer: ranking, locality and explicitly defined control objectives; cached features, reproducible configuration and checkpoints.
-- Baselines: random/area, inverse similarity, phrase matching, text-only/image-only/shuffled-image controls, patch decomposition, Grad-ECLIP, and CCI masking importance. Add a task-matched supervised omission baseline. CIEA adaptation remains conditional, as in the original proposal.
-- Evaluation: TIG, off-target stability, precisely defined target ranking and MRR, region localization evaluation, and omitted-phrase recoverability under controlled deletion. Report image-level confidence intervals and at least three training seeds.
-- Essential ablations: each loss, crop versus pooled patch features, intervention construction, and at least one encoder or transfer check if the measured budget allows.
-- Visual Genome: run a compact independent subset only if Flickr30K core results and feature extraction fit the 20-hour budget; otherwise record it as explicitly unverified rather than consuming quota blindly.
-- Final report: claim-to-evidence table, quantitative tables, qualitative maps, error taxonomy, compute ledger, reproducible commands, and Agent Log. Explicitly identify unsupported claims.
-- Push reproducible code, configurations, documentation and compact results to the existing GitHub repository; keep datasets, caches, credentials and bulky checkpoints out of Git.
+## Evidence and completion gates
 
-Optional finance and licensed WSJ experiments remain conditional on data access and remaining resources, consistent with the original proposal. The CVPR extension is a separate later research phase. An access-dependent exception must be disclosed and agreed with the user; it cannot silently count as a completed experiment.
+1. **Recover and correct evidence (CPU).** Recover HPC manifests, predictions, checkpoints, model metadata and final Slurm accounting. Preserve historical metrics; distinguish seed averages from ensembles, independent retraining from transfer, and similarity proxies from recoverability. Fix cache provenance and tie handling before new conclusions.
+2. **Validate the task.** Export and manually review 100 stratified intervention pairs. Record target fact granularity, whether it is visible and genuinely omitted, and which other regions change. Natural captions cannot assume every non-target region remains covered. Mark invalid/ambiguous cases; do not invent human annotations. Freeze a reviewed diagnostic subset before comparing methods.
+3. **Run the bounded follow-up.** Reuse deletion-trained checkpoints without optimization on matched/natural captions. Report same-caption absolute ranking, intervention-difference ranking, tie-aware metrics, three seeds, a separately identified prediction ensemble, paired image-bootstrap intervals and scale-normalized changes. The existing test set is exploratory after repeated inspection.
+4. **Decision gate.** If labels cannot support the operational definition, repair or replace the task. If strong similarity/phrase baselines remain best, finish a rigorous course comparison and failure analysis, or recommend changing direction. At most two motivated learned variants may be proposed after the validity gate; no unbounded tuning.
+5. **Conditional confirmation.** Only with a meaningful validation signal, preregister a new untouched image subset, strong direct semantic-coverage baselines, automatic-region visibility/recall controls, and an independent reader evaluation. Visual Genome transfer, independent semantic coverage, and a complete official attribution reproduction remain unverified. They cannot be marked complete from the current pilot.
+6. **Deliver.** Maintain corrected proposal, review, runnable staged experiment scripts, report, compute ledger and Agent Log; push code and compact evidence. Keep data, caches and checkpoints outside Git. Publication expansion has its own gated proposal.
 
-## Resource policy and order
+See `research/RESULTS_REVIEW_AND_NEXT_STEPS.md`, `research/CVPR_EXTENSION_PROPOSAL.md` and `hpc/NEXT_ROUND.md` for the decision tree and execution details.
 
-Use account `ds_ga_1006_001-2026fa`, but treat 24 GPU hours as the project hard cap for this phase. Use exactly one L4 (`g2-standard-12`) for formal runs; do not request A100 or multi-GPU jobs. Stop jobs before the cap and record `sacct` usage.
+## Compute budget and hardware
 
-Order: CPU data staging → L4 smoke test → Flickr30K core scorer and controls → essential ablations → one expensive baseline or compact transfer check → report. Reuse cached features and stop if the measured remaining budget cannot support a result. Do not spend the allocation on a Cartesian product of configurations.
+- Course quota is 300 GPU hours; it is **not** the phase authorization. The imported HPC record states a revised 24 GPU-hour cap; the earlier local conversation authorized 20. Reconcile the handoff and final `sacct` ledger before submission; if unresolved, use the lower 20-hour total. Count previously consumed allocations, concurrent jobs and GPU count. No automatic reset or quota extension.
+- The recorded 1.1267 GPU hours is a snapshot with a running job, not final usage. Next diagnostic work has an internal ceiling of **4 additional allocated GPU hours**, bounded further by the actual remaining authorized balance. This is a maximum, not a request to consume it.
+- Use available compatible hardware: L4, A100, or another suitable GPU. Do not wait for A100 as a requirement. Default to one GPU; batch size follows memory. Multi-GPU only if measured throughput and total allocation cost justify it within the same budget.
+- Prepare downloads, environment, semantic audit, CPU reports and commands before allocating a GPU. Use batch jobs to survive terminal disconnection. Cluster idle-reclamation behavior must be checked locally; utilization alone does not guarantee a session survives.
 
-HPC utilization is an execution constraint: do not leave allocated GPU or CPU nodes at persistently low utilization. Stage inputs before allocation, keep the device fed, emit frequent progress/utilization records, and promptly diagnose, restart, or cancel stalled jobs before the scheduler reclaims them. If a primary GPU run stalls, switch to a predeclared productive fallback such as feature caching, a baseline, an ablation, or evaluation; do not use synthetic burn loops merely to inflate utilization. If no useful task is ready, release the allocation. Cache and checkpoint reusable work so recovery does not repeat expensive computation.
+## Productive utilization is required
 
-## Current state
+Persistently low GPU utilization delays the project and must be investigated promptly. During steady GPU-ready work, target 70–90% utilization where the workload permits. These are internal diagnostic targets, not claimed cluster rules. Record device utilization, memory, timestamps and progress every 5 seconds. If utilization remains below 30% for two minutes, or progress stalls, check input loading, batching, CPU synchronization, I/O and memory pressure. Separate warmup, downloads and CPU-only intervals from compute-stage statistics.
 
-- The bounded Flickr30K Entities validation is implemented and has run end to end on one L4. The audited subset contains 350 images and 1,165 grounded intervention pairs with fixed 200/50/100 image splits.
-- CLIP deterministic, length-matched, and natural-caption interventions completed with three training seeds, image-level bootstrap confidence intervals, loss ablations, and random/area/inverse-similarity/phrase/text-only/image-only/shuffled-image/supervised controls.
-- Algorithm-adapted pooled-patch, region masking, CCI clustering, and Grad-ECLIP attribution completed. Absolute localization and omitted-phrase recoverability checks completed. SigLIP encoder transfer completed for all three interventions.
-- The main superiority claim is not supported at this scale: on deterministic deletion, rank+locality+control Acc@1 is 0.7722 versus 0.8450 for inverse cosine. The negative result and failure taxonomy are retained rather than hidden.
-- Visual Genome and a distinct automatic-region transfer benchmark remain explicitly unverified. They are not required for this bounded core result and were not added after the central hypothesis failed.
-- Reproducible code, compact metrics, qualitative figures, compute ledger, report, and Agent Log are prepared in the repository. Raw data, model caches, and bulky predictions remain excluded from Git.
+Maintain a finite queue of needed extraction/inference tasks. Cache reusable features, batch text/crops, prepare inputs on CPU, and checkpoint completed stages. A lightweight cached-feature scorer or bootstrap belongs on CPU if GPU work is too small. Necessary subagents may prepare code, audit outputs or stage independent work; the main agent controls submissions, shared outputs and cumulative budget. Never duplicate experiments just to raise utilization. Release the node when no useful in-scope GPU task is ready.
 
-## Exact text for the conversation goal
+## Proposed conversation goal text
 
-/goal 第一目标：在不超过 24 GPU hours 的硬预算内，完成当前 proposal 的核心验证。正式运行使用一张 L4（`g2-standard-12`），切换不增加预算。覆盖 Flickr30K Entities、三项研究问题、主要基线与负控、核心文本干预、必要消融、至少三次 seed（预算允许时）和置信区间；Visual Genome、SigLIP、自动区域与昂贵 attribution 只在剩余预算足够时执行，否则明确标记未验证。保存可复现实验、失败分析、Agent Log 和最终证据报告并推送 repo。完成原 proposal 的预算内验证后，再按独立 CVPR proposal 推进投稿级研究。一定要注意保持 GPU 占用，要不我们研究的数据都难以下载下来，必须时刻监测并保持占用。
+`/goal 第一目标：在剩余已授权预算内验证 proposal 全局内容，先审计现有结果与标签，再运行已准备好的冻结模型迁移和有效性实验，根据证据决定保留、收缩或更换方向，不强行证明原假设。使用任何可用且合适的 GPU，不限定 A100/L4；提前准备代码与数据，持续监测并优化有效 GPU 占用，必要时用 subagent 并行准备工作。保持预算账本，更新 proposal、实验计划、报告和 repo；CVPR 扩展必须通过独立决策门槛。`
 
-The repository goal and active conversation goal use the objective above.
+This file updates the repository goal. It does not assert that the conversation-level goal was changed; the available goal API cannot rewrite an existing goal's objective.

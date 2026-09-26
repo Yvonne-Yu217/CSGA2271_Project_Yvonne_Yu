@@ -2,6 +2,16 @@
 
 Research extension proposal — 26 September 2026
 
+## Decision update after the initial HPC results
+
+The original MLP superiority claim is unsupported: 77.22% versus 84.50% inverse-cosine deletion Acc@1; paired difference −7.28 percentage points, CI [−11.70, −3.33]. Natural-caption and SigLIP results were independently retrained, not frozen transfer. Semantic label validity and absolute-ranking tie handling remain unresolved. These findings do not justify automatically scaling the original method.
+
+**Gate 1:** complete artifact recovery, semantic audit and frozen-checkpoint diagnostics using `hpc/NEXT_ROUND.md`. **Gate 2:** demonstrate a meaningful failure of strong direct semantic-coverage baselines on reviewed validation data. If neither task validity nor an unsolved useful problem is established, conclude the rigorous course analysis or change direction. **Gate 3:** freeze an untouched confirmation set and a fixed-reader, equal-budget evaluation before larger experiments. No claim of CVPR readiness follows from finishing the pilot.
+
+Direction A below is conditional. Direction B may become a replacement project (budgeted acquisition of new correct facts), rather than an added module used to rescue the original story. Verify its novelty and annotation feasibility first. Direction C remains deferred. The immediately scheduled code implements Gate 1; later annotation, models and reader experiments are intentionally not represented as ready-to-run completed implementations.
+
+See `RESULTS_REVIEW_AND_NEXT_STEPS.md` for stop criteria and `../GOAL.md` for hardware flexibility, productive utilization and cumulative budget. CVPR is a conference; this document targets that research standard without implying submission readiness.
+
 ## Abstract
 
 Images contain facts that accompanying text may omit, partially express, or contradict. We propose to study grounded residual visual information at the level of region–fact pairs, and to evaluate whether a localized predictor identifies useful information that remains unavailable from text. The project will move beyond entity omission by separating visual support, textual entailment, and uncertainty, and by testing controlled text changes alongside visual evidence perturbations. The intended contribution is a rigorously audited benchmark and a method that improves budgeted information acquisition over strong coverage and grounding baselines. This is a research plan, not a claim of established novelty or a completed result.
