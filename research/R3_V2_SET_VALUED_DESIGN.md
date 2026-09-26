@@ -83,3 +83,11 @@ geometry, action family, proposal score and normalized cost. A separate audit
 verified finite/unit-normalized blocks, unique IDs, valid per-image offsets,
 family semantics, cost bounds and absence of outcome-label inputs. This cache
 prepares computation only; it is not evidence and does not open the human gate.
+
+The gate is executable rather than documentary. `prepare_r3_human_targets.py`
+requires both reviewer sheets to be complete and every disagreement to have a
+separate valid adjudication. It resolves the three atomic decisions (visual
+support, novelty, and same-mentioned-instance detail) to positive only when all
+are yes, negative when any is no, and unknown otherwise. At the current blank
+packet it exits with `human review gate closed: awaiting_reviews` and writes no
+target file.

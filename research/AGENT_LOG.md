@@ -276,3 +276,13 @@
 - Mechanical/leakage audit passed with no nonfinite values or outcome-like
   sources; per-image lists contain 3--8 actions. This is compute preparation,
   not training or evidence.
+
+## 2026-09-26 — Executable human training gate
+
+- Added a target builder that consumes only completed reviewer sheets, the
+  private identity manifest and separate human adjudications. It never reads
+  automated Qwen/Smol labels for target construction.
+- Positive requires human yes on support, novelty and same mentioned instance;
+  any no yields negative; remaining uncertainty stays unknown and is maskable.
+- Current blank packet was tested end to end: the builder exits nonzero with
+  `human review gate closed: awaiting_reviews` and creates no target JSONL.

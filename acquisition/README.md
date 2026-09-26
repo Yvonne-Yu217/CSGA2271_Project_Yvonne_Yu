@@ -184,6 +184,11 @@ PYTHONPATH=. python -m acquisition.export_r2_review \
 
 PYTHONPATH=. python -m acquisition.audit_r2_reviews \
   --packet acquisition/data/e0-r2-blind-review-100
+
+# This remains closed until both sheets and all adjudications are complete.
+PYTHONPATH=. python -m acquisition.prepare_r3_human_targets \
+  --packet acquisition/data/e0-r2-blind-review-100 \
+  --output acquisition/results/r3-v2-human-targets
 ```
 
 The current generated packet has 300 rows per reviewer and is deliberately

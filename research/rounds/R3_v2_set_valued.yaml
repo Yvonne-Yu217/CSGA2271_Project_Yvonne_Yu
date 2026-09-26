@@ -8,6 +8,8 @@ prior_failures:
   - R3-v0 pointwise SigLIP interaction ridge failed its uncertainty rule
   - R3-v1 explicit detector phrase interaction did not improve the same inspected proxy split
 human_gate: two independent R2 reviews, adjudication, and leakage/schema audit are required before training
+human_target_builder: acquisition/prepare_r3_human_targets.py
+current_gate_check: correctly refuses with human review gate closed awaiting_reviews and emits no labels
 prohibited: tuning or model selection on the old 67/14/19 proxy test or using automated semantic labels as primary targets
 development_split: image-grouped five-fold cross-validation, three fixed seeds
 primary_metric: human-valid selected-action success versus strongest same-input learned comparator

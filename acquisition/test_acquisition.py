@@ -13,6 +13,7 @@ from acquisition.metrics import (bootstrap_cluster, caption_necessity, expected_
                                  material_switch, pair_regret)
 from acquisition.observe_conditioned import cache_key as conditioned_cache_key
 from acquisition.planner_baseline import parse_choice
+from acquisition.prepare_r3_human_targets import action_target, resolved_vote
 from acquisition.screen_entailment import parse_label as parse_entailment
 from acquisition.screen_independent_visual import parse_independent_label
 from acquisition.screen_visual_support import parse_label as parse_visual_support
@@ -130,6 +131,15 @@ class AcquisitionTests(unittest.TestCase):
             original = model(candidates, contexts, mask)
             permuted = model(candidates[:, permutation], contexts, mask[:, permutation])
         self.assertTrue(torch.allclose(original[:, permutation], permuted, atol=1e-6))
+
+    def test_human_target_resolution_requires_adjudication(self):
+        self.assertEqual(resolved_vote("yes", "yes", ""), "yes")
+        self.assertEqual(resolved_vote("yes", "no", "uncertain"), "uncertain")
+        with self.assertRaises(ValueError):
+            resolved_vote("yes", "no", "")
+        self.assertEqual(action_target(["yes", "yes", "yes"]), "positive")
+        self.assertEqual(action_target(["yes", "no", "uncertain"]), "negative")
+        self.assertEqual(action_target(["yes", "yes", "uncertain"]), "unknown")
 
     def test_e1_e2_report_is_diagnostic_without_e0_and_strong_baseline(self):
         report = evaluate_bundle(self.root, "proposal_score", bootstrap_samples=200, seed=7)

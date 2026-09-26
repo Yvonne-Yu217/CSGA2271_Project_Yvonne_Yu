@@ -133,3 +133,9 @@ The corresponding label-free frozen feature store is complete and mechanically
 audited: 100 images, 500 context states and 643 entity/full/STOP actions with no
 outcome-label sources. It may be consumed only after the human gate; its
 existence is not selector evidence.
+
+The human-target builder enforces that gate in code. On the current blank
+packet it refuses with `awaiting_reviews` and emits no label file. After two
+complete independent sheets, disagreements must be separately adjudicated;
+uncertain components remain unknown rather than being forced positive or
+negative.
