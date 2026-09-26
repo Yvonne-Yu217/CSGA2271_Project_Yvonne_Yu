@@ -48,9 +48,9 @@ Extend the existing schema instead of bypassing its gold/public separation. The 
 
 New cache keys must include image SHA, context hash, candidate geometry/instance IDs, global-view configuration, model and processor revision, prompt hash, decoding settings and output schema revision. In R2, include the initial completion B's content/hash, generator revision and prompt, and pass the identical T+B state to every second-step observer, selector and fact filter. B is a prediction, not gold; its errors remain scored. A context-independent caption cache cannot be silently relabeled as context-conditioned output.
 
-## P2: single-L4 productive execution queue
+## P2: single-GPU productive execution queue
 
-All project GPU work stays on L4. Start with one `g2-standard-12` device. Do not manually cancel or release any existing allocation.
+Use any currently available suitable GPU, starting with one device and recording its exact type. Adapt each workload to measured memory and throughput. Do not manually cancel or release any existing allocation.
 
 | Queue stage | Real artifact produced | Concurrent preparation |
 |---|---|---|
@@ -120,7 +120,7 @@ Fresh confirmation data does not by itself control repeated testing. Before the 
 ## Handoff invariants
 
 - Current stage is CV validation, not finance and not a successful E3 method.
-- GPU type remains L4. No automatic device switch.
+- Any suitable available GPU may be used; record the exact device and configuration for every run.
 - Observe utilization/progress every five seconds during HPC execution; investigate <30% for two minutes or stalled progress. Aim for high sustained useful throughput, not artificial utilization.
 - Subagents prepare independent tasks concurrently; a single owner controls GPU submissions and total spend.
 - Preserve allocations, sessions, caches and checkpoints. No manual `scancel`, release or allocation restart.

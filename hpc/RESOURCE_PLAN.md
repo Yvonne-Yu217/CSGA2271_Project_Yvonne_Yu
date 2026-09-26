@@ -1,10 +1,10 @@
-# L4 resource and productive-execution plan
+# GPU resource and productive-execution plan
 
-Updated 2026-09-26 after HPC commit `2f96409` and the user's fixed-L4 instruction. Authority: [GOAL.md](../GOAL.md). The old pilot's resource envelopes and device alternatives do not govern this plan.
+Updated 2026-09-26 after the user authorized any suitable available GPU. Authority: [GOAL.md](../GOAL.md). The old pilot's resource envelopes do not govern this plan.
 
-## Hardware decision: fixed L4
+## Hardware decision: use available suitable accelerators
 
-**All subsequent project GPU experiments use NVIDIA L4. Start with one L4 on `g2-standard-12`.** Adapt model size, precision, resolution, batch size and training strategy to this choice. There is no automatic device-type upgrade or availability-based substitution.
+**Use any currently available suitable GPU, including NVIDIA L4 or A100, and start with one device.** Record the exact device for every run and adapt model size, precision, resolution, batch size and training strategy to measured memory and throughput. A device change must not change the scientific protocol silently.
 
 The [NVIDIA L4 specifications](https://www.nvidia.com/en-us/data-center/l4/) list 24GB memory and 300GB/s memory bandwidth. Node-visible usable memory and other processes must be measured on the actual allocation.
 
@@ -19,7 +19,7 @@ The [NVIDIA L4 specifications](https://www.nvidia.com/en-us/data-center/l4/) lis
 
 Sources: [E0–E2 progress](../research/E0_E2_PROGRESS.md), [agent log](../research/AGENT_LOG.md), [focus preflight](../research/FOCUS_AMBIGUITY_PREFLIGHT.md). These are historical measurements, not profiling of the redesigned global-plus-region method. Torch allocated memory excludes some device/runtime use and reserved buffers; do not equate it with total VRAM usage.
 
-**Conclusion:** L4 is sufficient for the already-run 3B inference and is a justified platform for the next controlled diagnostics. The new workloads and later training must be made to fit and profiled; their exact speed and memory are not yet known.
+**Conclusion:** L4 is sufficient for the already-run 3B inference, while A100 and other suitable available GPUs may accelerate the next controlled diagnostics. New workloads and later training must be profiled on the actual device; their exact speed and memory are not yet known.
 
 ## Configuration for the next round
 
@@ -29,7 +29,7 @@ Sources: [E0–E2 progress](../research/E0_E2_PROGRESS.md), [agent log](../resea
 - Profile a finite batch sweep such as 1/2/4/8 on real representative development inputs; stop increasing when memory/latency/throughput worsens. Choose the highest useful throughput with safe headroom, initially leaving approximately 10–15% of device memory available and verifying no upward drift. This is a tuning target, not a guarantee.
 - Bucket similar visual-token and text lengths to limit padding. Predecode/prefetch inputs on CPU, cache crops/features, and overlap preparation with inference where supported.
 - Select efficient attention only if the pinned environment supports it and output behavior is checked in the authorized implementation-validation stage. Do not break the working environment during an allocation to chase a theoretical speedup.
-- For later learned policies, start with cached-feature cross-attention or small adapters; profile activations, optimizer state and sequence lengths before training. If a design is too large, revise model/configuration on L4 and document its limitations.
+- For later learned policies, start with cached-feature cross-attention or small adapters; profile activations, optimizer state and sequence lengths before training. If a design is too large, revise the model/configuration or use another available suitable GPU and document its limitations.
 - Begin with one GPU-owning process. Do not launch multiple heavy models merely because several subagents are available. Additional concurrent processes require measured device headroom and a net gain in completed useful work.
 
 ## Continuous utilization and progress monitoring

@@ -4,11 +4,11 @@ Text-conditioned localization of complementary visual information — CSCI-GA 22
 
 **Milestone order: CV validation → course-project ready → CVPR ready → downstream application.** Finance follows core CV development: first grounded event understanding, then conditional market prediction. The current authoritative proposal is `research/FOLLOWUP_PROPOSAL.md`; downstream planning does not change the immediate R0–R2 priority (repair and validate E0–E2).
 
-**Current priority: retain the complementary-information question and redesign the failed method.** The latest fixed-grid/caption-independent crop pipeline lost to caption-conditioned full-image completion; that comparison does not isolate segmentation or invalidate the research objective. Next isolate grounding, text conditioning and global context, then test residual facts beyond strong full-image baselines. Follow the diagnosis → redesign → development → independent-confirmation loop until positive evidence and novelty meet the goal. Project GPU work is fixed to L4, with continuous productive-utilization monitoring and no manual allocation release.
+**Current priority: retain the complementary-information question and redesign the failed method.** The latest fixed-grid/caption-independent crop pipeline lost to caption-conditioned full-image completion; that comparison does not isolate segmentation or invalidate the research objective. Next isolate grounding, text conditioning and global context, then test residual facts beyond strong full-image baselines. Follow the diagnosis → redesign → development → independent-confirmation loop until positive evidence and novelty meet the goal. Use any suitable available GPU, with continuous productive-utilization monitoring and no manual allocation release.
 
 - [Current proposal and course-to-publication experiment design](research/FOLLOWUP_PROPOSAL.md)
 - [Latest failure audit, redesign experiments and HPC handoff](research/METHOD_REDESIGN_PLAN.md)
-- [Fixed-L4 resource and utilization plan](hpc/RESOURCE_PLAN.md)
+- [GPU resource and utilization plan](hpc/RESOURCE_PLAN.md)
 - [Historical frozen-transfer literature/repo review](research/DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md)
 - [Archived focus-ambiguity preflight](research/FOCUS_AMBIGUITY_PREFLIGHT.md)
 - [Archived focus-ambiguity reproduction commands](focus_ambiguity/README.md)

@@ -3,7 +3,7 @@
 ## HPC utilization policy
 
 - Follow the cumulative budget and handoff reconciliation in `GOAL.md`; never treat the 300-hour course quota as authorization.
-- The project is fixed to NVIDIA L4 under the user's latest instruction. Start with one L4 (`g2-standard-12`) and adapt model size, resolution, batching and staged loading to it. Do not switch GPU type. Stage datasets, model weights, environments, and CPU preprocessing before requesting it.
+- Use any currently available suitable GPU, including L4 or A100. Start with one device, record its type, and adapt model size, resolution, batching and staged loading to measured capacity and throughput. Stage datasets, model weights, environments, and CPU preprocessing before requesting compute.
 - Do not leave an allocated GPU or CPU node idle or at persistently low utilization. Keep the accelerator fed with suitable batching, workers, caching, and overlap between input preparation and inference.
 - Maintain a queue of productive fallback GPU tasks (feature caching, smoke tests, baselines, ablations, or evaluation) and switch to the next valid task if the primary run stalls. Every fallback must produce an artifact needed by the stated experiment.
 - Never run synthetic burn loops or unrelated workloads merely to inflate utilization. Keep a finite queue of productive tasks, but **do not manually release, cancel, or `scancel` any CPU/GPU allocation**. The user's latest instruction is to let the server reclaim allocations itself because manual release interrupts the working session.

@@ -64,16 +64,16 @@ Fresh holdouts alone do not control repeated-confirmation false positives. Befor
 - When no valid GPU-ready work exists, log the dependency, advance CPU/preparation work and preserve the allocation for server-managed reclamation. Do not invent work or silently cross a scientific gate.
 - No live HPC connection or utilization trace was inspected in this local documentation turn. These are execution requirements, not a claim that a remote GPU is currently busy.
 
-## Fixed L4 execution and accounting
+## Available-GPU execution and accounting
 
-**The project is fixed to NVIDIA L4, starting with one L4 (`g2-standard-12`), per the user's latest instruction.** Keep subsequent methods and experiments within this hardware choice. Previous acquisition runs used about 7.4–7.7 GiB peak torch allocation; a separate Qwen ambiguity workload reached 10.79 GiB. These are workload-specific measurements, not a bound for the new global-plus-region setup or total device memory.
+**Use any currently available suitable GPU, including L4 or A100, and finish the required experiments.** Start with one device, record its exact type, and adapt model size, resolution, batching and staged loading to measured capacity and throughput. Previous L4 acquisition runs used about 7.4–7.7 GiB peak torch allocation; a separate Qwen ambiguity workload reached 10.79 GiB. These are workload-specific measurements, not a bound for the new global-plus-region setup or another GPU type.
 
-Profile actual processed visual tokens, batch size, peak allocated/reserved/device memory, valid outputs/second and total stage time. Adapt model size, resolution, batching, staged model loading and supported efficient training to L4. If a configuration does not fit, redesign it and disclose any resulting scientific limitation. Do not change GPU type or cancel an allocation to solve a configuration issue.
+Profile actual processed visual tokens, batch size, peak allocated/reserved/device memory, valid outputs/second and total stage time on every device used. If a configuration does not fit, adapt it or use another available GPU and disclose any resulting scientific limitation. Do not cancel an allocation merely to change GPU type.
 
 The research design is not constrained by historical pilot-hour envelopes. Actual spending still requires current authorized balance, cumulative `sacct` reconciliation and allocation-aware accounting; **300 course GPU-hours is not authorization to spend them all**. Old 20/24-hour figures and the 2.0333-hour snapshot are historical, not a verified current balance. No new compute is submitted by this documentation update.
 
 ## Suggested conversation goal
 
-`/goal 保持“给定已有文本，提取图片能补充的正确且有用事实”这一主线，按 CV 验证 → course-project ready → CVPR ready → downstream application 推进。把失败归因到具体方法和证据，先公平比较区域生成、caption 条件、全局上下文和事实评估，再学习相对强全图基线的新增收益。若方法失败，必须保存结果、分析错误、查阅论文与官方 repo、自主提出并预先记录新实验设计，在授权资源内继续迭代直到获得独立确认的正向效果与明确新意；不能反复刷测试集或包装假阳性。项目固定使用 L4，从单卡开始，后续模型、分辨率、训练与 batch 均适配 L4。GPU 有效占用是每次执行和交接的重点：每 5 秒监控，及时诊断低利用率，提前准备代码数据和有限必要任务队列，必要时安排 subagent 并发准备，统一提交记账。不得随意取消、释放或重启 CPU/GPU 分配，保留缓存检查点与会话，由服务器管理回收。`
+`/goal 保持“给定已有文本，提取图片能补充的正确且有用事实”这一主线，按 CV 验证 → course-project ready → CVPR ready → downstream application 推进。把失败归因到具体方法和证据，先公平比较区域生成、caption 条件、全局上下文和事实评估，再学习相对强全图基线的新增收益。若方法失败，必须保存结果、分析错误、查阅论文与官方 repo、自主提出并预先记录新实验设计，在授权资源内继续迭代直到获得独立确认的正向效果与明确新意；不能反复刷测试集或包装假阳性。可使用任何当前可用且适合的 GPU（包括 L4 或 A100），从单卡开始，按实际硬件调整模型、分辨率、训练与 batch，并把必要实验跑完。GPU 有效占用是每次执行和交接的重点：每 5 秒监控，及时诊断低利用率，提前准备代码数据和有限必要任务队列，必要时安排 subagent 并发准备，统一提交记账。不得随意取消、释放或重启 CPU/GPU 分配，保留缓存检查点与会话，由服务器管理回收。`
 
 This file and its suggested command update the repository goal; no conversation-level goal API rewrite is claimed.
