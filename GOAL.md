@@ -49,3 +49,13 @@ Prepare and push runnable stage code, dependencies, inputs and resume commands b
 `/goal 按 CV 核心验证 → course-project ready → CVPR ready → downstream application 的顺序推进，主次分明。首先验证给定已有描述时，能否学习选择最能补充正确视觉事实的观察，重点是已提及实体的未覆盖属性/关系。先完成可靠数据、强 baseline、oracle 和上下文必要性验证，再训练实际收益选择器并做独立测试，以可信正向效果、人工核验和明确新意达到课程标准；随后完成跨域/跨模型、机制与质量成本证据，推进 CVPR 级研究。此后开展 finance 事件理解；只有数据与结果支持时才研究市场预测，不能用金融相关性替代 CV 方法验证。研究设计不受旧试验小时数限制，使用任何合适的可用 GPU，提前完成代码与数据准备，保持有效 GPU 占用并及时诊断低利用率，必要时用 subagent 准备独立任务；统一提交、记账、缓存和检查点，不随意取消或释放 CPU/GPU 分配，不随意删除资源，由服务器管理回收并保持会话连续。若核心方向无提升空间或无实质新意就换题，绝不强行包装正结果。`
 
 This updates the repository objective; it does not claim the conversation-level goal was rewritten through an API.
+
+## Current implementation state (2026-09-26)
+
+The E0–E2 infrastructure and 100-image staging/frozen-observer caches now exist;
+see `research/E0_E2_PROGRESS.md`. This is engineering progress only. E0 has no
+completed pair of independent human annotations or adjudication and therefore
+has **not passed**. E1/E2 have not been evaluated, and selector training remains
+gated. A frozen full-image prompted-planner cache has also completed, but cannot
+be scored before gold exists. No current artifact establishes a positive result
+or novelty.

@@ -1,5 +1,16 @@
 # Agent log
 
+## 2026-09-26 — E0–E2 infrastructure, staging, and frozen model caches
+
+- Implemented the caption-conditioned visual-acquisition data boundary and strict schema. Public selectors cannot see context condition metadata, facts, visibility, observer claims, or derived utility. Atomic context/fact and candidate/fact matrices must be complete, twice reviewed, adjudicated, and image-consistent; STOP and observation semantics are hard-checked.
+- Staged 100 new source-ID-disjoint Flickr30K images, 500 natural captions, 1,500 fixed actions, and 1,768 source evidence rows. These are review materials, not gold. No old-pilot overlap or perceptual-duplicate warning was found.
+- Froze Qwen2.5-VL-3B-Instruct snapshot `66285546d2b821cf421d4f5eb2576359d3770cd3`; cached 1,400 generated crop observations plus 100 STOP records in 455.72 seconds on one L4, peak torch allocation 7.72 GiB. Outputs are unreviewed and include format/truncation flags and visible hallucination risk.
+- Cached 7,000 same-image CLIP diagnostic scores and completed a scientifically necessary frozen Qwen full-image prompted-planner cache: 500/500 valid parsed choices in 116.11 seconds, peak 7.67 GiB torch allocation, including 85 STOP choices. Neither reads gold or constitutes E1 evidence.
+- Split human review into fact/instance establishment followed by canonical-ID context/claim labeling. Existing earlier one-stage packets must not be used as valid annotations.
+- Tightened E0 gating per label family and excluded synthetic fixtures. Tightened E1/E2 so built-in heuristics are diagnostic only, absent error evidence cannot pass, saturated STOP uses the frozen baseline, and synthetic fixtures cannot claim success.
+- Added counterexample tests; 12 acquisition tests, Python compilation, and diff whitespace checks passed before final integration. E0 is **not passed**: no two-person human labels/adjudication exist. E1/E2 and all later milestones remain unrun.
+- Preserved live allocation job 1979 without manual cancellation or release. GPU work is real model inference only; the server remains responsible for reclamation.
+
 ## 2026-09-26 — Milestone priorities and conditional finance downstream
 
 - Updated GOAL.md and the authoritative follow-up proposal to the user's explicit order: CV validation, course-project readiness, CVPR readiness, then downstream application. Immediate work remains E0–E2; finance cannot substitute for core novelty or independent positive CV evidence.

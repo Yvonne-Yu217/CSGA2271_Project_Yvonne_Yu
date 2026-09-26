@@ -1,0 +1,165 @@
+import json
+import tempfile
+import unittest
+from pathlib import Path
+
+from acquisition.evaluate import evaluate_bundle
+from acquisition.fixture import write_fixture
+from acquisition.metrics import bootstrap_cluster, caption_necessity, material_switch, pair_regret
+from acquisition.schema import (
+    GoldStore, PublicStore, SchemaError, derive_action_labels, observation_cache_key,
+    validate_bundle,
+)
+
+
+class AcquisitionTests(unittest.TestCase):
+    def setUp(self):
+        self.temp = tempfile.TemporaryDirectory()
+        self.root = write_fixture(Path(self.temp.name) / "bundle")
+        public = PublicStore(self.root)
+        self.context = {row["initial_caption"]: row["context_id"] for row in public.contexts.values()}
+        self.candidate = {(row["image_id"], tuple(map(tuple, row["boxes"]))): row["candidate_id"]
+                          for row in public.candidates.values()}
+        self.image = {Path(row["image_path"]).stem: row["image_id"] for row in public.images.values()}
+
+    def tearDown(self):
+        self.temp.cleanup()
+
+    def test_fixture_audits_and_atomic_actions_rederive(self):
+        report = validate_bundle(self.root)
+        self.assertEqual(report["status"], "pass", report["errors"])
+        public, gold = PublicStore(self.root), GoldStore(self.root)
+        derived = derive_action_labels(public, gold)
+        supplied = {(row["context_id"], row["candidate_id"]):
+                    {key: value for key, value in row.items() if key != "_source_line"}
+                    for row in gold.tables["action_labels"]}
+        self.assertEqual(derived, supplied)
+        sparse = self.context["A person rides a bicycle."]
+        enriched = self.context["A person rides with a child behind them."]
+        rear = self.candidate[(self.image["im1"], ((0, 5, 10, 10),))]
+        self.assertEqual(derived[(sparse, rear)]["new_supported_fact_ids"],
+                         ["f1_child", "f1_rear"])
+        self.assertEqual(derived[(enriched, rear)]["new_supported_fact_ids"], [])
+
+    def test_selector_state_never_contains_gold_or_unexecuted_observations(self):
+        public = PublicStore(self.root)
+        sparse = self.context["A person rides a bicycle."]
+        clothes = self.candidate[(self.image["im1"], ((0, 0, 5, 5),))]
+        other = self.candidate[(self.image["im2"], ((0, 0, 5, 10),))]
+        state = public.selector_state(sparse, [clothes])
+        rendered = json.dumps(state, sort_keys=True)
+        for forbidden in ("fact_id", "entity_id", "new_supported", "utility", "f1_red"):
+            self.assertNotIn(forbidden, rendered)
+        self.assertEqual([row["candidate_id"] for row in state["history"]], [clothes])
+        self.assertNotIn("The rider wears red", json.dumps(
+            public.selector_state(sparse), sort_keys=True))
+        with self.assertRaises(SchemaError):
+            public.selector_state(sparse, [other])
+
+    def test_public_gold_key_is_hard_failure(self):
+        path = self.root / "public" / "contexts.jsonl"
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        rows[0]["target_fact_id"] = "f1_red"
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        report = validate_bundle(self.root)
+        self.assertEqual(report["status"], "fail")
+        self.assertIn("gold-like public key", report["errors"][0])
+
+    def test_duplicate_group_cross_split_is_hard_failure(self):
+        path = self.root / "public" / "images.jsonl"
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        rows[1]["duplicate_group_id"] = rows[0]["duplicate_group_id"]
+        rows[1]["split"] = "test"
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        report = validate_bundle(self.root)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("crosses splits" in error for error in report["errors"]))
+
+    def test_cache_key_ignores_context_and_gold(self):
+        public = PublicStore(self.root)
+        image = public.images[self.image["im1"]]
+        candidate = public.candidates[self.candidate[(self.image["im1"], ((0, 0, 5, 5),))]]
+        key = observation_cache_key(image["image_sha256"], candidate, "obs-v1", "prompt-v1")
+        self.assertEqual(key, observation_cache_key(
+            image["image_sha256"], candidate, "obs-v1", "prompt-v1"))
+        self.assertNotEqual(key, observation_cache_key(
+            image["image_sha256"], candidate, "obs-v2", "prompt-v1"))
+
+    def test_e1_e2_report_is_diagnostic_without_e0_and_strong_baseline(self):
+        report = evaluate_bundle(self.root, "proposal_score", bootstrap_samples=200, seed=7)
+        self.assertEqual(report["protocol"]["frozen_baseline_method"], "proposal_score")
+        self.assertGreater(report["e1"]["methods"]["recognition_oracle"]
+                           ["delta_coverage"]["mean"],
+                           report["e1"]["methods"]["proposal_score"]
+                           ["delta_coverage"]["mean"])
+        self.assertGreater(report["e2"]["caption_necessity_gap"]["mean"], 0)
+        self.assertEqual(report["e2"]["paraphrase_gold_action_regret_data_check"]["mean"], 0)
+        self.assertFalse(report["protocol"]["evidence_eligible"])
+        self.assertFalse(report["e1"]["gate_pass"])
+        self.assertFalse(report["e2"]["gate_pass"])
+
+    def test_missing_atomic_matrix_row_is_hard_failure(self):
+        path = self.root / "gold" / "context_fact_labels.jsonl"
+        rows = path.read_text().splitlines()
+        path.write_text("\n".join(rows[:-1]) + "\n")
+        report = validate_bundle(self.root)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("exactly cover" in error for error in report["errors"]))
+
+    def test_single_vote_and_unadjudicated_label_are_hard_failures(self):
+        path = self.root / "gold" / "candidate_fact_labels.jsonl"
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        rows[0]["annotator_votes"] = rows[0]["annotator_votes"][:1]
+        rows[0]["adjudication"] = None
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        report = validate_bundle(self.root)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("two independent" in error for error in report["errors"]))
+
+    def test_public_context_has_no_experimental_condition(self):
+        public = PublicStore(self.root)
+        rendered = json.dumps(public.tables["contexts"])
+        self.assertNotIn("context_kind", rendered)
+        self.assertNotIn("reference_context_id", rendered)
+
+    def test_semantic_public_identifier_is_hard_failure(self):
+        path = self.root / "public" / "contexts.jsonl"
+        rows = [json.loads(line) for line in path.read_text().splitlines()]
+        rows[0]["context_id"] = "ctx_sparse_caption"
+        path.write_text("".join(json.dumps(row) + "\n" for row in rows))
+        report = validate_bundle(self.root)
+        self.assertEqual(report["status"], "fail")
+        self.assertTrue(any("opaque hashed" in error for error in report["errors"]))
+
+    def test_duplicate_observation_and_repeated_history_are_hard_failures(self):
+        path = self.root / "public" / "observations.jsonl"
+        lines = path.read_text().splitlines()
+        path.write_text("\n".join(lines + [lines[0]]) + "\n")
+        self.assertEqual(validate_bundle(self.root)["status"], "fail")
+
+    def test_caption_metrics_are_tie_aware_and_order_invariant(self):
+        scores = {
+            "a": {"x": 0.4, "y": 0.2, "stop": 0.0},
+            "b": {"x": 0.0, "y": 0.2, "stop": 0.0},
+        }
+        gap = caption_necessity(scores)
+        self.assertAlmostEqual(gap["caption_necessity_gap"], 0.1)
+        self.assertTrue(material_switch(scores["a"], scores["b"], epsilon=0.01,
+                                        material_loss=0.05))
+        self.assertEqual(pair_regret({"x": 0.2, "y": 0.2}, {"x": 0.3, "y": 0.3}), 0)
+        reversed_scores = {context: dict(reversed(list(values.items())))
+                           for context, values in scores.items()}
+        self.assertEqual(caption_necessity(scores), caption_necessity(reversed_scores))
+
+    def test_bootstrap_resamples_duplicate_groups_and_is_reproducible(self):
+        a = bootstrap_cluster([0.0] * 20 + [1.0], ["one"] * 20 + ["two"],
+                              samples=500, seed=11)
+        b = bootstrap_cluster([0.0] * 20 + [1.0], ["one"] * 20 + ["two"],
+                              samples=500, seed=11)
+        self.assertEqual(a, b)
+        self.assertEqual(a["clusters"], 2)
+        self.assertAlmostEqual(a["mean"], 0.5)
+
+
+if __name__ == "__main__":
+    unittest.main()

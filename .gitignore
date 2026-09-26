@@ -28,5 +28,7 @@ pilot/results/prepare-*.log
 *.partial
 slurm-*.out
 .venv/
+acquisition/data/
+acquisition/results/
 .env
 .env.*
