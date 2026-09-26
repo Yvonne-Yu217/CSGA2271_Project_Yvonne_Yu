@@ -221,7 +221,8 @@ The gate selects **finish the rigorous course comparison and repair or replace t
 | 1971 | g2-standard-12 | 41 | 0.0114 | COMPLETED |
 | 1972 | g2-standard-12 | 683 | 0.1897 | CANCELLED by 4645820 |
 | 1973 | g2-standard-12 | 304 | 0.0844 | CANCELLED by 4645820 |
-| 1974 | g2-standard-12 | 1427 | 0.3964 | RUNNING |
+| 1974 | g2-standard-12 | 1478 | 0.4106 | CANCELLED by 4645820 |
+| 1975 | g2-standard-12 | 748 | 0.2078 | RUNNING |
 
 ## Utilization monitoring
 
@@ -232,7 +233,7 @@ The gate selects **finish the rigorous course comparison and repair or replace t
 | faithfulness_l4 | 20 | 3.9% | 73% | 10.0% |
 | frozen_followup | 8 | 11.6% | 91% | 25.0% |
 
-Recorded allocation total at report generation: `1.8114` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The ledger is a generation-time snapshot; final job state and cumulative usage must be recovered from sacct before new allocation.
+Recorded allocation total at report generation: `2.0333` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The currently running notebook allocation is server-managed under the latest user directive and will not be manually canceled; its eventual final state and elapsed time remain recoverable from sacct.
 
 ## Reproduction
 

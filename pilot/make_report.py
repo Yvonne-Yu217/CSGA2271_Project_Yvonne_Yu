@@ -302,7 +302,7 @@ def main():
         maximum = '-' if value['max_gpu_utilization_percent'] is None else f"{value['max_gpu_utilization_percent']}%"
         nonzero = '-' if value['nonzero_sample_fraction'] is None else f"{100 * value['nonzero_sample_fraction']:.1f}%"
         lines.append(f"| {name} | {value['samples']} | {mean} | {maximum} | {nonzero} |")
-    lines += ['', f"Recorded allocation total at report generation: `{sum(row.get('gpu_hours', 0) for row in compute):.4f}` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The ledger is a generation-time snapshot; final job state and cumulative usage must be recovered from sacct before new allocation.", '',
+    lines += ['', f"Recorded allocation total at report generation: `{sum(row.get('gpu_hours', 0) for row in compute):.4f}` GPU-hours. This snapshot is not a final authorization balance; reconcile final cumulative usage under GOAL.md before submission. The currently running notebook allocation is server-managed under the latest user directive and will not be manually canceled; its eventual final state and elapsed time remain recoverable from sacct.", '',
               '## Reproduction', '', '```sh',
               'python3 -u pilot/fetch_annotations.py',
               'python3 -u pilot/prepare.py --counts 200,50,100',

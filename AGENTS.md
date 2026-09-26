@@ -6,9 +6,9 @@
 - Use any available compatible GPU, including L4 or A100; neither is mandatory. Prefer one GPU unless measured throughput justifies more within the same budget. Stage datasets, model weights, environments, and CPU preprocessing before requesting it.
 - Do not leave an allocated GPU or CPU node idle or at persistently low utilization. Keep the accelerator fed with suitable batching, workers, caching, and overlap between input preparation and inference.
 - Maintain a queue of productive fallback GPU tasks (feature caching, smoke tests, baselines, ablations, or evaluation) and switch to the next valid task if the primary run stalls. Every fallback must produce an artifact needed by the stated experiment.
-- Never run synthetic burn loops or unrelated workloads merely to inflate utilization. If no productive in-scope task is ready, release the allocation immediately and resume after staging is complete.
+- Never run synthetic burn loops or unrelated workloads merely to inflate utilization. Keep a finite queue of productive tasks, but **do not manually release, cancel, or `scancel` any CPU/GPU allocation**. The user's latest instruction is to let the server reclaim allocations itself because manual release interrupts the working session.
 - Emit frequent progress and utilization records for long jobs. Monitor `nvidia-smi`, CPU utilization, job state, elapsed time, and the experiment log after submission.
-- If utilization stays unexpectedly low, diagnose promptly. Cancel or restart a stalled/idle job rather than waiting for the scheduler to reclaim it.
+- If utilization stays unexpectedly low, diagnose promptly and move to another useful in-scope task when one is ready. Do not cancel or restart the allocation; preserve checkpoints and let the scheduler handle reclamation.
 - Checkpoint and cache reusable work so a preempted or cancelled job can resume without repeating expensive computation.
 - Record measured Slurm usage and utilization issues in the compute ledger and `research/AGENT_LOG.md`.
 - Sample utilization and progress every 5 seconds. During steady GPU-ready work, target 70–90% where feasible; diagnose <30% for two minutes or stalled progress. These are internal targets, not verified cluster eviction rules.

@@ -2,6 +2,9 @@
 
 ## 2026-09-26 — Frozen transfer, semantic review, and decision gate
 
+- Latest user override after the follow-up: never manually release, cancel, or `scancel` CPU/GPU allocations because doing so interrupts the task session; the server handles reclamation. This supersedes earlier project-memory advice to release idle nodes. Productive work remains preferred and synthetic load remains prohibited.
+- Job 1975 is therefore left running for server-managed reclamation. Its elapsed time is recorded only as a generation-time ledger snapshot; no artificial or duplicate GPU task was started after the experimental decision gate closed.
+
 - Recovered the persistent formal artifacts and ran `pilot/next_round.py preflight` against the deletion source. It verified split separation, staged images, checkpoint dimensions, hashes, cached encoder identity, and emitted a 100-row stratified semantic-audit sample. The legacy training-time encoder revision remains unprovable and is disclosed.
 - Ran `pilot/visibility_audit.py`: among 342 unique historical regions, 190 are fully visible in the center crop, 141 partially visible, and 11 invisible; 19 require the historical nearest-patch fallback. This invalidates an unqualified crop-versus-patch comparison.
 - Ran one bounded frozen inference pass on L4 job 1972. All 925 pairs were encoded jointly; the same three deletion-trained checkpoints produced predictions for 337 deletion, 337 matched, and 251 natural-caption pairs without retraining. Five-second monitoring captured a 91% utilization peak. Job 1972 was canceled after GPU work and CPU summary completed; final elapsed time was 683 seconds.

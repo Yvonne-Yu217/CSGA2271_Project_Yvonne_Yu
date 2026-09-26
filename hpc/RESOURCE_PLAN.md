@@ -21,12 +21,12 @@ The course quota of 300 GPU hours must not be used as the project budget. The im
 
 1. CPU: recover artifacts, preflight local model/data/checkpoints, export semantic review, resolve reporting caveats and finalize commands.
 2. GPU only as needed: cache missing embeddings and infer from frozen deletion-trained checkpoints. Use existing compatible caches when available. One GPU is sufficient; adapt batch size to its memory.
-3. CPU: bootstrap, normalization, tables and decision report. Do not retain GPU allocation for manual review or report writing.
+3. CPU: bootstrap, normalization, tables and decision report. Do not request an extra GPU allocation for manual review or report writing; any allocation already attached to the working session remains server-managed.
 4. Stop if evidence is invalid or no meaningful progress is possible. Do not launch model variants, Visual Genome or new direction experiments before their decision gate.
 
-P0–P2 are complete. Job 1972 performed the frozen inference in 683 allocated seconds and was released after output generation; the five-second trace captured a 91% utilization peak. The semantic gate failed (44 valid / 53 invalid / 3 uncertain in a Codex visual diagnostic, with zero human-confirmed rows), so stage 4 applies: no additional GPU experiment is currently authorized. Notebook allocations created for CPU reporting are released rather than filled with duplicate work.
+P0–P2 are complete. Job 1972 performed the frozen inference in 683 allocated seconds and was canceled after output generation under the earlier policy; the five-second trace captured a 91% utilization peak. The semantic gate failed (44 valid / 53 invalid / 3 uncertain in a Codex visual diagnostic, with zero human-confirmed rows), so stage 4 applies: no additional GPU experiment is currently authorized. Under the latest user instruction, later notebook allocations remain server-managed and are neither manually released nor filled with duplicate work.
 
-For GPU-ready stages, seek 70–90% utilization where feasible, monitor every 5 seconds, and diagnose sustained <30% for two minutes or missing progress. These thresholds are internal targets, not scheduler rules. Improve batching/workers/I/O, move small CPU work off GPU allocations, or release the node. Keep useful fallback tasks ready, never synthetic load. Subagents may prepare independent work; one owner controls submissions and budget.
+For GPU-ready stages, seek 70–90% utilization where feasible, monitor every 5 seconds, and diagnose sustained <30% for two minutes or missing progress. These thresholds are internal targets, not scheduler rules. Improve batching/workers/I/O and keep useful fallback tasks ready, never synthetic load. Do not manually release or cancel CPU/GPU allocations; server-managed reclamation is the latest user requirement. Subagents may prepare independent work; one owner controls submissions and budget.
 
 ## Original proposal coverage
 

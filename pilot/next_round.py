@@ -233,7 +233,7 @@ def gpu(args):
               'cumulative_seconds': time.time() - started})
         print(f'{field}: predictions saved for {len(selected)} pairs; no training performed', flush=True)
     cache.close()
-    print('GPU work complete. Release allocation; run summarize on CPU.', flush=True)
+    print('GPU work complete. Run summarize on CPU; do not manually release the allocation.', flush=True)
 
 
 def rank_metrics(values, np):
