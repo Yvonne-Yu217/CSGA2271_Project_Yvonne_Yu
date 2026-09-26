@@ -1,0 +1,27 @@
+round_id: R1-v1
+status: predeclared_development
+date: 2026-09-26
+parent_failure_record: research/PROVISIONAL_DIRECTION_SCREEN.md
+objective: additional correct visual facts given existing text
+bottleneck_hypothesis: caption-independent crops lose task alignment and region-only inputs lose instance context
+material_method_change: matched caption-conditioned instruction with explicit global-plus-ROI same-image input
+development_manifest:
+  staging_images_sha256: 35a5de457ca116c7cf4ee5c46caa814f2b9b59cfd0c64e72276ce904a465cf92
+  natural_contexts_sha256: 50e6c7469fbbce3b5ae8ef2a160594a0a885f01a055d68a7b6b460dd8c9c2d01
+  automatic_candidates_sha256: 81bb864daac1f0a2ddb77e2b244db58410c3057ffd33f312bbf952df2952edfe
+profiling_block: first 8 sorted opaque image IDs; first sorted context ID per image; all 14 non-STOP fixed-grid candidates
+r1_factors:
+  geometry: fixed_grid_baseline_then_automatic_grounding
+  text: caption_independent_vs_caption_conditioned
+  context: region_only_vs_global_plus_roi
+observer: Qwen/Qwen2.5-VL-3B-Instruct@66285546d2b821cf421d4f5eb2576359d3770cd3
+primary_metric: independently reviewed correct novel mentioned-entity facts per context-action
+development_continuation_rule: global-plus-ROI conditioned improves the primary rate by at least 5 percentage points over matched region-only, without invalid-claim rate increasing more than 3 points
+uncertainty_unit: image/duplicate group
+automated_sensitivity_only: model-based screens cannot pass E0 or replace human review
+confirmation_manifest: locked_separately_after_development
+confirmation_attempt_budget: at most two attempts, two-sided alpha 0.025 each
+gpu_policy: any suitable available GPU; exact type and configuration recorded per run
+holdout_policy: no confirmation inference during R1 development
+results_and_failure_examples: pending
+decision_and_next_design: pending
