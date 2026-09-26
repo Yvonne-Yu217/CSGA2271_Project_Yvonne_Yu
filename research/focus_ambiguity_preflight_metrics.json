@@ -1,6 +1,6 @@
 {
   "date": "2026-09-26",
-  "decision": "weak_feasibility_signal_direction_not_passed",
+  "decision": "reject_current_focus_ambiguity_direction",
   "test_policy": "No test inference, threshold selection, or model selection was performed.",
   "data": {
     "records": {"train": 70, "val": 70, "test": 5334},
@@ -67,6 +67,25 @@
       },
       "semantic_agreement_across_code_orders": 0.55
     }
+  },
+  "symmetric_next_token_logits": {
+    "qwen2_5_vl_3b": {
+      "image_question_balanced_accuracy": 0.5291666667,
+      "image_question_balanced_accuracy_ci95": [0.4788975022, 0.5821078431],
+      "image_question_ambiguous_recall": 0.1333333333,
+      "image_question_code_order_agreement": 0.5714285714,
+      "elapsed_seconds": 177.6899468899,
+      "peak_gpu_memory_mb": 16143.1040039062
+    },
+    "smolvlm": {
+      "image_question_balanced_accuracy": 0.5083333333,
+      "image_question_balanced_accuracy_ci95": [0.5, 0.5272727273],
+      "image_question_ambiguous_recall": 0.0166666667,
+      "image_question_code_order_agreement": 0.2428571429,
+      "elapsed_seconds": 92.0281863213,
+      "peak_gpu_memory_mb": 5031.06640625
+    },
+    "slurm_job_id": "1998"
   },
   "siglip_fixed_ridge": {
     "revision": "7fd15f0689c79d79e38b1c2e2e2370a7bf2761ed",

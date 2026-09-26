@@ -87,7 +87,7 @@ masks pass structural validation, but the metadata require care: every internal
 width/height records are swapped while image and mask pixels agree. Use the JSON
 filename as the split and group any internal resampling by image.
 
-This topic has **not passed the direction gate**. A pinned zero-shot SmolVLM
+This topic has **failed the direction gate in its current form**. A pinned zero-shot SmolVLM
 image+question classifier reached only 51.67% balanced accuracy and 3.33%
 ambiguous recall on the 140 public train+validation rows. Swapping the meanings
 of A/B changed its ambiguity predictions from 2 to 23; the same change moved
@@ -99,10 +99,12 @@ accuracy on 70 validation rows, but its 95% bootstrap interval [49.48, 72.02]
 includes chance and performance varies sharply by source. A fixed CLIP probe is
 more concerning: image-only balanced accuracy is 62.50% [51.19, 73.56], higher
 than image+question at 57.50% [45.67, 69.05], indicating source/image shortcuts
-rather than demonstrated question-specific focus reasoning. The official test set
+rather than demonstrated question-specific focus reasoning. Order-symmetrized
+next-token logits also fail: Qwen reaches 52.92% balanced accuracy
+[47.89, 58.21] and SmolVLM 50.83% [50.00, 52.73]. The official test set
 remains locked. Recent ICCV 2025 and CVPRW 2026 work already covers ambiguity
 recognition, focus localization, sufficiency-oriented evaluation, and a
-two-stage baseline. Do not scale training or submit test predictions until a
-written novelty screen establishes a falsifiable contribution beyond those
-tasks and a source-aware development protocol is frozen; otherwise change topic
-again.
+two-stage baseline. Do not scale training or submit test predictions. Archive
+this preflight and change to another externally verifiable CV topic; reopening
+it requires a genuinely new contribution and source-balanced data, not tuning
+the 140 public development rows.

@@ -54,6 +54,21 @@ not change materially when the meanings of A and B are exchanged; the current
 SmolVLM and Qwen results do, so their prompted scores are diagnostics rather
 than accepted baselines.
 
+The stronger order-symmetrized check scores the next-token logits under both
+code orders, maps them back to semantic margins, and averages them:
+
+```bash
+.venv/bin/python focus_ambiguity/run_symmetric_logit_baseline.py \
+  --source focus_ambiguity/data/source \
+  --images focus_ambiguity/data/extracted/images \
+  --output focus_ambiguity/results/smolvlm-symmetric-logit \
+  --batch-size 4
+```
+
+Pass pinned Qwen `--model` and `--revision` arguments for the cross-model run.
+Both symmetric-logit baselines fail to beat chance reliably, so zero-shot
+classification is closed rather than used as evidence for this direction.
+
 ## Fixed linear learnability probe
 
 This probe extracts pinned SigLIP features and fits one deterministic dual

@@ -84,6 +84,14 @@ swapped run selected that class only four times. These models are following code
 and position preferences to a material degree; none of their point scores is an
 accepted strong baseline.
 
+To rule out free-generation parsing as the cause, a stronger check read the
+next-token A/B logits under both prompts, mapped each margin back to semantic
+ambiguity, and averaged the two margins. Qwen then reached only 52.92% balanced
+accuracy [47.89, 58.21]% with 13.33% ambiguous recall. SmolVLM reached 50.83%
+[50.00, 52.73]% and detected 1/60 ambiguous rows. Even at the logit level, base
+versus swapped semantic predictions agreed on only 57.14% of image-question
+rows for Qwen and 24.29% for SmolVLM. The failure is not a decoding artifact.
+
 ## Fixed SigLIP learnability probe (train to validation)
 
 Pinned `google/siglip-base-patch16-224` revision
@@ -118,24 +126,27 @@ SigLIP feature extraction took 7.16 seconds on one L4 and peaked at 474.90 MiB
 of torch GPU allocation; the CLIP replication took 10.54 seconds and peaked at
 384.14 MiB. Base Qwen and swapped Qwen each peaked at 10.79 GiB and took
 about 96.6 seconds end-to-end; base and swapped SmolVLM peaked at 4.95 GiB and
-took 55.9 and 54.8 seconds. All artifacts are cached
+took 55.9 and 54.8 seconds. The symmetric-logit runs took 177.69 seconds /
+16.14 GiB for Qwen and 92.03
+seconds / 5.03 GiB for SmolVLM on allocation job 1998. All artifacts are cached
 under ignored `focus_ambiguity/results/`. The official test set remains locked:
 no test inference, threshold selection, or performance inspection was done.
 
 ## Decision
 
-This is a **weak feasibility signal, not a direction pass**. Prompted generative
-classification is invalidated as a strong baseline by label-order sensitivity.
+This direction is **rejected in its current form**, not merely awaiting a larger
+training run. Prompted generative classification is invalidated as a strong
+baseline by label-order sensitivity.
 There is some train-to-validation signal in the frozen probes, but the sample is
 too small, the multimodal interval includes chance, source behavior is
 inconsistent, and the CLIP image-only shortcut is stronger than its multimodal
 probe. Recent papers already cover the base task and sufficiency-oriented
 localization.
 
-Do not submit test predictions or scale training yet. Continue only after a
-written novelty screen identifies a contribution beyond recognition,
-localization, and disambiguation sufficiency, and after an image-grouped,
-source-aware development protocol is fixed. The next bounded experiment should
-test that proposed distinction on train/validation without selecting on test.
-If no defensible distinction survives the literature gate, reject this topic
-and move to another externally verifiable CV task.
+Do not submit test predictions, scale training, or use this as the new main
+topic. The base task and sufficiency framing are already covered; zero-shot
+generation and symmetric logits fail; the only learned signal is small and
+confounded by an image-only/source shortcut. Archive the reproducible screen and
+move to another externally verifiable CV task. Reopening focus ambiguity would
+require a genuinely new contribution and new source-balanced development data,
+not tuning these 140 rows.
