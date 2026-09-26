@@ -1,5 +1,7 @@
 # Next-direction screen after the full-image baseline
 
+> Archived method screen. The current plan is [METHOD_REDESIGN_PLAN.md](METHOD_REDESIGN_PLAN.md). Its rejection remains recorded, but the instruction below to change CV topic is superseded. Here, “false support” is measured against full-image model judgments, not adjudicated human truth.
+
 Date: 2026-09-26. This is a falsification plan, not a new positive-result claim.
 
 ## Why the current action design stops

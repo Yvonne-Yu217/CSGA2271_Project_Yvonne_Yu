@@ -1,5 +1,7 @@
 # Same-image paired focus-ambiguity falsification proposal
 
+> Archived side-branch protocol, not the current execution plan. No paired inference result is recorded by this document. Resume the complementary-information method redesign in [METHOD_REDESIGN_PLAN.md](METHOD_REDESIGN_PLAN.md); retain this protocol and its split provenance for history.
+
 Date: 2026-09-26. Predeclared before any paired model inference.
 
 ## Motivation

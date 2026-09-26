@@ -1,5 +1,7 @@
 # VQ-FocusAmbiguity preflight
 
+> Archived branch, not the active project direction. Follow [the method redesign plan](../research/METHOD_REDESIGN_PLAN.md). The preflight below originally kept official test inference locked; the later [paired protocol](../research/PAIRED_FOCUS_PROPOSAL.md) repurposed official test records into a new internal split. Preserve this distinction when reproducing historical work.
+
 This directory contains a reproducible, test-label-locked preflight for the
 [official VQ-FocusAmbiguity dataset](https://vizwiz.org/tasks-and-datasets/focus-ambiguity-in-visual-questions/).
 Downloaded images, masks, model features, and predictions are ignored by Git.

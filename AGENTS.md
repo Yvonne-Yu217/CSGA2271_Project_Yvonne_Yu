@@ -3,7 +3,7 @@
 ## HPC utilization policy
 
 - Follow the cumulative budget and handoff reconciliation in `GOAL.md`; never treat the 300-hour course quota as authorization.
-- Use any available compatible GPU, including L4 or A100; neither is mandatory. Prefer one GPU unless measured throughput justifies more within the same budget. Stage datasets, model weights, environments, and CPU preprocessing before requesting it.
+- The project is fixed to NVIDIA L4 under the user's latest instruction. Start with one L4 (`g2-standard-12`) and adapt model size, resolution, batching and staged loading to it. Do not switch GPU type. Stage datasets, model weights, environments, and CPU preprocessing before requesting it.
 - Do not leave an allocated GPU or CPU node idle or at persistently low utilization. Keep the accelerator fed with suitable batching, workers, caching, and overlap between input preparation and inference.
 - Maintain a queue of productive fallback GPU tasks (feature caching, smoke tests, baselines, ablations, or evaluation) and switch to the next valid task if the primary run stalls. Every fallback must produce an artifact needed by the stated experiment.
 - Never run synthetic burn loops or unrelated workloads merely to inflate utilization. Keep a finite queue of productive tasks, but **do not manually release, cancel, or `scancel` any CPU/GPU allocation**. The user's latest instruction is to let the server reclaim allocations itself because manual release interrupts the working session.
@@ -13,4 +13,4 @@
 - Record measured Slurm usage and utilization issues in the compute ledger and `research/AGENT_LOG.md`.
 - Sample utilization and progress every 5 seconds. During steady GPU-ready work, target 70–90% where feasible; diagnose <30% for two minutes or stalled progress. These are internal targets, not verified cluster eviction rules.
 - Subagents may prepare independent code, data or analysis when useful; one main owner controls job submissions, output paths and cumulative budget.
-- Do not force the original proposal to succeed. The user now requires positive results and novelty, including for the course project. Follow the task/oracle/confirmation gates in `GOAL.md`; preserve negative evidence, change direction when needed, and distinguish unrun work from completed results.
+- Keep the complementary-visual-information research objective; individual method failures require diagnosis and redesign, not automatic abandonment of the question. Follow the autonomous failure-to-redesign loop and independent-confirmation gates in `GOAL.md` toward positive results and novelty. Preserve negative evidence and distinguish plans from completed results; never manufacture a positive claim or repeatedly tune against a confirmation set.

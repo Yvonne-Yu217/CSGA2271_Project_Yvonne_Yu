@@ -1,5 +1,7 @@
 # E0–E2 implementation and evidence status
 
+> Historical implementation record through `2f96409`. The current plan is [METHOD_REDESIGN_PLAN.md](METHOD_REDESIGN_PLAN.md): keep the complementary-information objective and redesign the observation method. Topic-change recommendations below are superseded; measurements and validation gaps remain unchanged. Historical allocation IDs are not live-state observations.
+
 Date: 2026-09-26. This is a status record, not a positive-results claim.
 
 ## Completed engineering work

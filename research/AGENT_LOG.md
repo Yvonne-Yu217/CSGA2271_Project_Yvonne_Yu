@@ -1,5 +1,17 @@
 # Agent log
 
+## 2026-09-26 — Preserve the research question; redesign the method on fixed L4
+
+- Fast-forward pulled `0e7ccef` to `2f96409`. Two read-only subagents audited results/code and primary literature/official repos. No experiment or live HPC connection occurred in this update.
+- Found that the acquisition candidate generator uses fixed grids/halves, not semantic segmentation. Crop observation was caption-independent while direct full-image completion used the caption and targeted instruction. The automated 48.6% versus 30.8% result rejects the unchanged pipeline but does not isolate geometry or disprove complementary-information learning.
+- Clarified limits: judge disagreement is not human truth; the crop-verification false-support figure uses model references; source-box area omits processor/planner/proposer cost. Human E0 remains incomplete and the latest paired-focus document is only a protocol, not a positive result.
+- Reviewed Grounding DINO, Grounded SAM 2, FINECAPTION/CompositionCap, high-resolution omitted-object completion, AdaptVision, CompreCap and Qwen2.5-VL implementation paths. Proposed controlled geometry × text-condition × global-context experiments, preserved full-image baselines, and conditional residual-value learning or global fact selection. Existing tool combinations alone are not claimed novel.
+- Rewrote GOAL.md and FOLLOWUP_PROPOSAL.md, added METHOD_REDESIGN_PLAN.md, and synchronized current handoff documents. The goal now requires an autonomous failure diagnosis, literature/code review, preregistered redesign and fresh confirmation loop; failures are retained, and positive evidence is not guaranteed or manufactured.
+- The user's final hardware instruction fixes the project to L4. Updated AGENTS.md and RESOURCE_PLAN.md accordingly. Retained five-second monitoring, high productive utilization, finite ready queues, optional subagent preparation, one GPU owner, accounting and no manual allocation release/cancellation.
+- Repaired a local Git warning by moving a verified AppleDouble `._*.idx` metadata sidecar out of the pack-index directory into `.git/appledouble_metadata`; the actual pack/index was retained. This is local filesystem metadata, not a repository content change.
+- This update changes documentation only. New method/queue/monitor modules are planned, not implemented. No new model test, training, compute charge or allocation mutation is claimed.
+- Read-only review added project-level repeated-confirmation error control, distinguished observer-only text ablation from text-derived candidate leakage, and required the shared T+B state and B-aware cache keys for residual experiments. Documentation whitespace and relative-link checks passed; no code test suite was run for these documentation-only changes.
+
 ## 2026-09-26 — VQ-FocusAmbiguity externally labeled preflight
 
 - Switched to an externally labeled CV benchmark after the observation-selection and crop-verification screens failed. Downloaded and CRC-checked the official VQ-FocusAmbiguity annotations/images, pinned all source hashes, and audited 5,474 records, 3,227 unique images, and 15,361 binary nonempty masks. All masks match decoded image dimensions.

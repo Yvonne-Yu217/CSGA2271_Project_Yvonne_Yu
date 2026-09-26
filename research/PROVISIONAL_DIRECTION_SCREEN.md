@@ -1,5 +1,7 @@
 # Provisional direction screen before human adjudication
 
+> Historical screen. Current interpretation and next work are in [METHOD_REDESIGN_PLAN.md](METHOD_REDESIGN_PLAN.md): these results reject the unchanged fixed-grid pipeline, not the research objective. A new geometry/context-controlled design replaces the old topic-change recommendation; no historical number is altered.
+
 Date: 2026-09-26. This document answers whether the new direction is promising
 enough to justify human review. It is **not E0/E1/E2 evidence** and must not be
 quoted as a final result.

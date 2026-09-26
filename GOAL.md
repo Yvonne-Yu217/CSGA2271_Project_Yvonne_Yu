@@ -1,110 +1,79 @@
-# Goal: Establish a positive result with a defensible research contribution
+# Goal: Validate complementary visual information through better methods
 
-Updated 2026-09-26 after pulling HPC commit `5f24bd4` and the user's new direction request. The user requires positive results and novelty for the course project as well as any publication extension. A negative-results report alone no longer satisfies the intended outcome.
+Updated 2026-09-26 after pulling HPC commit `2f96409` and the user's latest correction. This is the authoritative execution goal; it supersedes earlier instructions to abandon the research question after a single method family fails.
 
-## Current decision
+## Objective and priority
 
-Stop expanding the original CLIP-crop MLP and phrase-deletion objective as the main direction. Frozen ensemble intervention Acc@1 is 79.08/73.17/56.01% for deletion/matched/natural, versus inverse cosine 84.50/75.75/58.16%. No reliable learned superiority has emerged. Keep historical artifacts as evidence.
+**CV validation → course-project ready → CVPR ready → downstream application.**
 
-Do not interpret 44/100 passing automatic audit as a population semantic-error rate: 23 deletion failures were grammar-only, natural-caption controls genuinely changed, and some automatic judgments are inconsistent. New data needs adjudicated semantic labels.
+Keep the research question: **given an image and an existing description, extract additional correct, useful visual facts, with evidence tied to the right entities.** Missing attributes and relations of mentioned entities remain the primary diagnostic slice. Region selection, segmentation, global views and fact selection are replaceable implementation choices.
 
-The next candidate is **learning which visual observation adds the most grounded facts given an existing description**, particularly missing attributes/relations of already mentioned entities. This is a proposed pivot, not an established novel or successful method. Generic omission detection, crop-and-caption refinement, QA rewards and adaptive cropping have close predecessors.
+Continue developing and testing methods toward an independently confirmed positive result and a defensible contribution. A failed method is a reason to diagnose and redesign, not automatically abandon the question. Positive results are a completion requirement, not something the agent can promise or manufacture.
 
-Authoritative design: `research/FOLLOWUP_PROPOSAL.md`. Evidence and literature/repo review: `research/DIRECTION_DECISION_AFTER_FROZEN_RESULTS.md`. The existing proposal PDF and results document the completed phase; do not overwrite history with unrun positive claims.
+Authoritative proposal: [FOLLOWUP_PROPOSAL.md](research/FOLLOWUP_PROPOSAL.md).
+Next experiment and handoff plan: [METHOD_REDESIGN_PLAN.md](research/METHOD_REDESIGN_PLAN.md).
+Device/execution policy: [RESOURCE_PLAN.md](hpc/RESOURCE_PLAN.md).
 
-## Work and completion gates
+## What the latest evidence establishes
 
-**Priority order: CV validation → course-project ready → CVPR ready → downstream application.** Finance is a conditional downstream extension, not the main objective or a substitute for a positive CV result. Current work is CV validation (E0–E2). Prepare downstream data only when it does not delay that work.
+- The original CLIP MLP did not reliably beat inverse cosine. Preserve its results.
+- The next acquisition implementation used **fixed 3×3 tiles, horizontal/vertical halves and a full-image action**, not learned semantic segmentation. Its crop observer was caption-independent, while the stronger direct full-image baseline received the caption and a mentioned-entity completion prompt.
+- Automated strict-target success was 48.6% for low-resolution direct completion versus 30.8% for the fixed-candidate recognition oracle, difference +17.8 percentage points [9.2, 26.2]. This rejects investment in that unchanged pipeline; it does not isolate geometry, establish segmentation as the cause, or disprove complementary-information learning.
+- Judges were unstable: same-family Qwen accepted all 1,281 non-empty observations; SmolVLM accepted 393. Neither is human ground truth. Crop-verification “false support” is disagreement against full-image model judgments, not an adjudicated factual false-positive rate.
+- E0 human adjudication is unfinished. E1/E2 have diagnostic screens, not formal passes. Never relabel proxy results as validated facts.
+- The focus-ambiguity detour is archived, including the paired protocol. It is not the active main line. Its official test corpus was repurposed by that protocol; do not describe it as a pristine test for future development.
 
-1. **E0: valid task and data.** Prepare new image-disjoint development data, fluent caption states, independently checked object/attribute/relation facts and automatic candidates. Check instance identity, visibility, changed facts and annotation agreement. Preserve unknowns.
-2. **E1: measure available improvement.** Freeze the observer, enumerate candidate outcomes, and compare attainable same-budget utility against full-image caption completion, a strong prompted planner, omission rules, semantic coverage and simple selection. Count all inference costs. If the oracle has no useful gap, replace the direction before training.
-3. **E2: test caption dependence.** Show that useful actions change when known facts change, remain stable under paraphrase, and lose value after redundant acquisition. Include natural captions and saturated-caption STOP cases.
-4. **E3: learn actual action value.** Only after E1/E2, train direct utility ranking/regression and paired-caption supervision. Compare equal supervision, fixed observer and three seeds; avoid indefinite architecture/hyperparameter sweeps.
-5. **E4: independent positive confirmation.** Freeze model, metrics and strongest comparator; evaluate untouched images with human fact checks and image-level paired intervals. A meaningful gain over a competitive baseline is required. Negative outcomes change the next decision, not the stored results.
-6. **E5: publication development.** Only after positive confirmation and a clear prior-art distinction, test cross-reader/domain/backbone transfer, automatic regions, sequential observations, stop calibration and full quality–cost curves. A checklist cannot guarantee publication readiness.
-7. **D1: downstream event understanding, after the CV publication package.** Apply the validated method to financial news images. Condition on the full article and image caption available at the observation time. Compare text-only, full-image, generic image descriptions and selected complementary facts, plus shuffled-image controls. Require grounded event-understanding gains; finance alone does not establish method novelty.
-8. **D2: conditional market-outcome study.** Only if D1 succeeds and time-aligned data is valid, test incremental prediction of a preregistered market outcome with chronological evaluation and leakage controls. Better visual facts do not imply better returns prediction. A null market result must be retained and does not invalidate independently confirmed CV results.
+See the unchanged historical screens in `research/PROVISIONAL_DIRECTION_SCREEN.md`, `research/NEXT_DIRECTION_AFTER_STOPPING_SCREEN.md` and `research/FOCUS_AMBIGUITY_PREFLIGHT.md`. Their old topic-change recommendations are superseded by this goal; their results remain evidence.
 
-Course-project readiness requires E0–E4, a reproducible implementation, human checks, strong baselines and mechanism ablations. CVPR readiness additionally requires E5 and a defensible distinction from prior work; it is a research target, not an acceptance guarantee. Downstream work follows these milestones and must not postpone the core CV confirmation to chase a financial correlation.
+## Next method and completion gates
 
-Sample sizes and suggested thresholds are in the proposal; they are planning choices, not forecasts. Next implementation is E0–E2 infrastructure. The old frozen-checkpoint scripts do not implement the new task.
+1. **R0 / E0: establish valid evidence and diagnose the failure.** Reuse old outputs only for diagnosis. Complete the blinded stopping audit; also audit a random sample, because disagreement-enriched samples do not estimate population error. Stage new image-disjoint development data and independent entity/fact/context labels. Missing human evidence remains an explicit dependency, never filled by an AI pretending to be a human.
+2. **R1 / E1: isolate the implementation defects.** Compare old grids with automatic grounded entity boxes, padded boxes and relation-union views. Cross geometry with caption-aware versus caption-independent observation and crop-only versus global-plus-region context. Use identical frozen observer, prompts where applicable, output limits and measured total costs. GT regions are diagnostic upper bounds only.
+3. **R2 / E1–E2: measure residual value over strong full-image completion.** Preserve full-image completion as a first-class action/baseline. Test whether another observation adds verified facts beyond it, against an equal-call full-image refinement baseline. Validate same-image description changes, paraphrase stability, same-instance binding and stopping. Do not train a crop selector if the redesigned actions have no useful residual headroom.
+4. **R3 / E3: train only the mechanism supported by R1/R2.** Candidate method: instance-linked known-fact state plus direct marginal-value prediction for global, entity, relation and STOP actions. Compare a strong prompted planner, all-observations semantic ranking with its full cost, no-context/no-binding/no-paired-supervision ablations and three seeds. If selection is unnecessary, test the global fact-selection family described in the proposal while preserving the objective.
+5. **R4 / E4: course-project confirmation.** Freeze the selected design and strongest comparator before one untouched confirmation set. Require a practically meaningful gain, paired image-level uncertainty, human verification, error control and reproducible code. A prompt-only or detector-only improvement can establish engineering progress, but does not by itself meet the novelty requirement.
+6. **R5 / E5: CVPR development.** After R4, establish prior-art distinction, cross-domain/backbone/reader transfer, automatic proposals, cost–quality curves and mechanistic ablations. Multi-step policies are conditional on additional headroom. Readiness is a research standard, not a guarantee of acceptance.
+7. **D1 / D2: downstream application.** After the CV package, test finance event understanding with full article and image caption available at the observation time. Market prediction follows only if valid data and D1 support it; it is not required to rescue CV novelty. Follow the proposal's time, duplicate and leakage controls.
 
-## Resources and execution
+## Mandatory autonomous failure-to-redesign loop
 
-- Design the study around the scientific question. The user removed the prior limited-resource assumption for planning. Old 20/24-hour and four-hour diagnostic envelopes describe the completed pilot, not the new research design.
-- Before actual submission, profile model/resolution, check nodes/current allocation and maintain a cumulative ledger. The last committed 2.0333 GPU-hour figure includes a running allocation and is not final usage. No new job was submitted during this planning update.
-- Use any suitable available GPU, including L4 or A100. Neither is mandatory. Match model size, precision, batch size and parallelism to measured memory/throughput; stage independent inference work for available nodes.
-- Prepare code, models/data and CPU preflight before allocation. Keep third-party reproduction environments separate from the original pilot. Save revisions, prompt hashes, sample IDs, cost and resume artifacts.
+When a method fails, the task remains unfinished. Within the authorized compute balance, the agent must:
 
-## Productive utilization and session continuity
+1. Save the run manifest, all primary/secondary results, uncertainty, costs and representative failures.
+2. Classify the bottleneck: labels/judge, candidate coverage, entity binding, context loss, visual resolution, generation, action prediction, cost or lack of novelty. Separate observations from hypotheses.
+3. Revisit relevant primary papers and official code. Propose a material change targeted at the diagnosed bottleneck; do not merely retune the same model indefinitely.
+4. Write the next hypothesis, discriminating controls, fixed primary metric, continuation rule, sample split and finite job queue **before** running it. Implement/stage that round before GPU submission.
+5. Run the development experiment, record its decision, and repeat with a new design when warranted. After two failed variants addressing the same bottleneck, change method family rather than repeat parameter sweeps.
+6. Continue toward independent positive evidence and novelty. If labels, access or authorized compute block execution, report the exact dependency and continue independent preparation; do not silently mark the objective complete or consume unauthorized quota.
 
-Persistently low utilization slows progress and must be diagnosed. Sample memory/utilization and progress every five seconds. During steady GPU-ready stages, target 70–90% where feasible; investigate <30% for two minutes or stalled throughput. These are internal diagnostics, not scheduler guarantees. Improve batching, data workers, I/O and caching. Move small statistical jobs to CPU.
+All previously inspected samples remain development data. Retire a failed confirmation set from confirmation use; obtain a fresh holdout for a revised method. Never switch metrics, cherry-pick seeds or repeatedly inspect a holdout until it becomes positive. If multiple well-controlled method families leave no support for the scientific hypothesis, present that evidence and discuss revising the question rather than claiming success.
 
-Maintain a finite queue of necessary work. Subagents may prepare independent code/data/analysis; one owner controls GPU submissions, shared output paths and total cost. Never repeat experiments or generate synthetic load to inflate utilization. Under the latest HPC instruction, **do not manually cancel or release existing CPU/GPU allocations**; preserve the session and let the server handle reclamation.
+Fresh holdouts alone do not control repeated-confirmation false positives. Before the first formal confirmation, register a project-level attempt limit and multiplicity/alpha-spending plan, shared across method versions. An initial plan is at most two confirmatory attempts with two-sided alpha 0.025 each (97.5% intervals for the primary gain), totaling at most 0.05; adjust further if multiple primary comparisons are introduced. Report all attempts. Continued experimentation after that limit is development, not another unadjusted opportunity to declare success. Development screens may retain descriptive 95% intervals.
 
-Prepare and push runnable stage code, dependencies, inputs and resume commands before GPU execution so implementation gaps do not strand allocated hardware. If a run stalls, diagnose it and switch only to a ready, scientifically necessary task within the current gate. Preserve allocations, checkpoints, caches and working environments; do not arbitrarily delete resources or restart the allocation to address low utilization.
+## GPU utilization is an execution priority
+
+**Remember this at every handoff: keep allocated GPUs doing necessary, prepared work; detect and address low utilization promptly. Do not manually release or cancel allocations.**
+
+- During an active HPC run, sample GPU utilization, used/available memory and progress every **5 seconds**. Record throughput, CPU/I/O waits, run ID and job ID; maintain a monitor independent of the experiment process. A stale heartbeat is an issue even if utilization is high.
+- In steady GPU-ready stages, target **70–90% or higher when useful and feasible**. Investigate utilization below 30% for two minutes or stalled progress immediately. Also inspect rolling utilization and end-to-end useful outputs/hour; a high peak or occupied VRAM is not sustained productive work.
+- Prepare code, pinned dependencies, model weights, data, cached inputs and resume commands before the allocation's compute stage. Maintain a finite manifest-backed queue of approved, scientifically necessary inference, baselines and ablations. Queue completion, model loading, CPU annotation and failures can cause brief dips; do not promise physically constant 100% utilization.
+- Use batching, resolution/length buckets, CPU workers, pinned-memory prefetch and cached region preparation. While one GPU job runs, subagents may prepare independent code/data/literature/analysis. One owner alone submits jobs, assigns output directories and accounts for aggregate resource use.
+- Prefer one well-fed GPU process per device initially. Add concurrent inference workers only after measured memory headroom and throughput justify them; agents must not independently load several models onto the same GPU. Two GPUs require enough ready work to feed both.
+- On a stalled workload, preserve artifacts, diagnose, and move to the next valid ready task. Do not keep rerunning completed experiments, leak held-out data, or generate burn loads to fill the GPU.
+- **Never manually release, cancel, `scancel`, or restart existing CPU/GPU allocations.** Preserve the working session, checkpoints, caches and environments; the server handles reclamation. Ending a completed experiment process or unloading its model within the retained allocation is allowed for the next prepared task.
+- When no valid GPU-ready work exists, log the dependency, advance CPU/preparation work and preserve the allocation for server-managed reclamation. Do not invent work or silently cross a scientific gate.
+- No live HPC connection or utilization trace was inspected in this local documentation turn. These are execution requirements, not a claim that a remote GPU is currently busy.
+
+## Fixed L4 execution and accounting
+
+**The project is fixed to NVIDIA L4, starting with one L4 (`g2-standard-12`), per the user's latest instruction.** Keep subsequent methods and experiments within this hardware choice. Previous acquisition runs used about 7.4–7.7 GiB peak torch allocation; a separate Qwen ambiguity workload reached 10.79 GiB. These are workload-specific measurements, not a bound for the new global-plus-region setup or total device memory.
+
+Profile actual processed visual tokens, batch size, peak allocated/reserved/device memory, valid outputs/second and total stage time. Adapt model size, resolution, batching, staged model loading and supported efficient training to L4. If a configuration does not fit, redesign it and disclose any resulting scientific limitation. Do not change GPU type or cancel an allocation to solve a configuration issue.
+
+The research design is not constrained by historical pilot-hour envelopes. Actual spending still requires current authorized balance, cumulative `sacct` reconciliation and allocation-aware accounting; **300 course GPU-hours is not authorization to spend them all**. Old 20/24-hour figures and the 2.0333-hour snapshot are historical, not a verified current balance. No new compute is submitted by this documentation update.
 
 ## Suggested conversation goal
 
-`/goal 按 CV 核心验证 → course-project ready → CVPR ready → downstream application 的顺序推进，主次分明。首先验证给定已有描述时，能否学习选择最能补充正确视觉事实的观察，重点是已提及实体的未覆盖属性/关系。先完成可靠数据、强 baseline、oracle 和上下文必要性验证，再训练实际收益选择器并做独立测试，以可信正向效果、人工核验和明确新意达到课程标准；随后完成跨域/跨模型、机制与质量成本证据，推进 CVPR 级研究。此后开展 finance 事件理解；只有数据与结果支持时才研究市场预测，不能用金融相关性替代 CV 方法验证。研究设计不受旧试验小时数限制，使用任何合适的可用 GPU，提前完成代码与数据准备，保持有效 GPU 占用并及时诊断低利用率，必要时用 subagent 准备独立任务；统一提交、记账、缓存和检查点，不随意取消或释放 CPU/GPU 分配，不随意删除资源，由服务器管理回收并保持会话连续。若核心方向无提升空间或无实质新意就换题，绝不强行包装正结果。`
+`/goal 保持“给定已有文本，提取图片能补充的正确且有用事实”这一主线，按 CV 验证 → course-project ready → CVPR ready → downstream application 推进。把失败归因到具体方法和证据，先公平比较区域生成、caption 条件、全局上下文和事实评估，再学习相对强全图基线的新增收益。若方法失败，必须保存结果、分析错误、查阅论文与官方 repo、自主提出并预先记录新实验设计，在授权资源内继续迭代直到获得独立确认的正向效果与明确新意；不能反复刷测试集或包装假阳性。项目固定使用 L4，从单卡开始，后续模型、分辨率、训练与 batch 均适配 L4。GPU 有效占用是每次执行和交接的重点：每 5 秒监控，及时诊断低利用率，提前准备代码数据和有限必要任务队列，必要时安排 subagent 并发准备，统一提交记账。不得随意取消、释放或重启 CPU/GPU 分配，保留缓存检查点与会话，由服务器管理回收。`
 
-This updates the repository objective; it does not claim the conversation-level goal was rewritten through an API.
-
-## Current implementation state (2026-09-26)
-
-The E0–E2 infrastructure, 100-image staging, frozen observer/planners, independent
-SmolVLM visual-support screen and independent DeBERTa novelty screen now exist;
-see `research/E0_E2_PROGRESS.md` and `research/PROVISIONAL_DIRECTION_SCREEN.md`.
-E0 still has no completed pair of independent human annotations or adjudication
-and therefore has **not passed**. Generated saturated contexts failed the natural
-E2 screen, so E2 has not passed either.
-
-The required caption-conditioned direct full-image completion baseline changes
-the provisional direction decision. At a 50,176-pixel cap it retained 55.8%
-automated any-new-fact success and 48.6% strict mentioned-entity-detail success.
-The fixed-candidate strict core-target oracle reached only 30.8%; direct completion
-exceeded it by 17.8 points with image-bootstrap interval [9.2, 26.2]. These are
-automated sensitivity labels rather than human evidence, but the current action
-inventory cannot beat a goal-aligned strong baseline even with oracle selection.
-Do **not** train E3 on this candidate design. Use only a small blinded stopping
-audit to test whether the ordering is a judge artifact; otherwise replace the
-task/action design or change topic, as required by the goal, rather than expanding
-annotation or presenting the earlier oracle gap as a positive result.
-
-An adjacent claim-conditioned crop-verification pivot was also screened and
-failed its predeclared stop rule. Proper zoom views recovered 80.30% of
-full-image-supported claims but falsely supported 57.56% of rejected/partial
-claims, versus a 20% ceiling. Local tiles reduced false support to 14.38% only by
-collapsing recall to 42.76%. Generic zoom/verification also has direct recent
-prior art. Do not train this pivot. Preserve both negative screens and move to a
-genuinely different CV task with externally verifiable labels; do not skip to
-finance or reweight these proxies to manufacture a positive result.
-
-A first externally labeled topic preflight now exists for VQ-FocusAmbiguity;
-see `research/FOCUS_AMBIGUITY_PREFLIGHT.md`. Its official images and 15,361
-masks pass structural validation, but the metadata require care: every internal
-`set` field says `train`, 40 image filenames cross official JSON files, and 11
-width/height records are swapped while image and mask pixels agree. Use the JSON
-filename as the split and group any internal resampling by image.
-
-This topic has **failed the direction gate in its current form**. A pinned zero-shot SmolVLM
-image+question classifier reached only 51.67% balanced accuracy and 3.33%
-ambiguous recall on the 140 public train+validation rows. Swapping the meanings
-of A/B changed its ambiguity predictions from 2 to 23; the same change moved
-Qwen2.5-VL-3B from 66 to 3, with only 55% semantic agreement across Qwen prompt
-orders. Treat prompted generative classification as invalidated by label-order
-bias. A fixed, untuned
-SigLIP image+question ridge probe trained on 70 rows reached 60.83% balanced
-accuracy on 70 validation rows, but its 95% bootstrap interval [49.48, 72.02]
-includes chance and performance varies sharply by source. A fixed CLIP probe is
-more concerning: image-only balanced accuracy is 62.50% [51.19, 73.56], higher
-than image+question at 57.50% [45.67, 69.05], indicating source/image shortcuts
-rather than demonstrated question-specific focus reasoning. Order-symmetrized
-next-token logits also fail: Qwen reaches 52.92% balanced accuracy
-[47.89, 58.21] and SmolVLM 50.83% [50.00, 52.73]. The official test set
-remains locked. Recent ICCV 2025 and CVPRW 2026 work already covers ambiguity
-recognition, focus localization, sufficiency-oriented evaluation, and a
-two-stage baseline. Do not scale training or submit test predictions. Archive
-this preflight and change to another externally verifiable CV topic; reopening
-it requires a genuinely new contribution and source-balanced data, not tuning
-the 140 public development rows.
+This file and its suggested command update the repository goal; no conversation-level goal API rewrite is claimed.

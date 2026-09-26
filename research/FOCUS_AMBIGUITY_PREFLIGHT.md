@@ -1,5 +1,7 @@
 # Focus-ambiguity direction preflight
 
+> Archived side-branch evidence. The complementary-information objective resumes under [METHOD_REDESIGN_PLAN.md](METHOD_REDESIGN_PLAN.md). Historical topic-change recommendations below are superseded; retain the recorded negative results and split caveats. The later paired protocol repurposed official test records, so its internal split must not be presented as untouched official test evaluation.
+
 Date: 2026-09-26. This is a direction screen, not a positive-result claim.
 The compact machine-readable evidence snapshot is
 `research/focus_ambiguity_preflight_metrics.json`; raw predictions and features
