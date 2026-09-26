@@ -1,0 +1,23 @@
+round_id: R3-v1-grounded-binding-proxy
+status: predeclared_development_reuse
+date: 2026-09-26
+parent_round: research/rounds/R1_v2_grounded.yaml
+objective: test whether explicit grounded entity phrase binding makes caption-dependent action value more learnable
+data_status: all 100 images are development and the prior proxy split has been inspected; no confirmation claim is permitted
+candidates: 443 unpadded grounded_entity boxes only
+discarded_families: padded boxes and relation unions underperformed unpadded entity boxes
+features:
+  - frozen SigLIP crop embedding
+  - frozen SigLIP caption embedding
+  - frozen SigLIP Grounding-DINO entity-phrase embedding
+methods:
+  - image_only
+  - image_caption_interaction
+  - entity_phrase_caption_interaction
+  - combined_image_and_entity_interactions
+fit: deterministic lambda=1 ridge on the unchanged image-hash development split
+metric: selected-action automated strict mentioned-entity success
+interpretation: descriptive development comparison only; human E0 and a fresh confirmation set remain required
+gpu_policy: any suitable available GPU with exact device and utilization trace
+results: pending
+decision: pending

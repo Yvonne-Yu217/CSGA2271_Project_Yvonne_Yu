@@ -23,6 +23,8 @@ def main():
     parser.add_argument("--visual-output", type=Path, required=True)
     parser.add_argument("--full-image-screen-output", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--expected", type=int, default=0,
+                        help="Optional exact row count")
     parser.add_argument("--batch-size", type=int, default=256)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
@@ -34,8 +36,9 @@ def main():
     observations = read_jsonl(args.observer_output / "observations.jsonl")
     visual = {row["cache_key"]: row for row in read_jsonl(
         args.visual_output / "visual_support.jsonl")}
-    if len(observations) != 7000 or len(visual) != 7000:
-        raise RuntimeError("R2 observations/visual judgments must each contain 7000 rows")
+    if (len(observations) != len(visual) or
+            (args.expected and len(observations) != args.expected)):
+        raise RuntimeError("R2 observations/visual judgments have unexpected row counts")
     work = []
     for row in observations:
         if row["cache_key"] not in visual or visual[row["cache_key"]].get("status") != "ok":

@@ -25,6 +25,10 @@ def main():
     parser.add_argument("--nli-output", type=Path, required=True)
     parser.add_argument("--full-image-core-output", type=Path, required=True)
     parser.add_argument("--output", type=Path, required=True)
+    parser.add_argument("--candidates-file", type=Path,
+                        help="Optional candidate metadata for family summaries")
+    parser.add_argument("--expected", type=int, default=0,
+                        help="Optional exact row count")
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--model", default=DEFAULT_MODEL)
     parser.add_argument("--revision", default=DEFAULT_REVISION)
@@ -37,8 +41,9 @@ def main():
     visual = {row["cache_key"]: row for row in read_jsonl(
         args.visual_output / "visual_support.jsonl")}
     nli = {row["key"]: row for row in read_jsonl(args.nli_output / "entailments.jsonl")}
-    if not (len(observations) == len(visual) == len(nli) == 7000):
-        raise RuntimeError("R2 inputs must each contain 7000 rows")
+    if (not (len(observations) == len(visual) == len(nli)) or
+            (args.expected and len(observations) != args.expected)):
+        raise RuntimeError("R2 inputs have unexpected row counts")
     work = []
     for row in observations:
         key = row["cache_key"]
@@ -164,6 +169,39 @@ def main():
         args.full_image_core_output / "complement_types.jsonl")}
     direct = [int(full_image[context_id]["label"] == "MENTIONED_ENTITY_DETAIL")
               for context_id in ordered_context_ids]
+    family_oracles = {}
+    if args.candidates_file:
+        candidate_metadata = {row["candidate_id"]: row for row in read_jsonl(args.candidates_file)}
+        families = sorted({row.get("view_family") for row in candidate_metadata.values()
+                           if row.get("view_family") not in {None, "stop"}})
+        for family in families:
+            values, static_values = [], []
+            for image_id in sorted(contexts_by_image):
+                context_ids = sorted(contexts_by_image[image_id])
+                family_ids = [candidate_id for candidate_id, row in candidate_metadata.items()
+                              if row["staging_image_id"] == image_id and
+                              row.get("view_family") == family]
+                best_static = (max(family_ids, key=lambda candidate_id: (
+                    sum(success.get((context_id, candidate_id), 0)
+                        for context_id in context_ids), candidate_id))
+                    if family_ids else None)
+                for context_id in context_ids:
+                    values.append(int(any(success.get((context_id, candidate_id), 0)
+                                          for candidate_id in family_ids)))
+                    static_values.append(success.get((context_id, best_static), 0)
+                                         if best_static else 0)
+            family_oracles[family] = {
+                "candidate_count": sum(row.get("view_family") == family
+                                       for row in candidate_metadata.values()),
+                "strict_oracle": bootstrap_cluster(
+                    values, clusters, samples=10000, seed=2271),
+                "oracle_minus_full_image": paired_bootstrap(
+                    values, direct, clusters, samples=10000, seed=2271),
+                "best_same_image_static": bootstrap_cluster(
+                    static_values, clusters, samples=10000, seed=2271),
+                "caption_specific_oracle_minus_static": paired_bootstrap(
+                    values, static_values, clusters, samples=10000, seed=2271),
+            }
     report = {
         "status": "provisional_not_evidence",
         "warning": "Automated semantic typing is not human fact adjudication.",
@@ -178,6 +216,7 @@ def main():
             oracle, direct, clusters, samples=10000, seed=2271),
         "same_image_caption_pair_action_set_change_rate": sum(set_change) / len(set_change),
         "same_image_caption_pair_action_set_jaccard": sum(pair_jaccard) / len(pair_jaccard),
+        "family_oracles": family_oracles,
     }
     (args.output / "provisional_report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n")

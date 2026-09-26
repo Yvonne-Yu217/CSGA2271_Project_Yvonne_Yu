@@ -45,6 +45,9 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--staging", type=Path, required=True)
     parser.add_argument("--strict-output", type=Path, required=True)
+    parser.add_argument("--candidates-file", type=Path,
+                        help="Candidate JSONL; defaults to STAGING/automatic_candidates.jsonl")
+    parser.add_argument("--view-family", help="Optional candidate view_family filter")
     parser.add_argument("--full-image-core-output", type=Path, required=True)
     parser.add_argument("--coordinate-planner", type=Path, required=True)
     parser.add_argument("--montage-planner", type=Path, required=True)
@@ -57,24 +60,28 @@ def main():
               for row in read_jsonl(args.staging / "staging_images.jsonl")}
     contexts = {row["context_id"]: row
                 for row in read_jsonl(args.staging / "natural_contexts.jsonl")}
-    candidates = {row["candidate_id"]: row for row in read_jsonl(
-        args.staging / "automatic_candidates.jsonl") if row["kind"] != "stop"}
+    candidates_path = args.candidates_file or args.staging / "automatic_candidates.jsonl"
+    candidates = {row["candidate_id"]: row for row in read_jsonl(candidates_path)
+                  if row["kind"] != "stop" and
+                  (not args.view_family or row.get("view_family") == args.view_family)}
     labels = read_jsonl(args.strict_output / "complement_types.jsonl")
-    if len(labels) != 7000:
-        raise RuntimeError("expected 7000 R2 strict labels")
+    labels = [row for row in labels if row["candidate_id"] in candidates]
+    if len(labels) != len(contexts) * len(candidates) / len(images):
+        raise RuntimeError("strict labels do not exactly cover selected candidates and contexts")
     label_lookup = {(row["context_id"], row["candidate_id"]):
                     int(row["label"] == "MENTIONED_ENTITY_DETAIL") for row in labels}
     source_paths = [args.staging / "staging_images.jsonl",
                     args.staging / "natural_contexts.jsonl",
-                    args.staging / "automatic_candidates.jsonl",
+                    candidates_path,
                     args.strict_output / "complement_types.jsonl"]
     split_counts = Counter(split_for(image_id) for image_id in images)
     payload = {
-        "implementation": "r3-proxy-siglip-ridge-v1",
+        "implementation": "r3-proxy-siglip-ridge-v2-grounded-binding",
         "files": {str(path): digest(path) for path in source_paths},
         "model": MODEL, "revision": REVISION, "split_salt": SALT,
         "split_counts": dict(split_counts), "ridge_lambda": RIDGE,
         "batch_size": args.batch_size,
+        "view_family": args.view_family,
     }
     fingerprint = hashlib.sha256(json.dumps(payload, sort_keys=True).encode()).hexdigest()
     args.output.mkdir(parents=True, exist_ok=True)
@@ -123,12 +130,26 @@ def main():
                     model.get_text_features(**inputs).float(), dim=1).cpu())
             print(f"R3 text features {min(offset + len(chunk), len(context_ids))}/"
                   f"{len(context_ids)}", flush=True)
+        label_features = None
+        if all(row.get("grounding_labels") for row in candidates.values()):
+            label_batches = []
+            for offset in range(0, len(candidate_ids), args.batch_size):
+                chunk = candidate_ids[offset:offset + args.batch_size]
+                inputs = processor(
+                    text=[" and ".join(candidates[key]["grounding_labels"]) for key in chunk],
+                    padding=True, truncation=True, return_tensors="pt").to("cuda")
+                with torch.inference_mode():
+                    label_batches.append(torch.nn.functional.normalize(
+                        model.get_text_features(**inputs).float(), dim=1).cpu())
+            label_features = torch.cat(label_batches)
         cache = {
             "fingerprint": fingerprint, "candidate_ids": candidate_ids,
             "context_ids": context_ids,
             "image_features": torch.stack([image_features[key] for key in candidate_ids]),
             "text_features": torch.cat(text_batches),
         }
+        if label_features is not None:
+            cache["label_features"] = label_features
         torch.save(cache, cache_path)
         runtime["feature_peak_gpu_memory_mb"] = torch.cuda.max_memory_allocated() / 1024 ** 2
     candidate_index = {key: i for i, key in enumerate(cache["candidate_ids"])}
@@ -150,6 +171,13 @@ def main():
         "interaction": image * text,
         "image_plus_interaction": torch.cat([image, image * text], dim=1),
     }
+    if "label_features" in cache:
+        label = torch.stack([cache["label_features"][candidate_index[row[2]]]
+                             for row in rows]).to("cuda")
+        feature_sets.update({
+            "label_interaction": label * text,
+            "combined_interactions": torch.cat([image * text, label * text], dim=1),
+        })
     train_indices = [i for i, row in enumerate(rows) if split_for(row[1]) == "train"]
     scores = {}
     for method, features in feature_sets.items():
@@ -197,6 +225,13 @@ def main():
                 vectors["interaction"], vectors["full_image_completion"], clusters,
                 samples=10000, seed=2271),
         }
+        if "combined_interactions" in vectors:
+            report["splits"][split]["combined_minus_interaction"] = paired_bootstrap(
+                vectors["combined_interactions"], vectors["interaction"], clusters,
+                samples=10000, seed=2271)
+            report["splits"][split]["combined_minus_full_image"] = paired_bootstrap(
+                vectors["combined_interactions"], vectors["full_image_completion"], clusters,
+                samples=10000, seed=2271)
     (args.output / "provisional_report.json").write_text(
         json.dumps(report, indent=2, sort_keys=True) + "\n")
     runtime.update({

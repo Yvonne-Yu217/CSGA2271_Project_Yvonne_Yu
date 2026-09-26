@@ -76,6 +76,10 @@ def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--staging", type=Path, required=True)
     parser.add_argument("--observer-output", type=Path, required=True)
+    parser.add_argument("--candidates-file", type=Path,
+                        help="Candidate JSONL; defaults to STAGING/automatic_candidates.jsonl")
+    parser.add_argument("--expected", type=int, default=0,
+                        help="Optional exact observation count")
     parser.add_argument("--output", type=Path, required=True)
     parser.add_argument("--batch-size", type=int, default=128)
     parser.add_argument("--model", default=DEFAULT_MODEL)
@@ -85,15 +89,16 @@ def main():
         parser.error("CUDA is required")
     images = {row["staging_image_id"]: row
               for row in read_jsonl(args.staging / "staging_images.jsonl")}
-    candidates = {row["candidate_id"]: row
-                  for row in read_jsonl(args.staging / "automatic_candidates.jsonl")}
+    candidates_path = args.candidates_file or args.staging / "automatic_candidates.jsonl"
+    candidates = {row["candidate_id"]: row for row in read_jsonl(candidates_path)}
     observations = sorted(read_jsonl(args.observer_output / "observations.jsonl"),
                           key=lambda row: (row["staging_image_id"], row["context_id"],
                                            row["candidate_id"]))
-    if len(observations) != 7000 or any(row.get("status") != "ok" for row in observations):
-        raise RuntimeError("expected 7000 complete R2 observations")
+    if ((args.expected and len(observations) != args.expected) or
+            any(row.get("status") != "ok" for row in observations)):
+        raise RuntimeError(f"unexpected/incomplete observations: {len(observations)}")
     source_paths = [args.staging / "staging_images.jsonl",
-                    args.staging / "automatic_candidates.jsonl",
+                    candidates_path,
                     args.observer_output / "observations.jsonl"]
     payload = {
         "implementation": IMPLEMENTATION,
