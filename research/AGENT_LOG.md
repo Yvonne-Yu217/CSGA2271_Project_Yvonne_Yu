@@ -247,3 +247,16 @@
   actual reviewer disagreements.
 - The current human audit correctly reports `awaiting_reviews`, 0/1,100 required
   fields filled for each reviewer. No blank was interpreted as a negative vote.
+
+## 2026-09-26 — R3-v2 gated method-family change
+
+- After two failed pointwise ridge variants, reviewed MDETR, BLIP retrieval and
+  RankFormer primary papers plus official/author code, recording exact upstream
+  revisions in the round declaration.
+- Predeclared a permutation-equivariant joint list scorer with uniform
+  multi-positive human targets, masked unknowns, explicit STOP and symmetric
+  paraphrase consistency. This directly targets the observed 0.72--0.74 action
+  set Jaccard instead of treating one action as uniquely correct.
+- Added unit-tested architecture and loss components only. Training remains
+  prohibited until both R2 reviews and adjudication finish; the inspected proxy
+  split and automated Qwen/Smol labels cannot be primary training targets.

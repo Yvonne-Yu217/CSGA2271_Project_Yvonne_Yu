@@ -3,6 +3,8 @@ import tempfile
 import unittest
 from pathlib import Path
 
+import torch
+
 from acquisition.evaluate import evaluate_bundle
 from acquisition.audit import audit_report
 from acquisition.audit_r2_reviews import BASE_FIELDS, PAIR_FIELDS, required_fields
@@ -14,6 +16,9 @@ from acquisition.planner_baseline import parse_choice
 from acquisition.screen_entailment import parse_label as parse_entailment
 from acquisition.screen_independent_visual import parse_independent_label
 from acquisition.screen_visual_support import parse_label as parse_visual_support
+from acquisition.set_valued_selector import (SetValuedSelector,
+                                              multi_positive_listwise_loss,
+                                              paraphrase_consistency_loss)
 from acquisition.schema import (
     GoldStore, PublicStore, SchemaError, derive_action_labels, observation_cache_key,
     validate_bundle,
@@ -105,6 +110,26 @@ class AcquisitionTests(unittest.TestCase):
         self.assertEqual(required_fields({"alternate_claim": ""}), BASE_FIELDS)
         self.assertEqual(required_fields({"alternate_claim": "Another claim."}),
                          BASE_FIELDS + PAIR_FIELDS)
+
+    def test_set_valued_losses_and_permutation_equivariance(self):
+        logits = torch.tensor([[2.0, 1.0, -3.0]], requires_grad=True)
+        positive = torch.tensor([[True, True, False]])
+        valid = torch.tensor([[True, True, False]])
+        loss = multi_positive_listwise_loss(logits, positive, valid)
+        self.assertTrue(torch.isfinite(loss))
+        loss.backward()
+        self.assertIsNotNone(logits.grad)
+        self.assertAlmostEqual(float(paraphrase_consistency_loss(
+            logits.detach(), logits.detach(), valid)), 0.0, places=6)
+        model = SetValuedSelector(3, 2, hidden_dim=8, heads=2, layers=1, dropout=0).eval()
+        candidates = torch.randn(2, 4, 3)
+        contexts = torch.randn(2, 2)
+        mask = torch.ones(2, 4, dtype=torch.bool)
+        permutation = torch.tensor([2, 0, 3, 1])
+        with torch.no_grad():
+            original = model(candidates, contexts, mask)
+            permuted = model(candidates[:, permutation], contexts, mask[:, permutation])
+        self.assertTrue(torch.allclose(original[:, permutation], permuted, atol=1e-6))
 
     def test_e1_e2_report_is_diagnostic_without_e0_and_strong_baseline(self):
         report = evaluate_bundle(self.root, "proposal_score", bootstrap_samples=200, seed=7)

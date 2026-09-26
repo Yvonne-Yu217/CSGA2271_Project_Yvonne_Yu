@@ -1,0 +1,21 @@
+round_id: R3-v2-set-valued-selector
+status: prepared_waiting_for_human_e0
+date: 2026-09-26
+parent_round: research/rounds/R3_v1_grounded_binding.yaml
+objective: learn caption-conditioned marginal action value without forcing one unstable best-action label
+material_change: permutation-equivariant joint list scorer with multi-positive targets and reviewed paraphrase consistency
+prior_failures:
+  - R3-v0 pointwise SigLIP interaction ridge failed its uncertainty rule
+  - R3-v1 explicit detector phrase interaction did not improve the same inspected proxy split
+human_gate: two independent R2 reviews, adjudication, and leakage/schema audit are required before training
+prohibited: tuning or model selection on the old 67/14/19 proxy test or using automated semantic labels as primary targets
+development_split: image-grouped five-fold cross-validation, three fixed seeds
+primary_metric: human-valid selected-action success versus strongest same-input learned comparator
+continuation_rule: gain at least 3 percentage points with image-cluster paired 95% interval above zero and paraphrase noninferiority within 3 points
+failure_action: archive the selector family and move to global fact selection
+implementation: acquisition/set_valued_selector.py
+design: research/R3_V2_SET_VALUED_DESIGN.md
+official_code_revisions:
+  mdetr: ea09acc44ca067072c4b143b726447ee7ff66f5f
+  blip: 056a169437371659074aa2732649d5de3bffb4a8
+  rankformer: f2722352575079ec37b18e9a1f2fac170cda585e

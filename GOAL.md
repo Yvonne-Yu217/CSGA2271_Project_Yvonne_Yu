@@ -121,3 +121,10 @@ population error estimation and 50 rows each for grid judge disagreement, grid
 consensus positives, grounded consensus positives, and paraphrase action flips.
 Both reviewer sheets have 300 independently shuffled rows and 600 verified
 assets. Its audit status is `awaiting_reviews`; blanks are not labels.
+
+R3-v2 is prepared but must not train before that gate. It replaces the two
+failed pointwise ridge variants with a permutation-equivariant joint action-list
+scorer, uniform multi-positive human targets, unknown masking, STOP, and
+reviewed paraphrase consistency. The implementation currently contains only
+unit-tested architecture/loss components; the old inspected proxy split and
+automated semantic labels are prohibited for primary training or selection.
